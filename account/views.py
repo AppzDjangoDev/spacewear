@@ -22,7 +22,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 def homePage(request):
     return render(request,'accounts/index.html')
 
-def user_dashboard(request):
+def dashboard(request):
     return render(request, "trading_tool/html/index.html")
 
 # Create your views here.
@@ -37,7 +37,7 @@ class UserloginView(View):
         if logged_user.is_authenticated:
             print(logged_user)
             print("dashboard__form")
-            return redirect('user_dashboard')  
+            return redirect('dashboard')  
         else:
             print(logged_user)
             print("login__form")
@@ -143,7 +143,7 @@ class ProfileView(View):
             form.save()
             print("updated successfully")
             messages.success(request, 'Your Account details updated successfully!')
-            return redirect('user_dashboard')  
+            return redirect('dashboard')  
         else:
             print("updating failed")
             return render(request, template, context)
