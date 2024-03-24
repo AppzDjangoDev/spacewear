@@ -8,6 +8,10 @@ urlpatterns = [
     path('broker_config', views.Brokerconfig.as_view(), name='broker_config'),
     path('brokerconnect', views.brokerconnect, name='brokerconnect'),
     path('get_accese_token', views.get_accese_token, name='get_accese_token'),
+    path('get_user_profile', views.get_user_profile, name='get_user_profile'),
+
+
+    
 
 
 

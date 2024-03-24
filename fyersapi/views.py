@@ -108,7 +108,8 @@ def get_user_profile(request):
     else:
         print("noithing here")
         # Handle the case where access_token is not found in the session
-        return redirect('dashboard')
+    
+    return redirect('dashboard')
 
 # # Example usage:
 # client_id = "XC4XXXXM-100"
