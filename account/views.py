@@ -31,6 +31,7 @@ def dashboard(request):
         parsed_url = urlparse(current_url)
         query_params = parse_qs(parsed_url.query)
         auth_code = query_params.get('auth_code', [''])[0]
+        print("auth_codeauth_code", auth_code)
         if auth_code:
             request.session['auth_code'] = auth_code
             messages.success(request, 'Auth code stored successfully.')
