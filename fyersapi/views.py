@@ -88,6 +88,15 @@ def get_accese_token(request):
 
     # Print the response, which should contain the access token and other details
     print("auth_codeauth_codeauth_codeauth_codeauth_codeauth_codetttttttt",response)
+    access_token = response.get('access_token')
+    refresh_token = response.get('refresh_token')
+    if access_token and refresh_token:
+        request.session['access_token'] = access_token
+        request.session['refresh_token'] = refresh_token
+        print("oooooooooooooooo",response)
+    else:
+        print("pppppppppp",response)
+
 
     # You can redirect to another page or render a template after printing
     return redirect('dashboard')  # Assuming 'home' is the name of a URL pattern you want to redirect to
@@ -95,7 +104,7 @@ def get_accese_token(request):
 
 def get_user_profile(request):
     client_id = settings.FYERS_CLIENT_ID
-    access_token = request.session.get('auth_code')
+    access_token = request.session.get('access_token')
     print("client_idclient_id", client_id)
     print("access_tokenaccess_token", access_token)
     if access_token:
