@@ -80,7 +80,11 @@
           </ul>
           <div class="navbar-collapse justify-content-end px-0" id="navbarNav">
             <ul class="navbar-nav flex-row ms-auto align-items-center justify-content-end">
-              <a target="_blank" class="btn btn-success mx-2">Refresh</a>
+              <a href="{% url "brokerconnect" %}" class="btn btn-success mx-2">Refresh</a>
+
+              <a href="{% url "get_accese_token" %}" class="btn btn-success mx-2">Get Access</a>
+
+              
               <li class="nav-item dropdown">
                 <a class="nav-link nav-icon-hover" href="javascript:void(0)" id="drop2" data-bs-toggle="dropdown"
                   aria-expanded="false">
@@ -92,7 +96,7 @@
                       <i class="ti ti-user fs-6"></i>
                       <p class="mb-0 fs-3">My Account</p>
                     </a>
-                    <a href="javascript:void(0)" class="d-flex align-items-center gap-2 dropdown-item">
+                    <a href="{% url 'broker_config' %}" class="d-flex align-items-center gap-2 dropdown-item">
                       <i class="ti ti-list-check fs-6"></i>
                       <p class="mb-0 fs-3">Broker Configurations</p>
                     </a>

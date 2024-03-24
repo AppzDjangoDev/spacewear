@@ -52,6 +52,7 @@ MESSAGE_LEVEL = message_constants.DEBUG
 INSTALLED_APPS = [
     'account',
     'trading_tool',
+    'fyersapi',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -182,5 +183,5 @@ DATE_INPUT_FORMATS = [
     '%Y-%m-%d',  # Default format
 ]
 
-
-
+FYERS_CLIENT_ID="H9O406XBXW-100"
+FYERS_SECRET_ID="3V49195NI4"

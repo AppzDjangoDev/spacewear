@@ -148,11 +148,3 @@ class ProfileView(View):
             print("updating failed")
             return render(request, template, context)
         
-
-
-class ExpoloreMore(View):
-    def get(self, request):
-        template = "exploremore.html"
-        context={}
-        print("context", context)
-        return render(request, template, context)
