@@ -28,6 +28,8 @@ from django.conf import settings
 from fyers_apiv3 import fyersModel
 import webbrowser
 
+
+
 def brokerconnect(request):
     # Get client_id and secret_key from settings.py
     client_id = settings.FYERS_CLIENT_ID
@@ -51,14 +53,13 @@ def brokerconnect(request):
     response = session.generate_authcode()
 
     # Print the auth code received in the response
-    print(response)
-    webbrowser.open(response,new=1)
-
+    print("responseresponseresponse",response)
     # You can redirect to another page or render a template after printing
     return redirect(response)  # Assuming 'home' is the name of a URL pattern you want to redirect to
 
 
 def get_accese_token(request):
+    # return redirect('some_redirect_url')
     # Get client_id and secret_key from settings.py
     client_id = settings.FYERS_CLIENT_ID
     secret_key = settings.FYERS_SECRET_ID
@@ -67,7 +68,7 @@ def get_accese_token(request):
     grant_type = "authorization_code"  
 
     # The authorization code received from Fyers after the user grants access
-    auth_code = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9"
+    auth_code = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJhcGkubG9naW4uZnllcnMuaW4iLCJpYXQiOjE3MTEyNzg2NDgsImV4cCI6MTcxMTMwODY0OCwibmJmIjoxNzExMjc4MDQ4LCJhdWQiOiJbXCJ4OjBcIiwgXCJ4OjFcIiwgXCJ4OjJcIiwgXCJkOjFcIiwgXCJkOjJcIiwgXCJ4OjFcIiwgXCJ4OjBcIl0iLCJzdWIiOiJhdXRoX2NvZGUiLCJkaXNwbGF5X25hbWUiOiJZUzA1MTQxIiwib21zIjoiSzEiLCJoc21fa2V5IjoiNGQ0OWQzMzA2MmM4YzMyOTA4OGEyMzZkMWVkZDI0MDhhODYyY2QyZDdlMmI2M2Y4NjI3N2JkZGUiLCJub25jZSI6IiIsImFwcF9pZCI6Ikg5TzQwNlhCWFciLCJ1dWlkIjoiNTdhYzQ2MmM0YzkxNGI0MzlmMGY3OTc3MGRmMDM0YTEiLCJpcEFkZHIiOiIwLjAuMC4wIiwic2NvcGUiOiIifQ.RhnYqWn9hqR5X_yg5wHKcOGCkGFnAb4Ms2xbToDMPAw"
 
     # Create a session object to handle the Fyers API authentication and token generation
     session = fyersModel.SessionModel(
@@ -88,4 +89,4 @@ def get_accese_token(request):
     print(response)
 
     # You can redirect to another page or render a template after printing
-    return redirect(response)  # Assuming 'home' is the name of a URL pattern you want to redirect to
+    return redirect('dashboard')  # Assuming 'home' is the name of a URL pattern you want to redirect to

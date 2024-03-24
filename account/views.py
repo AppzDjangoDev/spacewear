@@ -16,13 +16,29 @@ from .forms import CustomUserCreationForm
 from django.contrib.auth import authenticate, login
 from decimal import Decimal
 from django.contrib.auth.mixins import LoginRequiredMixin
-
-
+from django.shortcuts import render, redirect
+from django.contrib import messages
+from urllib.parse import urlparse, parse_qs
 
 def homePage(request):
     return render(request,'accounts/index.html')
 
 def dashboard(request):
+    print("ppppppppppppppppppppppppppppppppppp")
+    try:
+        current_url = request.build_absolute_uri()
+        print("current_url:", current_url)
+        parsed_url = urlparse(current_url)
+        query_params = parse_qs(parsed_url.query)
+        auth_code = query_params.get('auth_code', [''])[0]
+        if auth_code:
+            request.session['auth_code'] = auth_code
+            messages.success(request, 'Auth code stored successfully.')
+        else:
+            messages.error(request, 'Failed to extract auth code from the URL.')
+    except Exception as e:
+        messages.error(request, f'An error occurred: {str(e)}')
+
     return render(request, "trading_tool/html/index.html")
 
 # Create your views here.
