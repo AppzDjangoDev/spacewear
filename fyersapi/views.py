@@ -104,7 +104,8 @@ def get_accese_token(request):
 
 def get_user_profile(request):
     context={}
-    template="trading_tool\html\profile_view.html"
+    
+    template="trading_tool/html/profile_view.html"
     client_id = settings.FYERS_CLIENT_ID
     access_token = request.session.get('access_token')
     print("client_idclient_id", client_id)
