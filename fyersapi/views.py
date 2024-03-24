@@ -110,8 +110,8 @@ def get_user_profile(request):
         # Handle the case where access_token is not found in the session
         return redirect('dashboard')
 
-# Example usage:
-client_id = "XC4XXXXM-100"
-access_token = "eyJ0eXXXXXXXX2c5-Y3RgS8wR14g"
-profile_response = get_user_profile(client_id, access_token)
-print(profile_response)
+# # Example usage:
+# client_id = "XC4XXXXM-100"
+# access_token = "eyJ0eXXXXXXXX2c5-Y3RgS8wR14g"
+# profile_response = get_user_profile(client_id, access_token)
+# print(profile_response)
