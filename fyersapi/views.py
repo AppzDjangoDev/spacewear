@@ -90,3 +90,28 @@ def get_accese_token(request):
 
     # You can redirect to another page or render a template after printing
     return redirect('dashboard')  # Assuming 'home' is the name of a URL pattern you want to redirect to
+
+
+def get_user_profile(request):
+    client_id = settings.FYERS_CLIENT_ID
+    access_token = request.session.get('auth_code')
+    print("client_idclient_id", client_id)
+    print("access_tokenaccess_token", access_token)
+    if access_token:
+        # Initialize the FyersModel instance with your client_id, access_token, and enable async mode
+        fyers = fyersModel.FyersModel(client_id=client_id, is_async=False, token=access_token, log_path="")
+        # Make a request to get the user profile information
+        response = fyers.get_profile()
+        print("return responsereturn response",response)
+        # Return the response received from the Fyers API
+        return redirect('dashboard')
+    else:
+        print("noithing here")
+        # Handle the case where access_token is not found in the session
+        return redirect('dashboard')
+
+# Example usage:
+client_id = "XC4XXXXM-100"
+access_token = "eyJ0eXXXXXXXX2c5-Y3RgS8wR14g"
+profile_response = get_user_profile(client_id, access_token)
+print(profile_response)
