@@ -103,6 +103,8 @@ def get_accese_token(request):
 
 
 def get_user_profile(request):
+    context={}
+    template="trading_tool\html\profile_view.html"
     client_id = settings.FYERS_CLIENT_ID
     access_token = request.session.get('access_token')
     print("client_idclient_id", client_id)
@@ -113,13 +115,15 @@ def get_user_profile(request):
         # Make a request to get the user profile information
         response = fyers.get_profile()
         print("return responsereturn response",response)
+        context=response
+        print("contextcontext", context)
         # Return the response received from the Fyers API
-        return redirect('dashboard')
+        return render(request,template,context)
     else:
         print("noithing here")
         # Handle the case where access_token is not found in the session
     
-    return redirect('dashboard')
+    return render(request,template,context)
 
 # # Example usage:
 # client_id = "XC4XXXXM-100"

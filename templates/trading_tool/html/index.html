@@ -116,6 +116,11 @@
           </div>
         </nav>
       </header>
+
+
+      {% block content %}
+
+
       <!--  Header End -->
       <div class="container-fluid">
         <div class="row">
@@ -488,6 +493,8 @@
           <p class="mb-0 fs-4">Design and Developed by <a href="https://appztechblog.com/" target="_blank" class="pe-1 text-primary text-decoration-underline">Appztechblog.com</a></p>
         </div>
       </div>
+
+    {% endblock %}
     </div>
   </div>
   <script src="{% static 'trading_tool/assets/libs/jquery/dist/jquery.min.js' %}"></script>
