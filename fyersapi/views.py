@@ -31,12 +31,14 @@ import webbrowser
 
 
 def brokerconnect(request):
+    print("00000000000000000000000000000000000000000000000000")
     # Get client_id and secret_key from settings.py
     client_id = settings.FYERS_CLIENT_ID
     secret_key = settings.FYERS_SECRET_ID
 
     # Replace these values with your actual API credentials
-    redirect_uri = "https://spacewear.co.in/dashboard"
+    # redirect_uri = "https://spacewear.co.in/dashboard"
+    redirect_uri = "https://f9e6-2405-201-f007-402c-b832-eb44-568d-85ce.ngrok-free.app/dashboard"
     response_type = "code"  
     state = "sample_state"
 
@@ -59,11 +61,13 @@ def brokerconnect(request):
 
 
 def get_accese_token(request):
+    print("7777777777777777777777777777777777")
     # return redirect('some_redirect_url')
     # Get client_id and secret_key from settings.py
     client_id = settings.FYERS_CLIENT_ID
     secret_key = settings.FYERS_SECRET_ID
-    redirect_uri = "https://spacewear.co.in/dashboard"
+    # redirect_uri = "https://spacewear.co.in/dashboard"
+    redirect_uri = "https://f9e6-2405-201-f007-402c-b832-eb44-568d-85ce.ngrok-free.app/dashboard"
     response_type = "code" 
     grant_type = "authorization_code"  
 
@@ -104,7 +108,6 @@ def get_accese_token(request):
 
 def get_user_profile(request):
     context={}
-    
     template="trading_tool/html/profile_view.html"
     client_id = settings.FYERS_CLIENT_ID
     access_token = request.session.get('access_token')

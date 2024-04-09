@@ -9,7 +9,6 @@
   <link rel="shortcut icon" type="image/png" href="{% url 'home' %}" />
   <link rel="stylesheet" href="{% static 'trading_tool/assets/css/styles.min.css' %}" />
 </head>
-
 <body>
   <!--  Body Wrapper -->
   <div class="page-wrapper" id="main-wrapper" data-layout="vertical" data-navbarbg="skin6" data-sidebartype="full"
@@ -46,12 +45,20 @@
               <span class="hide-menu">UI COMPONENTS</span>
             </li>
             <li class="sidebar-item">
+              <a class="sidebar-link" href="{% url 'logout' %}" aria-expanded="false">
+                <span>
+                  <i class="ti ti-aperture"></i>
+                </span>
+                <span class="hide-menu">Order Data </span>
+              </a>
+
               <a class="sidebar-link" href="./sample-page.html" aria-expanded="false">
                 <span>
                   <i class="ti ti-aperture"></i>
                 </span>
                 <span class="hide-menu">Sample Page</span>
               </a>
+              
             </li>
           </ul>
         </nav>
@@ -82,13 +89,8 @@
             <ul class="navbar-nav flex-row ms-auto align-items-center justify-content-end">
               <a href="{% url "brokerconnect" %}" class="btn btn-success mx-2">Refresh</a>
 
-              <a href="{% url "get_accese_token" %}" class="btn btn-success mx-2">Get Access</a>
-              <a href="{% url "get_user_profile" %}" class="btn btn-success mx-2">Get Profile</a>
-
-
-              
-
-              
+              {% comment %} <a href="{% url "get_accese_token" %}" class="btn btn-success mx-2">Get Access</a> {% endcomment %}
+              {% comment %} <a href="{% url "get_user_profile" %}" class="btn btn-success mx-2">Get Profile</a> {% endcomment %}
               <li class="nav-item dropdown">
                 <a class="nav-link nav-icon-hover" href="javascript:void(0)" id="drop2" data-bs-toggle="dropdown"
                   aria-expanded="false">
@@ -96,7 +98,7 @@
                 </a>
                 <div class="dropdown-menu dropdown-menu-end dropdown-menu-animate-up" aria-labelledby="drop2">
                   <div class="message-body">
-                    <a href="javascript:void(0)" class="d-flex align-items-center gap-2 dropdown-item">
+                    <a href="{% url "get_user_profile" %}" class="d-flex align-items-center gap-2 dropdown-item">
                       <i class="ti ti-user fs-6"></i>
                       <p class="mb-0 fs-3">My Account</p>
                     </a>
@@ -497,6 +499,12 @@
     {% endblock %}
     </div>
   </div>
+
+  <style>
+    .container-fluid {
+        max-width: none !important;
+    }
+  </style>
   <script src="{% static 'trading_tool/assets/libs/jquery/dist/jquery.min.js' %}"></script>
   <script src="{% static 'trading_tool/assets/libs/bootstrap/dist/js/bootstrap.bundle.min.js' %}"></script>
   <script src="{% static 'trading_tool/assets/js/sidebarmenu.js' %}"></script>

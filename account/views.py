@@ -12,6 +12,8 @@ from datetime import datetime
 from django.db.models import Sum
 from django.urls import reverse_lazy
 from django.views.generic import CreateView
+
+from fyersapi.views import brokerconnect, get_accese_token
 from .forms import CustomUserCreationForm
 from django.contrib.auth import authenticate, login
 from decimal import Decimal
@@ -19,13 +21,16 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from urllib.parse import urlparse, parse_qs
+from django.contrib.auth.decorators import login_required
+import time
 
 def homePage(request):
     return render(request,'accounts/index.html')
 
+@login_required
 def dashboard(request):
-    print("ppppppppppppppppppppppppppppppppppp")
     try:
+        print("ppppppppppppppppppppppppppppppppppp")
         current_url = request.build_absolute_uri()
         print("current_url:", current_url)
         parsed_url = urlparse(current_url)
@@ -38,7 +43,11 @@ def dashboard(request):
         else:
             messages.error(request, 'Failed to extract auth code from the URL.')
     except Exception as e:
-        messages.error(request, f'An error occurred: {str(e)}')
+        messages.error(request, f'An error occurred: {str(e)}. No broker connected.')
+
+    # Delay the execution of get_accese_token function by 1 second
+    time.sleep(1)
+    get_accese_token(request)
 
     return render(request, "trading_tool/html/index.html")
 
@@ -54,7 +63,7 @@ class UserloginView(View):
         if logged_user.is_authenticated:
             print(logged_user)
             print("dashboard__form")
-            return redirect('dashboard')  
+            return redirect('brokerconnect')  
         else:
             print(logged_user)
             print("login__form")
@@ -83,7 +92,7 @@ class UserloginView(View):
                     print("login success")
                     messages.success(request, "Login Successful !")
                     # return render(request, "user/dashboard.html")
-                    return redirect('dashboard')  
+                    return redirect('brokerconnect')  
                 else:
                     print("user not Exists")
                     # messages.info(request, "user not Exists")
@@ -92,9 +101,6 @@ class UserloginView(View):
             else:
                 print("user not created")
                 return render(request, template, context)
-
-
-
 
 class UserRegistrationView(CreateView):
     print("============================================")
