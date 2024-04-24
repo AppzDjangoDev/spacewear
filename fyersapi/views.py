@@ -35,10 +35,14 @@ def brokerconnect(request):
     # Get client_id and secret_key from settings.py
     client_id = settings.FYERS_CLIENT_ID
     secret_key = settings.FYERS_SECRET_ID
+    redirect_uri = settings.FYERS_REDIRECT_URL+"/dashboard"
 
     # Replace these values with your actual API credentials
     # redirect_uri = "https://spacewear.co.in/dashboard"
-    redirect_uri = "https://2164-2405-201-f007-402c-28dd-1e8a-dd23-5ef.ngrok-free.app/dashboard"
+
+
+    
+    # redirect_uri = "https://2164-2405-201-f007-402c-28dd-1e8a-dd23-5ef.ngrok-free.app/dashboard"
     response_type = "code"  
     state = "sample_state"
 
@@ -66,8 +70,9 @@ def get_accese_token(request):
     # Get client_id and secret_key from settings.py
     client_id = settings.FYERS_CLIENT_ID
     secret_key = settings.FYERS_SECRET_ID
+    redirect_uri = settings.FYERS_REDIRECT_URL+"/dashboard"
     # redirect_uri = "https://spacewear.co.in/dashboard"
-    redirect_uri = "https://2164-2405-201-f007-402c-28dd-1e8a-dd23-5ef.ngrok-free.app/dashboard"
+    # redirect_uri = "https://2164-2405-201-f007-402c-28dd-1e8a-dd23-5ef.ngrok-free.app/dashboard"
     response_type = "code" 
     grant_type = "authorization_code"  
 
