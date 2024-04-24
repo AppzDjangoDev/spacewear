@@ -11,6 +11,7 @@ urlpatterns = [
     path('get_user_profile', views.get_user_profile, name='get_user_profile'),
 
     path('exit_pending_orders', views.exit_pending_orders, name='exit_pending_orders'),
+    path('update-data-instance/', views.update_data_instance, name='update_data_instance'),
 
 
     

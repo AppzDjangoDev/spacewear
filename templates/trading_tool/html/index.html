@@ -531,6 +531,32 @@
   <script src="{% static 'trading_tool/assets/js/sidebarmenu.js' %}"></script>
   <script src="{% static 'trading_tool/assets/js/app.min.js' %}"></script>
   <script>
+    $(document).ready(function() {
+        // Define a function to fetch data from the server
+        function fetchData() {
+          console.log("1111111111111")
+
+            $.ajax({
+                url: '{% url "update_data_instance" %}',
+                type: 'GET',
+                success: function(response) {
+                    // Handle the response data here
+                    console.log('Data received:', response);
+                },
+                error: function(xhr, status, error) {
+                    console.error('Error fetching data:', error);
+                }
+            });
+        }
+    
+        // Call the fetchData function initially when the page is loaded
+        fetchData();
+    
+        // Set an interval to call the fetchData function every 1 second
+        setInterval(fetchData, 1000);
+    });
+  </script>
+  <script>
     var positions_data = {{ positions_data | safe }};
     $(document).ready(function() {
       $('#close_positions_button').click(function(e) {

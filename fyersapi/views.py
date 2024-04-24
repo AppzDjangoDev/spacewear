@@ -196,6 +196,22 @@ def get_data_instance(request):
         # Handle the case where access_token is not found in the session
     
     return fyers
+from django.http import JsonResponse
+
+
+def update_data_instance(request):
+    context = {}
+    client_id = settings.FYERS_CLIENT_ID
+    access_token = request.session.get('access_token')
+
+    if access_token:
+        fyers = fyersModel.FyersModel(client_id=client_id, is_async=False, token=access_token, log_path="")
+        response = fyers.positions()
+        # Process the response and prepare the data
+        data = { 'positions': response }  # Modify this according to your response structure
+        return JsonResponse(data)
+    else:
+        return JsonResponse({'error': 'Access token not found'}, status=400)
 
 
 def get_user_profile(request):
