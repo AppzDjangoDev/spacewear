@@ -41,6 +41,7 @@ if not DEBUG:
     CSRF_COOKIE_SECURE = True
 
 
+
 ALLOWED_HOSTS = ['*']
 
 from django.contrib.messages import constants as message_constants
@@ -166,18 +167,13 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
-
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # user model assign to account.user
 AUTH_USER_MODEL = 'account.User'
 
-
-
 # massages
 from django.contrib.messages import constants as messages
-
-
 
 DATE_INPUT_FORMATS = [
     '%Y-%m-%d',  # Default format
@@ -186,7 +182,7 @@ DATE_INPUT_FORMATS = [
 FYERS_CLIENT_ID="H9O406XBXW-100"
 FYERS_SECRET_ID="XOVF82L85V"
 
-FYERS_LIVE_CLIENT_ID="5NYKD87NTH-100"
-FYERS_LIVE_SECRET_ID="XIXJN6AKI5"
-
-
+if not DEBUG:
+    #for production
+    FYERS_CLIENT_ID="5NYKD87NTH-100"
+    FYERS_SECRET_ID="XIXJN6AKI5"

@@ -48,7 +48,6 @@ def dashboard(request):
     # Delay the execution of get_accese_token function by 1 second
     time.sleep(1)
     get_accese_token(request)
-
     return render(request, "trading_tool/html/index.html")
 
 # Create your views here.
@@ -101,6 +100,7 @@ class UserloginView(View):
             else:
                 print("user not created")
                 return render(request, template, context)
+
 
 class UserRegistrationView(CreateView):
     print("============================================")

@@ -38,7 +38,7 @@ def brokerconnect(request):
 
     # Replace these values with your actual API credentials
     # redirect_uri = "https://spacewear.co.in/dashboard"
-    redirect_uri = "https://f9e6-2405-201-f007-402c-b832-eb44-568d-85ce.ngrok-free.app/dashboard"
+    redirect_uri = "https://2164-2405-201-f007-402c-28dd-1e8a-dd23-5ef.ngrok-free.app/dashboard"
     response_type = "code"  
     state = "sample_state"
 
@@ -67,14 +67,13 @@ def get_accese_token(request):
     client_id = settings.FYERS_CLIENT_ID
     secret_key = settings.FYERS_SECRET_ID
     # redirect_uri = "https://spacewear.co.in/dashboard"
-    redirect_uri = "https://f9e6-2405-201-f007-402c-b832-eb44-568d-85ce.ngrok-free.app/dashboard"
+    redirect_uri = "https://2164-2405-201-f007-402c-28dd-1e8a-dd23-5ef.ngrok-free.app/dashboard"
     response_type = "code" 
     grant_type = "authorization_code"  
 
     # The authorization code received from Fyers after the user grants access
     # auth_code = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJhcGkubG9naW4uZnllcnMuaW4iLCJpYXQiOjE3MTEyNzg2NDgsImV4cCI6MTcxMTMwODY0OCwibmJmIjoxNzExMjc4MDQ4LCJhdWQiOiJbXCJ4OjBcIiwgXCJ4OjFcIiwgXCJ4OjJcIiwgXCJkOjFcIiwgXCJkOjJcIiwgXCJ4OjFcIiwgXCJ4OjBcIl0iLCJzdWIiOiJhdXRoX2NvZGUiLCJkaXNwbGF5X25hbWUiOiJZUzA1MTQxIiwib21zIjoiSzEiLCJoc21fa2V5IjoiNGQ0OWQzMzA2MmM4YzMyOTA4OGEyMzZkMWVkZDI0MDhhODYyY2QyZDdlMmI2M2Y4NjI3N2JkZGUiLCJub25jZSI6IiIsImFwcF9pZCI6Ikg5TzQwNlhCWFciLCJ1dWlkIjoiNTdhYzQ2MmM0YzkxNGI0MzlmMGY3OTc3MGRmMDM0YTEiLCJpcEFkZHIiOiIwLjAuMC4wIiwic2NvcGUiOiIifQ.RhnYqWn9hqR5X_yg5wHKcOGCkGFnAb4Ms2xbToDMPAw"
     auth_code = request.session.get('auth_code')
-
     # Create a session object to handle the Fyers API authentication and token generation
     session = fyersModel.SessionModel(
         client_id=client_id,
