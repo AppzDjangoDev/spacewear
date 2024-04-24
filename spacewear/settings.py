@@ -12,7 +12,6 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 
 import os
 from pathlib import Path
-
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -179,12 +178,14 @@ DATE_INPUT_FORMATS = [
     '%Y-%m-%d',  # Default format
 ]
 
+DEVELOPMENT_MODE=False
+
 FYERS_CLIENT_ID="H9O406XBXW-100"
 FYERS_SECRET_ID="XOVF82L85V"
 FYERS_REDIRECT_URL="https://2164-2405-201-f007-402c-28dd-1e8a-dd23-5ef.ngrok-free.app/dashboard"
 
 
-if not DEBUG:
+if not DEVELOPMENT_MODE:
     #for production
     FYERS_CLIENT_ID="5NYKD87NTH-100"
     FYERS_SECRET_ID="XIXJN6AKI5"
