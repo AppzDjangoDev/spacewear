@@ -42,7 +42,7 @@ def brokerconnect(request):
 
 
     
-    # redirect_uri = "https://2164-2405-201-f007-402c-28dd-1e8a-dd23-5ef.ngrok-free.app/dashboard"
+    # redirect_uri = "https://aabe-2405-201-f007-417b-7d9c-6736-527b-61a6.ngrok-free.app/dashboard"
     response_type = "code"  
     state = "sample_state"
 
@@ -72,7 +72,7 @@ def get_accese_token(request):
     secret_key = settings.FYERS_SECRET_ID
     redirect_uri = settings.FYERS_REDIRECT_URL+"/dashboard"
     # redirect_uri = "https://spacewear.co.in/dashboard"
-    # redirect_uri = "https://2164-2405-201-f007-402c-28dd-1e8a-dd23-5ef.ngrok-free.app/dashboard"
+    # redirect_uri = "https://aabe-2405-201-f007-417b-7d9c-6736-527b-61a6.ngrok-free.app/dashboard"
     response_type = "code" 
     grant_type = "authorization_code"  
 

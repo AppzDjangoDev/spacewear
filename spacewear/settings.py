@@ -178,11 +178,11 @@ DATE_INPUT_FORMATS = [
     '%Y-%m-%d',  # Default format
 ]
 
-DEVELOPMENT_MODE=False
+DEVELOPMENT_MODE=True
 
 FYERS_CLIENT_ID="H9O406XBXW-100"
 FYERS_SECRET_ID="XOVF82L85V"
-FYERS_REDIRECT_URL="https://2164-2405-201-f007-402c-28dd-1e8a-dd23-5ef.ngrok-free.app/dashboard"
+FYERS_REDIRECT_URL="https://aabe-2405-201-f007-417b-7d9c-6736-527b-61a6.ngrok-free.app"
 
 
 if not DEVELOPMENT_MODE:
