@@ -10,6 +10,8 @@ urlpatterns = [
     path('get_accese_token', views.get_accese_token, name='get_accese_token'),
     path('get_user_profile', views.get_user_profile, name='get_user_profile'),
 
+    path('exit_pending_orders', views.exit_pending_orders, name='exit_pending_orders'),
+
 
     
 

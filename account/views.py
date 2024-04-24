@@ -13,7 +13,7 @@ from django.db.models import Sum
 from django.urls import reverse_lazy
 from django.views.generic import CreateView
 
-from fyersapi.views import brokerconnect, get_accese_token
+from fyersapi.views import brokerconnect, get_accese_token, get_data_instance
 from .forms import CustomUserCreationForm
 from django.contrib.auth import authenticate, login
 from decimal import Decimal
@@ -27,28 +27,48 @@ import time
 def homePage(request):
     return render(request,'accounts/index.html')
 
-@login_required
-def dashboard(request):
-    try:
-        print("ppppppppppppppppppppppppppppppppppp")
-        current_url = request.build_absolute_uri()
-        print("current_url:", current_url)
-        parsed_url = urlparse(current_url)
-        query_params = parse_qs(parsed_url.query)
-        auth_code = query_params.get('auth_code', [''])[0]
-        print("auth_codeauth_code", auth_code)
-        if auth_code:
-            request.session['auth_code'] = auth_code
-            messages.success(request, 'Auth code stored successfully.')
-        else:
-            messages.error(request, 'Failed to extract auth code from the URL.')
-    except Exception as e:
-        messages.error(request, f'An error occurred: {str(e)}. No broker connected.')
+from django.views.generic import TemplateView
+from django.utils.decorators import method_decorator
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import render
+from urllib.parse import urlparse, parse_qs
+from django.contrib import messages
+import time
 
-    # Delay the execution of get_accese_token function by 1 second
-    time.sleep(1)
-    get_accese_token(request)
-    return render(request, "trading_tool/html/index.html")
+class DashboardView(TemplateView):
+    template_name = "trading_tool/html/index.html"
+
+    @method_decorator(login_required)
+    def dispatch(self, request, *args, **kwargs):
+        try:
+            print("ppppppppppppppppppppppppppppppppppp")
+            current_url = request.build_absolute_uri()
+            print("current_url:", current_url)
+            parsed_url = urlparse(current_url)
+            query_params = parse_qs(parsed_url.query)
+            auth_code = query_params.get('auth_code', [''])[0]
+            print("auth_codeauth_code", auth_code)
+            if auth_code:
+                request.session['auth_code'] = auth_code
+                messages.success(request, 'Auth code stored successfully.')
+            else:
+                messages.error(request, 'Failed to extract auth code from the URL.')
+        except Exception as e:
+            messages.error(request, f'An error occurred: {str(e)}. No broker connected.')
+
+        # Delay the execution of get_access_token function by 1 second
+        time.sleep(1)
+        get_accese_token(request)
+        data_instance = get_data_instance(request)
+        self.positions_data = data_instance.positions()
+
+        print("data_instance", self.positions_data)
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['positions_data'] = self.positions_data
+        return context
 
 # Create your views here.
 class UserloginView(View):

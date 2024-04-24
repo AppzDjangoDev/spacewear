@@ -1,0 +1,2 @@
+{"level":"ERROR","location":"[delete_call:191] fyersModel","message":{"API":"/positions","Error":{"code":-50,"message":"id is required","s":"error"}},"timestamp":"2024-04-24 17:42:01,960+0000","service":"FyersAPI"}
+{"level":"ERROR","location":"[delete_call:191] fyersModel","message":{"API":"/positions","Error":{"code":-50,"message":"id is required","s":"error"}},"timestamp":"2024-04-24 17:42:10,566+0000","service":"FyersAPI"}

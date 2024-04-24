@@ -1,13 +1,67 @@
 $(function () {
+  // var positions_data = {{ positions_data | safe }};
+  console.log("positions_datapositions_datapositions_data", positions_data)
+
+
+
+
+  var realized_profits = [];
+  var realized_loss = [];
+  
+  positions_data.netPositions.forEach(function(position) {
+    var rounded_profit = Math.round(position.realized_profit * 100) / 100;
+    if (rounded_profit >= 0) {
+      realized_profits.push(rounded_profit);
+      realized_loss.push(0);
+    } else {
+      realized_loss.push(-rounded_profit);
+      realized_profits.push(0);
+    }
+  });
+
+  // Extracting last 7 characters of each symbol string into another array
+  var symbols_data = positions_data.netPositions.map(function(position) {
+    return position.symbol.slice(-7);
+  });
+
+
+
+
+
+
+
+
+  // Sort the array in ascending order
+  realized_profits.sort(function(a, b) {
+    return a - b;
+  });
+  // Sort the array in ascending order
+  realized_loss.sort(function(a, b) {
+    return b - a;
+  });
+  
+  console.log("realized_profitsrealized_profits",realized_profits);
+  console.log("realized_profitsrealized_profits",realized_loss);
+
+
+  // Find the highest value in the array
+  var max_profit = Math.max(...realized_profits);
+
+  // Round it up to the nearest hundred higher than that value
+  var rounded_profit = Math.ceil(max_profit / 100) * 100;
+
+  console.log(rounded_profit);
+
 
 
   // =====================================
   // Profit
   // =====================================
+
   var chart = {
     series: [
-      { name: "Earnings this month:", data: [355, 390, 300, 350, 390, 180, 355, 390] },
-      { name: "Expense this month:", data: [280, 250, 325, 215, 250, 310, 280, 250] },
+      { name: "P\L this Position:", data: realized_profits },
+      { name: "Loss this Day:", data:realized_loss},
     ],
 
     chart: {
@@ -21,11 +75,12 @@ $(function () {
     },
 
 
-    colors: ["#5D87FF", "#49BEFF"],
+    colors: ["#5D87FF", "#FF033E"],
 
 
     plotOptions: {
       bar: {
+        fill:"#E32636",
         horizontal: false,
         columnWidth: "35%",
         borderRadius: [6],
@@ -57,7 +112,7 @@ $(function () {
 
     xaxis: {
       type: "category",
-      categories: ["16/08", "17/08", "18/08", "19/08", "20/08", "21/08", "22/08", "23/08"],
+      categories: symbols_data,
       labels: {
         style: { cssClass: "grey--text lighten-2--text fill-color" },
       },
@@ -67,7 +122,7 @@ $(function () {
     yaxis: {
       show: true,
       min: 0,
-      max: 400,
+      max: rounded_profit,
       tickAmount: 4,
       labels: {
         style: {

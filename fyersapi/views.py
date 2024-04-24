@@ -110,6 +110,94 @@ def get_accese_token(request):
     return redirect('dashboard')  # Assuming 'home' is the name of a URL pattern you want to redirect to
 
 
+
+import requests
+def exit_pending_orders(request):
+    context = {}
+    template = "trading_tool/html/profile_view.html"
+    client_id = settings.FYERS_CLIENT_ID
+    access_token = request.session.get('access_token')
+
+    if access_token:
+        url = "https://api-t1.fyers.in/api/v3/positions"
+        headers = {
+            "Authorization": f"app_id:{client_id}:{access_token}",
+            "Content-Type": "application/json"
+        }
+        data = {
+            "pending_orders_cancel": 1
+        }
+
+        response = requests.delete(url, headers=headers, json=data)
+
+        print("responseresponseresponseresponseresponseooooooooo", response)
+
+        if response.status_code == 200:
+            # Successful response, you can process further if needed
+            print("Position closed successfully.")
+        else:
+            print("Failed to close position. Status code:", response.status_code)
+
+        status = close_all_positions(request)
+        print("statusstatusstatus", status)
+
+        return render(request, template, context)
+    else:
+        print("Access token not found in session.")
+        # Handle the case where access_token is not found in the session
+        return render(request, template, context)
+
+def close_all_positions(request):
+    client_id = settings.FYERS_CLIENT_ID
+    access_token = request.session.get('access_token')
+    print("client_idclient_id", client_id)
+    print("access_tokenaccess_token", access_token)
+    if access_token:
+        # Initialize the FyersModel instance with your client_id, access_token, and enable async mode
+        fyers = fyersModel.FyersModel(client_id=client_id, token=access_token, log_path="")
+
+        data = {
+            "segment":[11],
+            "side":[1,-1],
+            "productType":["INTRADAY","CNC"]
+        }
+
+        response = fyers.exit_positions(data=data)
+        print(response)
+        print("responseresponseresponseresponseresponse")
+        # Return the response received from the Fyers API
+        return response
+    else:
+        print("noithing here")
+        # Handle the case where access_token is not found in the session
+    return response
+
+
+
+def get_data_instance(request):
+    context={}
+    template="trading_tool/html/profile_view.html"
+    client_id = settings.FYERS_CLIENT_ID
+    access_token = request.session.get('access_token')
+    print("client_idclient_id", client_id)
+    print("access_tokenaccess_token", access_token)
+    if access_token:
+        # Initialize the FyersModel instance with your client_id, access_token, and enable async mode
+        fyers = fyersModel.FyersModel(client_id=client_id, is_async=False, token=access_token, log_path="")
+        # Make a request to get the user profile information
+        response = fyers.positions()
+        print("return responsereturn response",response)
+        context=response
+        print("contextcontext", context)
+        # Return the response received from the Fyers API
+        return fyers
+    else:
+        print("noithing here")
+        # Handle the case where access_token is not found in the session
+    
+    return fyers
+
+
 def get_user_profile(request):
     context={}
     template="trading_tool/html/profile_view.html"
