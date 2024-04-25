@@ -61,12 +61,15 @@ class DashboardView(TemplateView):
         get_accese_token(request)
         data_instance = get_data_instance(request)
         self.positions_data = data_instance.positions()
+        self.order_data = data_instance.orderbook()
+
 
         print("data_instance", self.positions_data)
         return super().dispatch(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        context['order_data'] = self.order_data
         context['positions_data'] = self.positions_data
         return context
 

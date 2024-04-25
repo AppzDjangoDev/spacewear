@@ -134,7 +134,8 @@
                   <div class="col-8">
                     <h5 class="card-title mb-9 fw-semibold">Today Earnings </h5>
                     <h4 class="fw-semibold mb-3" style="color: {% if positions_data.overall.pl_realized >= 0 %}#03C03C{% else %}red{% endif %}">
-                      <p class="fs-2 mb-0">INR</p> {{ positions_data.overall.pl_realized|floatformat:2 }}
+                      <p class="fs-2 mb-0" id="pl-realized" >INR</p> {{ positions_data.overall.pl_realized|floatformat:2 }}</p>
+                      {% comment %} <p class="fs-2 mb-0" id="pl-realized">INR {{ positions_data.overall.pl_realized|floatformat:2 }}</p> {% endcomment %}
                     </h4>
                     <div class="d-flex align-items-center pb-1">
                      <span
@@ -163,7 +164,7 @@
                   <div class="col-8">
                     <h5 class="card-title mb-9 fw-semibold">SMART EXIT</h5>
                     <h4 class="fw-semibold mb-3" style="color: {% if positions_data.overall.pl_unrealized >= 0 %}#03C03C{% else %}red{% endif %}">
-                      <p class="fs-2 mb-0">INR</p> {{ positions_data.overall.pl_unrealized|floatformat:2 }}
+                      <p class="fs-2 mb-0" id="pl-unrealized" >INR</p> {{ positions_data.overall.pl_unrealized|floatformat:2 }}
                     </h4>
                     {% comment %} <a href="{% url "exit_pending_orders" %}" class="btn btn-danger">Close all Position</a> {% endcomment %}
   
@@ -333,69 +334,7 @@
           </div> {% endcomment %}
         </div>
         <div class="row">
-          <div class="col-lg-4 d-flex align-items-stretch">
-            <div class="card w-100">
-              <div class="card-body p-4">
-                <div class="mb-4">
-                  <h5 class="card-title fw-semibold">Pending Orders</h5>
-                </div>
-                <ul class="timeline-widget mb-0 position-relative mb-n5">
-                  <li class="timeline-item d-flex position-relative overflow-hidden">
-                    <div class="timeline-time text-dark flex-shrink-0 text-end">09:30</div>
-                    <div class="timeline-badge-wrap d-flex flex-column align-items-center">
-                      <span class="timeline-badge border-2 border border-primary flex-shrink-0 my-8"></span>
-                      <span class="timeline-badge-border d-block flex-shrink-0"></span>
-                    </div>
-                    <div class="timeline-desc fs-3 text-dark mt-n1">Payment received from John Doe of $385.90</div>
-                  </li>
-                  <li class="timeline-item d-flex position-relative overflow-hidden">
-                    <div class="timeline-time text-dark flex-shrink-0 text-end">10:00 am</div>
-                    <div class="timeline-badge-wrap d-flex flex-column align-items-center">
-                      <span class="timeline-badge border-2 border border-info flex-shrink-0 my-8"></span>
-                      <span class="timeline-badge-border d-block flex-shrink-0"></span>
-                    </div>
-                    <div class="timeline-desc fs-3 text-dark mt-n1 fw-semibold">New sale recorded <a
-                        href="javascript:void(0)" class="text-primary d-block fw-normal">#ML-3467</a>
-                    </div>
-                  </li>
-                  <li class="timeline-item d-flex position-relative overflow-hidden">
-                    <div class="timeline-time text-dark flex-shrink-0 text-end">12:00 am</div>
-                    <div class="timeline-badge-wrap d-flex flex-column align-items-center">
-                      <span class="timeline-badge border-2 border border-success flex-shrink-0 my-8"></span>
-                      <span class="timeline-badge-border d-block flex-shrink-0"></span>
-                    </div>
-                    <div class="timeline-desc fs-3 text-dark mt-n1">Payment was made of $64.95 to Michael</div>
-                  </li>
-                  <li class="timeline-item d-flex position-relative overflow-hidden">
-                    <div class="timeline-time text-dark flex-shrink-0 text-end">09:30 am</div>
-                    <div class="timeline-badge-wrap d-flex flex-column align-items-center">
-                      <span class="timeline-badge border-2 border border-warning flex-shrink-0 my-8"></span>
-                      <span class="timeline-badge-border d-block flex-shrink-0"></span>
-                    </div>
-                    <div class="timeline-desc fs-3 text-dark mt-n1 fw-semibold">New sale recorded <a
-                        href="javascript:void(0)" class="text-primary d-block fw-normal">#ML-3467</a>
-                    </div>
-                  </li>
-                  <li class="timeline-item d-flex position-relative overflow-hidden">
-                    <div class="timeline-time text-dark flex-shrink-0 text-end">09:30 am</div>
-                    <div class="timeline-badge-wrap d-flex flex-column align-items-center">
-                      <span class="timeline-badge border-2 border border-danger flex-shrink-0 my-8"></span>
-                      <span class="timeline-badge-border d-block flex-shrink-0"></span>
-                    </div>
-                    <div class="timeline-desc fs-3 text-dark mt-n1 fw-semibold">New arrival recorded 
-                    </div>
-                  </li>
-                  <li class="timeline-item d-flex position-relative overflow-hidden">
-                    <div class="timeline-time text-dark flex-shrink-0 text-end">12:00 am</div>
-                    <div class="timeline-badge-wrap d-flex flex-column align-items-center">
-                      <span class="timeline-badge border-2 border border-success flex-shrink-0 my-8"></span>
-                    </div>
-                    <div class="timeline-desc fs-3 text-dark mt-n1">Payment Done</div>
-                  </li>
-                </ul>
-              </div>
-            </div>
-          </div>
+
 
         <div class="col-lg-8 d-flex align-items-stretch">
             <div class="card w-100">
@@ -405,6 +344,7 @@
 
               <div class="table-responsive">
                   <table class="table text-nowrap mb-0 align-middle">
+                    {% if order_data.positions_data.netPositions  %}
                       <thead class="text-dark fs-4">
                           <tr>
                               <th class="border-bottom-0">
@@ -425,26 +365,31 @@
                           </tr>
                       </thead>
                       <tbody>
-                      {% for position in positions_data.netPositions %}
-                      <tr>
-                        <td class="border-bottom-0"><h6 class="fw-semibold mb-0">{{ forloop.counter }}</h6></td>
-                        <td class="border-bottom-0">
-                            <h6 class="fw-semibold mb-1">{{ position.symbol }}</h6>
-                            <span class="fw-normal"> {{ position.productType }}  </span>                          
+                      {% endif %} 
+                      {% if order_data.positions_data.netPositions  %}
+                        {% for position in positions_data.netPositions %}
+                        <tr>
+                          <td class="border-bottom-0"><h6 class="fw-semibold mb-0">{{ forloop.counter }}</h6></td>
+                          <td class="border-bottom-0">
+                              <h6 class="fw-semibold mb-1">{{ position.symbol }}</h6>
+                              <span class="fw-normal"> {{ position.productType }}  </span>                          
+                          </td>
+                          {% comment %} <td class="border-bottom-0">
+                            <p class="mb-0 fw-normal">Elite Admin</p>
+                          </td> {% endcomment %}
+                          <td class="border-bottom-0">
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="badge {% if position.realized_profit < 0 %}bg-danger{% else %}bg-primary{% endif %} rounded-3 fw-semibold">{{ position.realized_profit|floatformat:2 }}</span>
+                            </div>
                         </td>
-                        {% comment %} <td class="border-bottom-0">
-                          <p class="mb-0 fw-normal">Elite Admin</p>
-                        </td> {% endcomment %}
-                        <td class="border-bottom-0">
-                          <div class="d-flex align-items-center gap-2">
-                              <span class="badge {% if position.realized_profit < 0 %}bg-danger{% else %}bg-primary{% endif %} rounded-3 fw-semibold">{{ position.realized_profit|floatformat:2 }}</span>
-                          </div>
-                      </td>
-                        {% comment %} <td class="border-bottom-0">
-                          <h6 class="fw-semibold mb-0 fs-4">$3.9</h6>
-                        </td> {% endcomment %}
-                      </tr> 
+                          {% comment %} <td class="border-bottom-0">
+                            <h6 class="fw-semibold mb-0 fs-4">$3.9</h6>
+                          </td> {% endcomment %}
+                        </tr> 
                       {% endfor %}
+                      {% else  %}
+                      <div class="timeline-desc fs-3 text-dark mt-n1">Currently No data Found</div>
+                      {% endif %} 
 
                       {% comment %} <tr>
                         <td class="border-bottom-0"><h6 class="fw-semibold mb-0">2</h6></td>
@@ -506,6 +451,84 @@
               </div>
             </div>
           </div> 
+          <div class="col-lg-4 d-flex align-items-stretch">
+            <div class="card w-100">
+              <div class="card-body p-4">
+                <div class="mb-4">
+                  <h5 class="card-title fw-semibold">Pending Orders</h5>
+                </div>
+
+                {% if order_data.orderBook  %}
+                  {% for order_instnace in order_data.orderBook %}
+                  <ul class="timeline-widget mb-0 position-relative mb-n5">
+                    <li class="timeline-item d-flex position-relative overflow-hidden">
+                      <div class="timeline-desc fs-3 text-dark">{{ order_instnace.slNo}}</div>
+                      <div class="timeline-time text-dark flex-shrink-0 text-end">{{ order_instnace.orderDateTime}}</div>
+                      <div class="timeline-badge-wrap d-flex flex-column align-items-center">
+                        
+                        <span class="timeline-badge border-2 border border-primary flex-shrink-0 my-8">
+                          <div class="timeline-desc fs-3 text-dark mt-n1">{{ order_instnace.qty}}</div>
+                        </span>
+                        <span class="timeline-badge-border d-block flex-shrink-0"></span>
+                      </div>
+                    <div class="timeline-desc fs-3 text-dark ">{{ order_instnace.symbol}}</div>
+                  </li>
+                  {% endfor %}
+
+                  {% else  %}
+                  <div class="timeline-desc fs-3 text-dark mt-n1">Currently No data Found</div>
+                  {% endif %} 
+
+                  {% comment %} <li class="timeline-item d-flex position-relative overflow-hidden">
+                    <div class="timeline-time text-dark flex-shrink-0 text-end">10:00 am</div>
+                    <div class="timeline-badge-wrap d-flex flex-column align-items-center">
+                      <span class="timeline-badge border-2 border border-info flex-shrink-0 my-8"></span>
+                      <span class="timeline-badge-border d-block flex-shrink-0"></span>
+                    </div>
+                    <div class="timeline-desc fs-3 text-dark mt-n1 fw-semibold">New sale recorded <a
+                        href="javascript:void(0)" class="text-primary d-block fw-normal">#ML-3467</a>
+                    </div>
+                  </li>
+                  <li class="timeline-item d-flex position-relative overflow-hidden">
+                    <div class="timeline-time text-dark flex-shrink-0 text-end">12:00 am</div>
+                    <div class="timeline-badge-wrap d-flex flex-column align-items-center">
+                      <span class="timeline-badge border-2 border border-success flex-shrink-0 my-8"></span>
+                      <span class="timeline-badge-border d-block flex-shrink-0"></span>
+                    </div>
+                    <div class="timeline-desc fs-3 text-dark mt-n1">Payment was made of $64.95 to Michael</div>
+                  </li>
+                  <li class="timeline-item d-flex position-relative overflow-hidden">
+                    <div class="timeline-time text-dark flex-shrink-0 text-end">09:30 am</div>
+                    <div class="timeline-badge-wrap d-flex flex-column align-items-center">
+                      <span class="timeline-badge border-2 border border-warning flex-shrink-0 my-8"></span>
+                      <span class="timeline-badge-border d-block flex-shrink-0"></span>
+                    </div>
+                    <div class="timeline-desc fs-3 text-dark mt-n1 fw-semibold">New sale recorded <a
+                        href="javascript:void(0)" class="text-primary d-block fw-normal">#ML-3467</a>
+                    </div>
+                  </li>
+                  <li class="timeline-item d-flex position-relative overflow-hidden">
+                    <div class="timeline-time text-dark flex-shrink-0 text-end">09:30 am</div>
+                    <div class="timeline-badge-wrap d-flex flex-column align-items-center">
+                      <span class="timeline-badge border-2 border border-danger flex-shrink-0 my-8"></span>
+                      <span class="timeline-badge-border d-block flex-shrink-0"></span>
+                    </div>
+                    <div class="timeline-desc fs-3 text-dark mt-n1 fw-semibold">New arrival recorded 
+                    </div>
+                  </li>
+                  <li class="timeline-item d-flex position-relative overflow-hidden">
+                    <div class="timeline-time text-dark flex-shrink-0 text-end">12:00 am</div>
+                    <div class="timeline-badge-wrap d-flex flex-column align-items-center">
+                      <span class="timeline-badge border-2 border border-success flex-shrink-0 my-8"></span>
+                    </div>
+                    <div class="timeline-desc fs-3 text-dark mt-n1">Payment Done</div>
+                  </li> {% endcomment %}
+
+
+                </ul>
+              </div>
+            </div>
+          </div>
 
 
         </div>
@@ -514,6 +537,8 @@
           <p class="mb-0 fs-4">Design and Developed by <a href="https://appztechblog.com/" target="_blank" class="pe-1 text-primary text-decoration-underline">Appztechblog.com</a></p>
         </div>
       </div>
+
+    
 
     {% endblock %}
     </div>
@@ -532,28 +557,43 @@
   <script src="{% static 'trading_tool/assets/js/app.min.js' %}"></script>
   <script>
     $(document).ready(function() {
-        // Define a function to fetch data from the server
-        function fetchData() {
-          console.log("1111111111111")
+      // Define a function to fetch data from the server
+      function fetchData() {
+          $.ajax({
+              url: '{% url "update_data_instance" %}',
+              type: 'GET',
+              success: function(response) {
+                  // Handle the response data here
+                  console.log('Data received:', response.positions.overall);
+                  // Check if the pl_realized property exists in the response
+                  if (response.positions.overall && response.positions.overall.pl_realized !== undefined) {
+                      // Update the HTML content of the element with the received data
+                      var plRealized = response.positions.overall.pl_realized.toFixed(2);
+                      $('.pl-realized').html('<p class="fs-2 mb-0">INR ' + plRealized + '</p>');
+                  } else {
+                      console.error('Error: pl_realized property is undefined in the response');
+                  }
 
-            $.ajax({
-                url: '{% url "update_data_instance" %}',
-                type: 'GET',
-                success: function(response) {
-                    // Handle the response data here
-                    console.log('Data received:', response);
-                },
-                error: function(xhr, status, error) {
-                    console.error('Error fetching data:', error);
-                }
-            });
-        }
-    
-        // Call the fetchData function initially when the page is loaded
-        fetchData();
-    
-        // Set an interval to call the fetchData function every 1 second
-        setInterval(fetchData, 1000);
+                  if (response.positions.overall && response.positions.overall.pl_unrealized !== undefined) {
+                    // Update the HTML content of the element with the received data
+                    var plUnrealized = response.positions.overall.pl_unrealized.toFixed(2);
+                    $('.pl-unrealized').html('<p class="fs-2 mb-0">INR ' + plRealized + '</p>');
+                  } else {
+                      console.error('Error: pl_unrealized property is undefined in the response');
+                  }
+                
+              },
+              error: function(xhr, status, error) {
+                  console.error('Error fetching data:', error);
+              }
+          });
+      }
+  
+      // Call the fetchData function initially when the page is loaded
+      fetchData();
+  
+      // Set an interval to call the fetchData function every 1 second
+      setInterval(fetchData, 1000);
     });
   </script>
   <script>
