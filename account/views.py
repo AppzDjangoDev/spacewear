@@ -62,6 +62,7 @@ class DashboardView(TemplateView):
         data_instance = get_data_instance(request)
         self.positions_data = data_instance.positions()
         self.order_data = data_instance.orderbook()
+        self.fund_data = data_instance.funds()
 
 
         print("data_instance", self.positions_data)
@@ -70,6 +71,7 @@ class DashboardView(TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['order_data'] = self.order_data
+        context['fund_data'] = self.fund_data
         context['positions_data'] = self.positions_data
         return context
 

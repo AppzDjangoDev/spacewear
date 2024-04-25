@@ -87,7 +87,12 @@
           </ul>
           <div class="navbar-collapse justify-content-end px-0" id="navbarNav">
             <ul class="navbar-nav flex-row ms-auto align-items-center justify-content-end">
-              <a href="{% url "brokerconnect" %}" class="btn btn-success mx-2">Refresh</a>
+              {% for item in fund_data.fund_limit %}
+                {% if item.id == 10 %}
+                    <a href="#" class="btn btn-success">Available Balance: {{ item.equityAmount }}</a>
+                {% endif %}
+              {% endfor %}
+              
               
 
               {% comment %} <a href="{% url "get_accese_token" %}" class="btn btn-success mx-2">Get Access</a> {% endcomment %}
