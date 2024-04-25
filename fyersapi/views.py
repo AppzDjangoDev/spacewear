@@ -1,6 +1,7 @@
 from django.shortcuts import render
 from django.views import View
 from django.conf import settings
+from django.contrib import messages
 
 class Brokerconfig(View):
     def get(self, request, *args, **kwargs):
@@ -31,7 +32,6 @@ import webbrowser
 
 
 def brokerconnect(request):
-    print("00000000000000000000000000000000000000000000000000")
     # Get client_id and secret_key from settings.py
     client_id = settings.FYERS_CLIENT_ID
     secret_key = settings.FYERS_SECRET_ID
@@ -47,7 +47,6 @@ def brokerconnect(request):
     state = "sample_state"
 
     # Create a session model with the provided credentials
-    print("redirect_uri", redirect_uri)
     session = fyersModel.SessionModel(
         client_id=client_id,
         secret_key=secret_key,
@@ -59,13 +58,11 @@ def brokerconnect(request):
     response = session.generate_authcode()
 
     # Print the auth code received in the response
-    print("responseresponseresponse",response)
     # You can redirect to another page or render a template after printing
     return redirect(response)  # Assuming 'home' is the name of a URL pattern you want to redirect to
 
 
 def get_accese_token(request):
-    print("7777777777777777777777777777777777")
     # return redirect('some_redirect_url')
     # Get client_id and secret_key from settings.py
     client_id = settings.FYERS_CLIENT_ID
@@ -95,15 +92,13 @@ def get_accese_token(request):
     response = session.generate_token()
 
     # Print the response, which should contain the access token and other details
-    print("auth_codeauth_codeauth_codeauth_codeauth_codeauth_codetttttttt",response)
     access_token = response.get('access_token')
     refresh_token = response.get('refresh_token')
     if access_token and refresh_token:
         request.session['access_token'] = access_token
         request.session['refresh_token'] = refresh_token
-        print("oooooooooooooooo",response)
     else:
-        print("pppppppppp",response)
+        print("access_token or refresh_token missing")
 
 
     # You can redirect to another page or render a template after printing
@@ -111,51 +106,9 @@ def get_accese_token(request):
 
 
 
-# import requests
-
-
-# def exit_pending_orders(request):
-#     context = {}
-#     template = "trading_tool/html/profile_view.html"
-#     client_id = settings.FYERS_CLIENT_ID
-#     access_token = request.session.get('access_token')
-
-#     if access_token:
-#         url = "https://api-t1.fyers.in/api/v3/positions"
-#         headers = {
-#             "Authorization": f"app_id:{client_id}:{access_token}",
-#             "Content-Type": "application/json"
-#         }
-#         data = {
-#             "pending_orders_cancel": 1
-#         }
-
-#         response = requests.delete(url, headers=headers, json=data)
-
-#         print("responseresponseresponseresponseresponseooooooooo", response)
-
-#         if response.status_code == 200:
-#             # Successful response, you can process further if needed
-#             print("Position closed successfully.")
-#         else:
-#             print("Failed to close position. Status code:", response.status_code)
-
-#         status = close_all_positions(request)
-#         print("statusstatusstatus", status)
-
-#         return render(request, template, context)
-#     else:
-#         print("Access token not found in session.")
-#         # Handle the case where access_token is not found in the session
-#         return render(request, template, context)
-    
-
-
 def close_all_positions(request):
     client_id = settings.FYERS_CLIENT_ID
     access_token = request.session.get('access_token')
-    print("client_id:", client_id)
-    print("access_token:", access_token)
 
     if access_token:
         # Initialize the FyersModel instance with your client_id, access_token, and enable async mode
@@ -180,114 +133,48 @@ def close_all_positions(request):
             # Cancel the orders
             order_cancel_response = fyers.cancel_basket_orders(data=orders_with_status_6)
             print("Order cancel response:", order_cancel_response)
+            messages.success(request,order_cancel_response)
+            
         else:
             print("No pending orders to cancel.")
+            messages.success(request,"No pending orders to cancel.")
 
-        if "code" in order_cancel_response:
-            code = order_cancel_response["code"]
-            if code == 1103 or code == 200:
-                # Code indicates successful cancellation or order not found
-                data = {
-                    "segment": [11],
-                    "side": [1],
-                    "productType": ["INTRADAY"]
-                }
-                response = fyers.exit_positions(data=data)
-                print("Exit positions response:", response)
-                return response
-            else:
-                # Unexpected response code
-                print("Unexpected response code:", code)
-                return redirect('brokerconnect')  
+
+      
+        # Code indicates successful cancellation or order not found
+        data = {
+            "segment": [11],
+            "side": [1],
+            "productType": ["INTRADAY"]
+        }
+        response = fyers.exit_positions(data=data)
+
+        # Check if 'data' key exists in the response
+        print("responseresponse", response)
+        if 'message' in response:
+            message = response['message']
+            print("messagemessagemessage", message)
+            messages.success(request, message)
+            return redirect('dashboard')  
         else:
-            # Response does not contain a 'code' key
-            return redirect('brokerconnect')  
+            # Handle the case where 'data' key is missing
+            messages.error(request, "Error: Response format is unexpected")
+            return redirect('dashboard')  
+      
 
-    return redirect('brokerconnect')  
-
-
-    
-
-
-
-
-# def exit_pending_orders(request):
-#     context = {}
-#     template = "trading_tool/html/profile_view.html"
-#     client_id = settings.FYERS_CLIENT_ID
-#     access_token = request.session.get('access_token')
-
-#     if access_token:
-#         url = "https://api-t1.fyers.in/api/v3/positions"
-#         headers = {
-#             "Authorization": f"app_id:{client_id}:{access_token}",
-#             "Content-Type": "application/json"
-#         }
-#         data = {
-#             "pending_orders_cancel": 1
-#         }
-
-#         response = requests.delete(url, headers=headers, json=data)
-
-#         print("responseresponseresponseresponseresponseooooooooo", response)
-
-#         if response.status_code == 200:
-#             # Successful response, you can process further if needed
-#             print("Position closed successfully.")
-#         else:
-#             print("Failed to close position. Status code:", response.status_code)
-
-#         status = close_all_positions(request)
-#         print("statusstatusstatus", status)
-
-#         return render(request, template, context)
-#     else:
-#         print("Access token not found in session.")
-#         # Handle the case where access_token is not found in the session
-#         return render(request, template, context)
-
-# def close_all_positions(request):
-#     client_id = settings.FYERS_CLIENT_ID
-#     access_token = request.session.get('access_token')
-#     print("client_idclient_id", client_id)
-#     print("access_tokenaccess_token", access_token)
-#     if access_token:
-#         # Initialize the FyersModel instance with your client_id, access_token, and enable async mode
-#         fyers = fyersModel.FyersModel(client_id=client_id, token=access_token, log_path="")
-
-#         data = {
-#             "segment":[11],
-#             "side":[1,-1],
-#             "productType":["INTRADAY","CNC"]
-#         }
-
-#         response = fyers.exit_positions(data=data)
-#         print(response)
-#         print("responseresponseresponseresponseresponse")
-#         # Return the response received from the Fyers API
-#         return response
-#     else:
-#         print("noithing here")
-#         # Handle the case where access_token is not found in the session
-#     return response
-
-
+    return redirect('dashboard')  
 
 def get_data_instance(request):
     context={}
     template="trading_tool/html/profile_view.html"
     client_id = settings.FYERS_CLIENT_ID
     access_token = request.session.get('access_token')
-    print("client_idclient_id", client_id)
-    print("access_tokenaccess_token", access_token)
     if access_token:
         # Initialize the FyersModel instance with your client_id, access_token, and enable async mode
         fyers = fyersModel.FyersModel(client_id=client_id, is_async=False, token=access_token, log_path="")
         # Make a request to get the user profile information
         response = fyers.positions()
-        print("return responsereturn response",response)
         context=response
-        print("contextcontext", context)
         # Return the response received from the Fyers API
         return fyers
     else:
@@ -317,16 +204,12 @@ def get_user_profile(request):
     template="trading_tool/html/profile_view.html"
     client_id = settings.FYERS_CLIENT_ID
     access_token = request.session.get('access_token')
-    print("client_idclient_id", client_id)
-    print("access_tokenaccess_token", access_token)
     if access_token:
         # Initialize the FyersModel instance with your client_id, access_token, and enable async mode
         fyers = fyersModel.FyersModel(client_id=client_id, is_async=False, token=access_token, log_path="")
         # Make a request to get the user profile information
         response = fyers.get_profile()
-        print("return responsereturn response",response)
         context=response
-        print("contextcontext", context)
         # Return the response received from the Fyers API
         return render(request,template,context)
     else:
@@ -334,9 +217,3 @@ def get_user_profile(request):
         # Handle the case where access_token is not found in the session
     
     return render(request,template,context)
-
-# # Example usage:
-# client_id = "XC4XXXXM-100"
-# access_token = "eyJ0eXXXXXXXX2c5-Y3RgS8wR14g"
-# profile_response = get_user_profile(client_id, access_token)
-# print(profile_response)

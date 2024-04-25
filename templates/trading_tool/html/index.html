@@ -10,6 +10,13 @@
   <link rel="stylesheet" href="{% static 'trading_tool/assets/css/styles.min.css' %}" />
 </head>
 <body>
+  {% if messages %}
+  <ul class="messages">
+      {% for message in messages %}
+          <li style="background-color: #dff0d8; color: #3c763d; border-color: #d6e9c6; padding: 10px; margin-bottom: 10px;">{{ message }}</li>
+      {% endfor %}
+  </ul>
+  {% endif %}
   <!--  Body Wrapper -->
   <div class="page-wrapper" id="main-wrapper" data-layout="vertical" data-navbarbg="skin6" data-sidebartype="full"
     data-sidebar-position="fixed" data-header-position="fixed">

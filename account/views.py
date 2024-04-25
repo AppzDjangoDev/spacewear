@@ -41,13 +41,11 @@ class DashboardView(TemplateView):
     @method_decorator(login_required)
     def dispatch(self, request, *args, **kwargs):
         try:
-            print("ppppppppppppppppppppppppppppppppppp")
+            
             current_url = request.build_absolute_uri()
-            print("current_url:", current_url)
             parsed_url = urlparse(current_url)
             query_params = parse_qs(parsed_url.query)
             auth_code = query_params.get('auth_code', [''])[0]
-            print("auth_codeauth_code", auth_code)
             if auth_code:
                 request.session['auth_code'] = auth_code
                 messages.success(request, 'Auth code stored successfully.')
@@ -94,24 +92,17 @@ class DashboardView(TemplateView):
         average_brokerage = 30
         self.recent_order_data = []
 
-        print("order_dataorder_dataorder_dataorder_data", self.order_data)
-
         if "orderBook" in self.order_data:
             # Filter orders with status 6
             filled_orders = [order for order in self.order_data["orderBook"] if order["status"] == 2]
-            print("ppppppppppppppppppppppp", filled_orders)
             
             # Sort pending orders by orderDateTime in descending order
             filled_orders_sorted = sorted(filled_orders, key=lambda x: x["orderDateTime"], reverse=True)
-            print("-------------------", filled_orders_sorted)
 
             # Iterate over the first 10 items in the sorted data
             for order in filled_orders_sorted[:5]:
                 self.recent_order_data.append(order)
             
-            # # Get the most recent 10 orderss
-            # self.recent_order_data = filled_orders_sorted[:10]
-            print("-------------------ppppppppppp", self.recent_order_data)
 
             # Update pending order count
             self.pending_orders_status_6 = sum(1 for order in self.order_data["orderBook"] if order["status"] == 6)
@@ -125,7 +116,6 @@ class DashboardView(TemplateView):
        
 
         self.expected_brokerage = self.total_orders_status_2 * average_brokerage
-        print("data_instance", self.positions_data)
         return super().dispatch(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
@@ -136,16 +126,14 @@ class DashboardView(TemplateView):
         context['pending_orders_status'] = self.pending_orders_status_6
         context['expected_brokerage'] = self.expected_brokerage
         context['recent_order_data'] = self.recent_order_data
-        
         context['positions_data'] = self.positions_data
         return context
 
-# Create your views here.
 class UserloginView(View):
     def get(self, request):
         template = "trading_tool/html/authentication-login.html"
-        context={}
-        context['form']= UserLoginForm()
+        context = {}
+        context['form'] = UserLoginForm()
         print("context", context)
         logged_user = request.user
 
@@ -158,9 +146,10 @@ class UserloginView(View):
             print("login__form")
             return render(request, template, context)
         
-    def logoutUser(request):
+    def logoutUser(self, request):  # Make sure to include `self` as the first parameter for methods in a class
         print("logout_processing")
         logout(request)
+        messages.success(request, "Logout Successful !")
         return redirect('login')
 
     def post(self, request):
