@@ -339,7 +339,7 @@
         <div class="row">
 
 
-        <div class="col-lg-8 d-flex align-items-stretch">
+        <div class="col-lg-6 d-flex align-items-stretch">
             <div class="card w-100">
               <div class="card-body p-4">
                 <h5 class="card-title fw-semibold mb-4">Positions</h5>
@@ -454,7 +454,7 @@
               </div>
             </div>
           </div> 
-          <div class="col-lg-4 d-flex align-items-stretch">
+          <div class="col-lg-6 d-flex align-items-stretch">
             <div class="card w-100">
               <div class="card-body p-4 mb-4">
                 <div class="mb-4">
@@ -474,12 +474,12 @@
                       </div>
                     <div class="timeline-desc fs-3 text-dark ">{{ order_instnace.symbol}}</div>
                     {% if order_instnace.side == 1 %}
-                        <a href="#" class="btn btn-success h-100">BUY</a>
+                        <a href="#" class="btn btn-success h-100">{{ order_instnace.qty}}</a>
                     {% elif order_instnace.side == -1 %}
-                        <a href="#" class="btn btn-danger h-100">SELL</a>
+                        <a href="#" class="btn btn-danger h-100">{{ order_instnace.qty}}</a>
                     {% endif %}
                     
-                    <div class="timeline-desc fs-3 text-dark mt-n1">{{ order_instnace.qty}}</div>
+                   
                   </li>
                   {% endfor %}
 
