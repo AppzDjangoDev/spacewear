@@ -10,13 +10,13 @@
   <link rel="stylesheet" href="{% static 'trading_tool/assets/css/styles.min.css' %}" />
 </head>
 <body>
-  {% if messages %}
+  {% comment %} {% if messages %}
   <ul class="messages">
       {% for message in messages %}
           <li style="background-color: #dff0d8; color: #3c763d; border-color: #d6e9c6; padding: 10px; margin-bottom: 10px;">{{ message }}</li>
       {% endfor %}
   </ul>
-  {% endif %}
+  {% endif %} {% endcomment %}
   <!--  Body Wrapper -->
   <div class="page-wrapper" id="main-wrapper" data-layout="vertical" data-navbarbg="skin6" data-sidebartype="full"
     data-sidebar-position="fixed" data-header-position="fixed">
@@ -171,6 +171,7 @@
               <div class="card-body">
                 <div class="row alig n-items-start">
                   <div class="col-8">
+                   
                     <h5 class="card-title mb-9 fw-semibold">SMART EXIT</h5>
                     <h4 class="fw-semibold mb-3" style="color: {% if positions_data.overall.pl_unrealized >= 0 %}#03C03C{% else %}red{% endif %}">
                       <p class="fs-2 mb-0" id="pl-unrealized" >INR</p> {{ positions_data.overall.pl_unrealized|floatformat:2 }}
@@ -188,6 +189,7 @@
                       {% comment %} <p class="text-dark me-1 fs-3 mb-0">+9%</p>
                       <p class="fs-3 mb-0">last year</p> {% endcomment %}
                     </div>
+                  
                   </div>
                   <div class="col-4">
                     <div class="d-flex justify-content-end">
