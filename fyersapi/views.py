@@ -111,66 +111,165 @@ def get_accese_token(request):
 
 
 
-import requests
-def exit_pending_orders(request):
-    context = {}
-    template = "trading_tool/html/profile_view.html"
-    client_id = settings.FYERS_CLIENT_ID
-    access_token = request.session.get('access_token')
+# import requests
 
-    if access_token:
-        url = "https://api-t1.fyers.in/api/v3/positions"
-        headers = {
-            "Authorization": f"app_id:{client_id}:{access_token}",
-            "Content-Type": "application/json"
-        }
-        data = {
-            "pending_orders_cancel": 1
-        }
 
-        response = requests.delete(url, headers=headers, json=data)
+# def exit_pending_orders(request):
+#     context = {}
+#     template = "trading_tool/html/profile_view.html"
+#     client_id = settings.FYERS_CLIENT_ID
+#     access_token = request.session.get('access_token')
 
-        print("responseresponseresponseresponseresponseooooooooo", response)
+#     if access_token:
+#         url = "https://api-t1.fyers.in/api/v3/positions"
+#         headers = {
+#             "Authorization": f"app_id:{client_id}:{access_token}",
+#             "Content-Type": "application/json"
+#         }
+#         data = {
+#             "pending_orders_cancel": 1
+#         }
 
-        if response.status_code == 200:
-            # Successful response, you can process further if needed
-            print("Position closed successfully.")
-        else:
-            print("Failed to close position. Status code:", response.status_code)
+#         response = requests.delete(url, headers=headers, json=data)
 
-        status = close_all_positions(request)
-        print("statusstatusstatus", status)
+#         print("responseresponseresponseresponseresponseooooooooo", response)
 
-        return render(request, template, context)
-    else:
-        print("Access token not found in session.")
-        # Handle the case where access_token is not found in the session
-        return render(request, template, context)
+#         if response.status_code == 200:
+#             # Successful response, you can process further if needed
+#             print("Position closed successfully.")
+#         else:
+#             print("Failed to close position. Status code:", response.status_code)
+
+#         status = close_all_positions(request)
+#         print("statusstatusstatus", status)
+
+#         return render(request, template, context)
+#     else:
+#         print("Access token not found in session.")
+#         # Handle the case where access_token is not found in the session
+#         return render(request, template, context)
+    
+
 
 def close_all_positions(request):
     client_id = settings.FYERS_CLIENT_ID
     access_token = request.session.get('access_token')
-    print("client_idclient_id", client_id)
-    print("access_tokenaccess_token", access_token)
+    print("client_id:", client_id)
+    print("access_token:", access_token)
+
     if access_token:
         # Initialize the FyersModel instance with your client_id, access_token, and enable async mode
         fyers = fyersModel.FyersModel(client_id=client_id, token=access_token, log_path="")
+        order_data = fyers.orderbook()
 
-        data = {
-            "segment":[11],
-            "side":[1,-1],
-            "productType":["INTRADAY","CNC"]
-        }
+        # Initialize an empty list to store order IDs with status 6
+        orders_with_status_6 = []
 
-        response = fyers.exit_positions(data=data)
-        print(response)
-        print("responseresponseresponseresponseresponse")
-        # Return the response received from the Fyers API
-        return response
-    else:
-        print("noithing here")
-        # Handle the case where access_token is not found in the session
-    return response
+        # Iterate through the orderBook
+        for order in order_data.get("orderBook", []):
+            # Check if the status is 6
+            if order.get("status") == 6:
+                # Append the ID to the list
+                orders_with_status_6.append({"id": order.get("id")})
+
+        order_cancel_response = []
+        print("orders_with_status_6orders_with_status_6orders_with_status_6", orders_with_status_6)
+        
+        # Check if there are orders to cancel
+        if orders_with_status_6:
+            # Cancel the orders
+            order_cancel_response = fyers.cancel_basket_orders(data=orders_with_status_6)
+            print("Order cancel response:", order_cancel_response)
+        else:
+            print("No pending orders to cancel.")
+
+        if "code" in order_cancel_response:
+            code = order_cancel_response["code"]
+            if code == 1103 or code == 200:
+                # Code indicates successful cancellation or order not found
+                data = {
+                    "segment": [11],
+                    "side": [1],
+                    "productType": ["INTRADAY"]
+                }
+                response = fyers.exit_positions(data=data)
+                print("Exit positions response:", response)
+                return response
+            else:
+                # Unexpected response code
+                print("Unexpected response code:", code)
+                return redirect('brokerconnect')  
+        else:
+            # Response does not contain a 'code' key
+            return redirect('brokerconnect')  
+
+    return redirect('brokerconnect')  
+
+
+    
+
+
+
+
+# def exit_pending_orders(request):
+#     context = {}
+#     template = "trading_tool/html/profile_view.html"
+#     client_id = settings.FYERS_CLIENT_ID
+#     access_token = request.session.get('access_token')
+
+#     if access_token:
+#         url = "https://api-t1.fyers.in/api/v3/positions"
+#         headers = {
+#             "Authorization": f"app_id:{client_id}:{access_token}",
+#             "Content-Type": "application/json"
+#         }
+#         data = {
+#             "pending_orders_cancel": 1
+#         }
+
+#         response = requests.delete(url, headers=headers, json=data)
+
+#         print("responseresponseresponseresponseresponseooooooooo", response)
+
+#         if response.status_code == 200:
+#             # Successful response, you can process further if needed
+#             print("Position closed successfully.")
+#         else:
+#             print("Failed to close position. Status code:", response.status_code)
+
+#         status = close_all_positions(request)
+#         print("statusstatusstatus", status)
+
+#         return render(request, template, context)
+#     else:
+#         print("Access token not found in session.")
+#         # Handle the case where access_token is not found in the session
+#         return render(request, template, context)
+
+# def close_all_positions(request):
+#     client_id = settings.FYERS_CLIENT_ID
+#     access_token = request.session.get('access_token')
+#     print("client_idclient_id", client_id)
+#     print("access_tokenaccess_token", access_token)
+#     if access_token:
+#         # Initialize the FyersModel instance with your client_id, access_token, and enable async mode
+#         fyers = fyersModel.FyersModel(client_id=client_id, token=access_token, log_path="")
+
+#         data = {
+#             "segment":[11],
+#             "side":[1,-1],
+#             "productType":["INTRADAY","CNC"]
+#         }
+
+#         response = fyers.exit_positions(data=data)
+#         print(response)
+#         print("responseresponseresponseresponseresponse")
+#         # Return the response received from the Fyers API
+#         return response
+#     else:
+#         print("noithing here")
+#         # Handle the case where access_token is not found in the session
+#     return response
 
 
 
@@ -194,7 +293,6 @@ def get_data_instance(request):
     else:
         print("noithing here")
         # Handle the case where access_token is not found in the session
-    
     return fyers
 from django.http import JsonResponse
 

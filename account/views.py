@@ -65,6 +65,66 @@ class DashboardView(TemplateView):
         self.fund_data = data_instance.funds()
 
 
+
+        # # Initialize order count variables to 0
+        # self.total_orders_status_2 = 0
+        # self.pending_orders_status_6 = 0
+        # self.expected_brokerage = 0 
+        # average_brokerage = 30
+        # self.recent_order_data = 0
+        # print("order_dataorder_dataorder_dataorder_data", self.order_data)
+        # if "orderBook" in self.order_data:
+        #     # Iterate through each order in orderBook
+        #     for order in self.order_data["orderBook"]:
+
+        #         # Check if the status of the order is 2
+        #         if order["status"] == 2:
+                    
+        #             # Increment the total order count
+        #             self.total_orders_status_2 += 1
+                    
+        #         # Check if the status of the order is 6
+        #         elif order["status"] == 6:
+        #             # Increment the pending order count
+        #             self.pending_orders_status_6 += 1
+        # Initialize order count variables to 0
+        self.total_orders_status_2 = 0
+        self.pending_orders_status_6 = 0
+        self.expected_brokerage = 0 
+        average_brokerage = 30
+        self.recent_order_data = []
+
+        print("order_dataorder_dataorder_dataorder_data", self.order_data)
+
+        if "orderBook" in self.order_data:
+            # Filter orders with status 6
+            filled_orders = [order for order in self.order_data["orderBook"] if order["status"] == 2]
+            print("ppppppppppppppppppppppp", filled_orders)
+            
+            # Sort pending orders by orderDateTime in descending order
+            filled_orders_sorted = sorted(filled_orders, key=lambda x: x["orderDateTime"], reverse=True)
+            print("-------------------", filled_orders_sorted)
+
+            # Iterate over the first 10 items in the sorted data
+            for order in filled_orders_sorted[:5]:
+                self.recent_order_data.append(order)
+            
+            # # Get the most recent 10 orderss
+            # self.recent_order_data = filled_orders_sorted[:10]
+            print("-------------------ppppppppppp", self.recent_order_data)
+
+            # Update pending order count
+            self.pending_orders_status_6 = sum(1 for order in self.order_data["orderBook"] if order["status"] == 6)
+
+            # Update total order count for status 2
+            self.total_orders_status_2 = sum(1 for order in self.order_data["orderBook"] if order["status"] == 2)
+
+
+
+
+       
+
+        self.expected_brokerage = self.total_orders_status_2 * average_brokerage
         print("data_instance", self.positions_data)
         return super().dispatch(request, *args, **kwargs)
 
@@ -72,6 +132,11 @@ class DashboardView(TemplateView):
         context = super().get_context_data(**kwargs)
         context['order_data'] = self.order_data
         context['fund_data'] = self.fund_data
+        context['total_orders_status'] = self.total_orders_status_2
+        context['pending_orders_status'] = self.pending_orders_status_6
+        context['expected_brokerage'] = self.expected_brokerage
+        context['recent_order_data'] = self.recent_order_data
+        
         context['positions_data'] = self.positions_data
         return context
 
