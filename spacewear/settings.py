@@ -59,6 +59,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django_celery_results',
 ]
 
 MIDDLEWARE = [
@@ -101,6 +102,14 @@ DATABASES = {
         'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
+
+# CELERY SETTINGS
+CELERY_BROKER_URL = 'redis://127.0.0.1:6379'
+CELERY_ACCEPT_CONTENT = ['application/json']
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_BACKEND = 'django-db'
+CELERY_TIMEZONE = 'Asia/Kolkata'
 
 # DATABASES = {
 #     'default': {
@@ -177,11 +186,11 @@ DATE_INPUT_FORMATS = [
     '%Y-%m-%d',  # Default format
 ]
 
-DEVELOPMENT_MODE=False
+DEVELOPMENT_MODE=False 
 
 FYERS_CLIENT_ID="H9O406XBXW-100"
 FYERS_SECRET_ID="XOVF82L85V"
-FYERS_REDIRECT_URL="https://aabe-2405-201-f007-417b-7d9c-6736-527b-61a6.ngrok-free.app"
+FYERS_REDIRECT_URL="https://23ba-2405-201-f007-402c-657e-321d-cba6-7662.ngrok-free.app"
 
 
 if not DEVELOPMENT_MODE:
@@ -189,3 +198,4 @@ if not DEVELOPMENT_MODE:
     FYERS_CLIENT_ID="5NYKD87NTH-100"
     FYERS_SECRET_ID="XIXJN6AKI5"
     FYERS_REDIRECT_URL="https://spacewear.co.in"
+

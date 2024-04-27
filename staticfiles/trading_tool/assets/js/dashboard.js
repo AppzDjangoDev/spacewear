@@ -1,6 +1,5 @@
 $(function () {
   // var positions_data = {{ positions_data | safe }};
-  console.log("positions_datapositions_datapositions_data", positions_data)
 
 
 
@@ -46,9 +45,14 @@ $(function () {
 
   // Find the highest value in the array
   var max_profit = Math.max(...realized_profits);
+  var maxloss = Math.max(...realized_loss);
+  var max_value = Math.max(max_profit, maxloss);
+
+
+
 
   // Round it up to the nearest hundred higher than that value
-  var rounded_profit = Math.ceil(max_profit / 100) * 100;
+  var rounded_profit = Math.ceil(max_value / 100) * 100;
 
   console.log(rounded_profit);
 

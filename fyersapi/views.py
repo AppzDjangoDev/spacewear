@@ -99,6 +99,7 @@ def get_accese_token(request):
         request.session['refresh_token'] = refresh_token
     else:
         print("access_token or refresh_token missing")
+        pass
 
 
     # You can redirect to another page or render a template after printing
@@ -155,16 +156,18 @@ def close_all_positions(request):
             message = response['message']
             print("messagemessagemessage", message)
             messages.success(request, message)
-            return redirect('dashboard')  
+            return JsonResponse({'message': message})
         else:
             # Handle the case where 'data' key is missing
+            message = "Error: Response format is unexpected"
             messages.error(request, "Error: Response format is unexpected")
-            return redirect('dashboard')  
+            return JsonResponse({'message': message})
       
 
     return redirect('dashboard')  
 
 def get_data_instance(request):
+    print("fetch enyryyy")
     context={}
     template="trading_tool/html/profile_view.html"
     client_id = settings.FYERS_CLIENT_ID
@@ -172,18 +175,15 @@ def get_data_instance(request):
     if access_token:
         # Initialize the FyersModel instance with your client_id, access_token, and enable async mode
         fyers = fyersModel.FyersModel(client_id=client_id, is_async=False, token=access_token, log_path="")
-        # Make a request to get the user profile information
-        response = fyers.positions()
-        context=response
         # Return the response received from the Fyers API
         return fyers
     else:
         print("noithing here")
         # Handle the case where access_token is not found in the session
     return fyers
+
+
 from django.http import JsonResponse
-
-
 def update_data_instance(request):
     context = {}
     client_id = settings.FYERS_CLIENT_ID
@@ -199,21 +199,130 @@ def update_data_instance(request):
         return JsonResponse({'error': 'Access token not found'}, status=400)
 
 
-def get_user_profile(request):
-    context={}
-    template="trading_tool/html/profile_view.html"
+# from django.views import View
+# from django.shortcuts import render
+
+# from fyers_api import fyersModel
+# import settings
+
+class ProfileView(View):
+  def get(self, request):
     client_id = settings.FYERS_CLIENT_ID
     access_token = request.session.get('access_token')
+
     if access_token:
-        # Initialize the FyersModel instance with your client_id, access_token, and enable async mode
-        fyers = fyersModel.FyersModel(client_id=client_id, is_async=False, token=access_token, log_path="")
-        # Make a request to get the user profile information
-        response = fyers.get_profile()
-        context=response
-        # Return the response received from the Fyers API
-        return render(request,template,context)
-    else:
-        print("noithing here")
-        # Handle the case where access_token is not found in the session
+      fyers = fyersModel.FyersModel(
+        client_id=client_id, 
+        is_async=False, 
+        token=access_token,
+        log_path=""
+      )
+
+      response = fyers.get_profile()
+      context = response
+      print("qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq")
+      return render(request, 'trading_tool/html/profile_view.html', context)
     
-    return render(request,template,context)
+    else:
+      print("no access token")
+      return render(request, 'trading_tool/html/profile_view.html')
+
+
+from django.core.paginator import Paginator
+from django.shortcuts import render
+from django.views import View
+from .models import TradingData
+
+class OrderHistory(View):
+    def get(self, request):
+        context = {}
+        order_data = TradingData.objects.filter(category='ORDERS')
+        paginator = Paginator(order_data, 20)  # Show 10 items per page
+        page_number = request.GET.get('page')
+        page_obj = paginator.get_page(page_number)
+        context['order_history_data'] = page_obj
+        return render(request, 'trading_tool/html/order_history.html', context)
+
+    
+
+
+from django.http import HttpResponse
+from .models import TradingData
+from django.utils import timezone
+from django.db.models import Q
+
+def update_latest_data(request):
+    # Call API to get data
+    print("entry__1")
+    data_instance = get_data_instance(request)
+
+    # Save positions data
+    positions = data_instance.positions()
+    TradingData.objects.update_or_create(
+        category='POSITIONS',
+        defaults={'data': positions, 'last_updated': timezone.now()},
+        # other fields
+    )
+
+    # Save orders data
+    orders = data_instance.orderbook()
+    TradingData.objects.update_or_create(
+        category='ORDERS',
+        defaults={'data': orders, 'last_updated': timezone.now()},
+        # other fields
+    )
+
+    # Save funds data
+    funds = data_instance.funds()
+    TradingData.objects.update_or_create(
+        category='FUNDS',
+        defaults={'data': funds, 'last_updated': timezone.now()},
+        # other fields
+    )
+
+    return HttpResponse('Data saved')
+
+import time
+
+def get_options_data(request):
+    # Call API to get data
+    print("entry__1")
+    import datetime
+
+    # Get today's date
+    today = datetime.date.today()
+
+    # Calculate the next Thursday
+    next_thursday = today + datetime.timedelta(days=(3 - today.weekday()) % 7)
+
+    # Set the time to 10:00 AM
+    next_thursday_time = datetime.time(hour=10, minute=0)
+
+    # Combine the date and time
+    next_thursday_datetime = datetime.datetime.combine(next_thursday, next_thursday_time)
+
+    # Convert the next Thursday datetime to a timestamp
+    next_thursday_timestamp = int(next_thursday_datetime.timestamp())
+
+    print("Next Thursday at 10:00 AM (timestamp):", next_thursday_timestamp)
+
+    #    swal("Saved successfully.", response, "success");
+
+
+
+
+    data_instance = get_data_instance(request)
+    data = {
+        "symbol":"NSE:NIFTY50-INDEX",
+        "strikecount":5,
+        "timestamp": next_thursday_timestamp
+    }
+
+    response = data_instance.optionchain(data=data);
+    print("OPTIONSOPTIONSOPTIONSOPTIONS",response)
+
+
+
+
+
+    return HttpResponse('Option Data Fetched')

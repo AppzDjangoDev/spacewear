@@ -100,7 +100,7 @@ class DashboardView(TemplateView):
             filled_orders_sorted = sorted(filled_orders, key=lambda x: x["orderDateTime"], reverse=True)
 
             # Iterate over the first 10 items in the sorted data
-            for order in filled_orders_sorted[:5]:
+            for order in filled_orders_sorted[:10]:
                 self.recent_order_data.append(order)
             
 
@@ -217,36 +217,36 @@ class SuccessView(View):
         return render(request, template, context)
         
       
-class ProfileView(View):
-    def __init__(self):
-        pass
+# class ProfileView(View):
+#     def __init__(self):
+#         pass
 
-    def get(self, request):
-        user_pk = request.user
-        try:
-            instance = User.objects.get(pk=user_pk.id)
-        except User.DoesNotExist:
-            instance = None
-        form = UserprofileUpdate(instance=instance)
-        template = "pages-account-settings-account.html"
-        context={}
-        context['form'] = form
-        print("context", context)
-        return render(request, template, context)
+#     def get(self, request):
+#         user_pk = request.user
+#         try:
+#             instance = User.objects.get(pk=user_pk.id)
+#         except User.DoesNotExist:
+#             instance = None
+#         form = UserprofileUpdate(instance=instance)
+#         template = "pages-account-settings-account.html"
+#         context={}
+#         context['form'] = form
+#         print("context", context)
+#         return render(request, template, context)
 
-    def post(self, request):
-        user_id = request.user.id
-        instance = get_object_or_404(User, id=user_id)
-        context={}
-        form = UserprofileUpdate(request.POST or None, request.FILES or None,  instance=instance)
-        context['form']= form
-        template = "pages-account-settings-account.html"
-        if form.is_valid():
-            form.save()
-            print("updated successfully")
-            messages.success(request, 'Your Account details updated successfully!')
-            return redirect('dashboard')  
-        else:
-            print("updating failed")
-            return render(request, template, context)
+#     def post(self, request):
+#         user_id = request.user.id
+#         instance = get_object_or_404(User, id=user_id)
+#         context={}
+#         form = UserprofileUpdate(request.POST or None, request.FILES or None,  instance=instance)
+#         context['form']= form
+#         template = "pages-account-settings-account.html"
+#         if form.is_valid():
+#             form.save()
+#             print("updated successfully")
+#             messages.success(request, 'Your Account details updated successfully!')
+#             return redirect('dashboard')  
+#         else:
+#             print("updating failed")
+#             return render(request, template, context)
         
