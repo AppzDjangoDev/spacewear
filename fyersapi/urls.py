@@ -17,14 +17,7 @@ urlpatterns = [
     path('order-history', views.OrderHistory.as_view(), name='order_history'),
     path('update-latest-data', views.update_latest_data, name='update_latest_data'),
     path('get-options-data', views.get_options_data, name='get_options_data'),
-
-
-
-    
-
-
-    
-
+    path('options-chain-view', views.OptionChainView.as_view(), name='options_chain_view'),
 
 
     

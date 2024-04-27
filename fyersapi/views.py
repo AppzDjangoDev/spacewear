@@ -243,7 +243,55 @@ class OrderHistory(View):
         context['order_history_data'] = page_obj
         return render(request, 'trading_tool/html/order_history.html', context)
 
+# class OptionChainView(View):
+#     def get(self, request):
+#         context = {}
+#         order_data = TradingData.objects.filter(category='ORDERS')
+#         paginator = Paginator(order_data, 20)  # Show 10 items per page
+#         page_number = request.GET.get('page')
+#         page_obj = paginator.get_page(page_number)
+#         context['order_history_data'] = page_obj
+#         return render(request, 'trading_tool/html/optionchainview.html', context)
     
+
+import datetime
+class OptionChainView(View):
+  def get(self, request):
+
+    context={}
+    template='trading_tool/html/optionchainview.html'
+    # Get today's date
+    today = datetime.date.today()
+
+    # Calculate the next Thursday
+    next_thursday = today + datetime.timedelta(days=(3 - today.weekday()) % 7)
+
+    # Set the time to 10:00 AM
+    next_thursday_time = datetime.time(hour=10, minute=0)
+
+    # Combine the date and time
+    next_thursday_datetime = datetime.datetime.combine(next_thursday, next_thursday_time)
+
+    # Convert the next Thursday datetime to a timestamp
+    next_thursday_timestamp = int(next_thursday_datetime.timestamp())
+
+    print("Next Thursday at 10:00 AM (timestamp):", next_thursday_timestamp)
+
+    data_instance = get_data_instance(request)
+    data = {
+        "symbol":"NSE:NIFTY50-INDEX",
+        "strikecount":1,
+        "timestamp": next_thursday_timestamp
+    }
+    response = data_instance.optionchain(data=data)
+    context['optons_data'] = response
+
+    print("responseresponseresponse", context)
+    return render(request, template, context)
+
+    # else:
+    #   print("no access token")
+    #   return render(request, template)
 
 
 from django.http import HttpResponse
@@ -308,21 +356,13 @@ def get_options_data(request):
 
     #    swal("Saved successfully.", response, "success");
 
-
-
-
     data_instance = get_data_instance(request)
     data = {
         "symbol":"NSE:NIFTY50-INDEX",
         "strikecount":5,
         "timestamp": next_thursday_timestamp
     }
-
     response = data_instance.optionchain(data=data);
     print("OPTIONSOPTIONSOPTIONSOPTIONS",response)
-
-
-
-
 
     return HttpResponse('Option Data Fetched')
