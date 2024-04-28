@@ -136,7 +136,6 @@ def close_all_positions(request):
     return redirect('dashboard')  
 
 def get_data_instance(request):
-    print("fetch enyryyy")
     context={}
     template="trading_tool/html/profile_view.html"
     client_id = settings.FYERS_CLIENT_ID
