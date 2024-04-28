@@ -6,38 +6,75 @@
   <div class="row">
     <div class="col-lg-12 col-sm-12 d-flex align-items-stretch">
         <div class="card w-100">
-          <div class="card-body p-4 mb-4">
-            <div class="mb-4">
-              <h5 class="card-title fw-semibold">Option Chain</h5>
+            <div class="card-body p-4 mb-4">
+              <div class="d-flex justify-content-between align-items-center mb-4">
+                <h5 class="card-title fw-semibold">Option Chain</h5>
+                <div class="d-flex align-items-center">
+                    {% for option in options_data.data.optionsChain %}
+                    {% if option.option_type == ""%}
+                  <h5 class="card-title fw-semibold text-muted mx-3">INDEX:&nbsp;{{option.ex_symbol}}</h5>
+                  <h5 class="card-title fw-semibold text-muted mx-3">POINT:&nbsp;{{option.ltp}}</h5>
+                  
+
+                  {% endif %}
+                  {% endfor %}
+                  {% comment %} {{options_data.data.expiryData}} {% endcomment %}
+                  {% comment %} {{ options_data.data.expiryData[0].date }} {% endcomment %}
+                  {% set first_expiry = options_data.data.expiryData|first %}
+                  {{ first_expiry.date }}
+
+
             </div>
+        </div>
             <div class="row">
             <div class="col-sm-6">
 
-            {% comment %} {{optons_data.data.optionsChain}} {% endcomment %}
-            {% for option in optons_data.data.optionsChain %}
+            {% comment %} {{options_data.data.optionsChain}} {% endcomment %}
+            {% for option in options_data.data.optionsChain %}
             {% if option.option_type == "CE"%}
-            <div class="card">
+            {% comment %} <div class="card">
                 <div class="card-body">
                     <h5 class="card-title">CE</h5>
                     <p class="card-text">STRIKE:{{option.strike_price}}</p>
-                    <p class="card-text">Expiry Date: 02-05-2024</p>
+                    <p class="card-text">Expiry: 02-05-2024</p>
                     <p class="card-text">{{option.ltp}}</p>
                 </div>
-            </div>
+            </div> {% endcomment %}
+            <div class="alert alert-success" role="alert">
+                <div class="row">
+                    <div class="col-md-4 d-flex justify-content-center align-items-center">
+                        <button class="btn btn-success btn-lg btn-block w-100 h-100 fw-bolder">Buy</button>
+                    </div>
+                    <div class="col-md-4  text-center">
+                        <h5 class="card-title fw-bolder">CE&nbsp;{{option.strike_price}}</h5>
+                        <p class="card-text fs-4 fw-bolder">Price:{{option.ltp}}</p>
+                        {% comment %} <p class="card-text">Expiry: 02-05-2024</p> {% endcomment %}
+                    </div>
+                    <div class="col-md-4 d-flex justify-content-center align-items-center">
+                        <button class="btn btn-danger btn-lg btn-block w-100 h-100 fw-bolder">Sell</button>
+                    </div>
+                </div>
+            </div>        
             {% endif %}
             {% endfor %}
-
-
             </div>
             <div class="col-sm-6">
-            {% for option in optons_data.data.optionsChain %}
+            {% for option in options_data.data.optionsChain %}
                 {% if option.option_type == "PE"%}
-                <div class="card">
-                    <div class="card-body">
-                        <h5 class="card-title">PE</h5>
-                        <p class="card-text">Call OI:{{option.strike_price}}</p>
-                        <p class="card-text">Expiry Date: 02-05-2024</p>
-                        <p class="card-text">{{option.ltp}}</p>
+                <div class="alert alert-danger" role="alert">
+                    <div class="row">
+                        <div class="col-md-4 d-flex justify-content-center align-items-center">
+                            <button class="btn btn-success btn-lg btn-block w-100 h-100 fw-bolder">Buy</button>
+                        </div>
+                        <div class="col-md-4  text-center">
+                            <h5 class="card-title fw-bolder">PE&nbsp;{{option.strike_price}}</h5>
+                            <p class="card-text fs-4 fw-bolder">Price:{{option.ltp}}</p>
+                            {% comment %} <p class="card-text">Expiry: 02-05-2024</p> {% endcomment %}
+
+                        </div>
+                        <div class="col-md-4 d-flex justify-content-center align-items-center">
+                            <button class="btn btn-danger btn-lg btn-block w-100 h-100 fw-bolder">Sell</button>
+                        </div>
                     </div>
                 </div>
                 {% endif %}

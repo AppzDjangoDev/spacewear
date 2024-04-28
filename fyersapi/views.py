@@ -280,11 +280,11 @@ class OptionChainView(View):
     data_instance = get_data_instance(request)
     data = {
         "symbol":"NSE:NIFTY50-INDEX",
-        "strikecount":1,
+        "strikecount":2,
         "timestamp": next_thursday_timestamp
     }
     response = data_instance.optionchain(data=data)
-    context['optons_data'] = response
+    context['options_data'] = response
 
     print("responseresponseresponse", context)
     return render(request, template, context)
@@ -307,7 +307,7 @@ def update_latest_data(request):
     # Save positions data
     positions = data_instance.positions()
     TradingData.objects.update_or_create(
-        category='POSITIONS',
+        category='POSITIONS',last_updated =  timezone.now(),
         defaults={'data': positions, 'last_updated': timezone.now()},
         # other fields
     )
@@ -315,7 +315,7 @@ def update_latest_data(request):
     # Save orders data
     orders = data_instance.orderbook()
     TradingData.objects.update_or_create(
-        category='ORDERS',
+        category='ORDERS',last_updated =  timezone.now(),
         defaults={'data': orders, 'last_updated': timezone.now()},
         # other fields
     )
@@ -323,7 +323,7 @@ def update_latest_data(request):
     # Save funds data
     funds = data_instance.funds()
     TradingData.objects.update_or_create(
-        category='FUNDS',
+        category='FUNDS',last_updated =  timezone.now(),
         defaults={'data': funds, 'last_updated': timezone.now()},
         # other fields
     )
