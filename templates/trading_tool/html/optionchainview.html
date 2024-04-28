@@ -2,6 +2,12 @@
 {% load static %}
 {% block content %}
 <!--  Header End -->
+
+<!-- Include CSRF token meta tag here -->
+<head>
+    <meta name="csrf-token" content="{{ csrf_token }}">
+</head>
+
 <div class="container-fluid">
   <div class="row">
     <div class="col-lg-12 col-sm-12 d-flex align-items-stretch">
@@ -12,45 +18,36 @@
                 <div class="d-flex align-items-center">
                     {% for option in options_data.data.optionsChain %}
                     {% if option.option_type == ""%}
-                  <h5 class="card-title fw-semibold text-muted mx-3">INDEX:&nbsp;{{option.ex_symbol}}</h5>
-                  <h5 class="card-title fw-semibold text-muted mx-3">POINT:&nbsp;{{option.ltp}}</h5>
+                  <h5 class="card-title fw-semibold text-muted mx-3">INDEX:</h5>
+                  <input class="form-control" name="ex_symbol" value="{{ option.ex_symbol }}">
+                  <h5 class="card-title fw-semibold text-muted mx-3">POINT:</h5>
+                  <input class="form-control" name="ltp" value="{{ option.ltp }}">
+                  <h5 class="card-title fw-semibold text-muted mx-3">EXPIRY:</h5>
+                  <input class="form-control" name="ltp" value="{{expiry_response}}">
                   
-
+                  
                   {% endif %}
                   {% endfor %}
-                  {% comment %} {{options_data.data.expiryData}} {% endcomment %}
-                  {% comment %} {{ options_data.data.expiryData[0].date }} {% endcomment %}
-                 
-
-
             </div>
         </div>
             <div class="row">
             <div class="col-sm-6">
-
-            {% comment %} {{options_data.data.optionsChain}} {% endcomment %}
             {% for option in options_data.data.optionsChain %}
             {% if option.option_type == "CE"%}
-            {% comment %} <div class="card">
-                <div class="card-body">
-                    <h5 class="card-title">CE</h5>
-                    <p class="card-text">STRIKE:{{option.strike_price}}</p>
-                    <p class="card-text">Expiry: 02-05-2024</p>
-                    <p class="card-text">{{option.ltp}}</p>
-                </div>
-            </div> {% endcomment %}
+
             <div class="alert alert-success" role="alert">
                 <div class="row">
                     <div class="col-4 d-flex justify-content-center align-items-center">
-                        <button class="btn btn-success btn-lg btn-block w-100 h-100 fw-bolder">Buy</button>
+                        <button class="btn btn-success btn-lg btn-block w-100 h-100 fw-bolder buy-button">Buy</button>
                     </div>
                     <div class="col-4  text-center">
+                        <input type="hidden" name="der-symbol" value="{{ option.symbol }}">
                         <h5 class="card-title fw-bolder">CE&nbsp;{{option.strike_price}}</h5>
-                        <p class="card-text fs-4 fw-bolder">Price:{{option.ltp}}</p>
+                        <p class="card-text fs-4 fw-bolder ">LTP:{{option.ltp}}</p>
                         {% comment %} <p class="card-text">Expiry: 02-05-2024</p> {% endcomment %}
                     </div>
                     <div class="col-4 d-flex justify-content-center align-items-center">
-                        <button class="btn btn-danger btn-lg btn-block w-100 h-100 fw-bolder">Sell</button>
+                        <button class="btn btn-danger btn-lg btn-block w-100 h-100 fw-bolder sell-button">Sell</button>
                     </div>
                 </div>
             </div>        
@@ -58,24 +55,23 @@
             {% endfor %}
             </div>
             <div class="col-sm-6">
-            {% for option in options_data.data.optionsChain %}
+                {% for option in options_data.data.optionsChain %}
                 {% if option.option_type == "PE"%}
-                <div class="alert alert-danger" role="alert">
-                    <div class="row">
-                        <div class="col-4 d-flex justify-content-center align-items-center">
-                            <button class="btn btn-success btn-lg btn-block w-100 h-100 fw-bolder">Buy</button>
-                        </div>
-                        <div class="col-4  text-center">
-                            <h5 class="card-title fw-bolder">PE&nbsp;{{option.strike_price}}</h5>
-                            <p class="card-text fs-4 fw-bolder">Price:{{option.ltp}}</p>
-                            {% comment %} <p class="card-text">Expiry: 02-05-2024</p> {% endcomment %}
-
-                        </div>
-                        <div class="col-4 d-flex justify-content-center align-items-center">
-                            <button class="btn btn-danger btn-lg btn-block w-100 h-100 fw-bolder">Sell</button>
+                    <div class="alert alert-danger" role="alert">
+                        <div class="row">
+                            <div class="col-4 d-flex justify-content-center align-items-center">
+                                <button class="btn btn-success btn-lg btn-block w-100 h-100 fw-bolder buy-button">Buy</button>
+                            </div>
+                            <div class="col-4 text-center">
+                                <input type="hidden" name="der-symbol" value="{{ option.symbol }}">
+                                <h5 class="card-title fw-bolder">PE&nbsp;{{option.strike_price}}</h5>
+                                <p class="card-text fs-4 fw-bolder">LTP:{{option.ltp}}</p>
+                            </div>
+                            <div class="col-4 d-flex justify-content-center align-items-center">
+                                <button class="btn btn-danger btn-lg btn-block w-100 h-100 fw-bolder sell-button">Sell</button>
+                            </div>
                         </div>
                     </div>
-                </div>
                 {% endif %}
             {% endfor %}
             </div>
@@ -84,8 +80,90 @@
           </div>
         </div>
       </div>
-</div>
+    </div>
 </div>
 
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
+<script>
+    $(document).ready(function() {
+        // Handle click event for buy buttons
+        $('.buy-button').click(function(e) {
+            e.preventDefault();
+            
+            // Get the value of the hidden input field
+            var derSymbol = $(this).closest('.alert').find('input[name="der-symbol"]').val();
+            
+            // Get the value of ex_symbol and ltp fields
+            var exSymbol = $('input[name="ex_symbol"]').val();
+            var ltp = $('input[name="ltp"]').val();
+            
+            // Get CSRF token
+            var csrfToken = $('meta[name="csrf-token"]').attr('content');
+            
+            // Make AJAX request
+            $.ajax({
+                type: 'POST',  // Adjust the request type as needed
+                url: '{% url "instant_buy_order" %}',  // Replace 'your_django_view_url' with the actual URL of your Django view
+                data: {
+                    'der_symbol': derSymbol,  // Pass the value of der-symbol field
+                    'ex_symbol': exSymbol,  // Pass the value of ex_symbol field
+                    'ltp': ltp,  // Pass the value of ltp field
+                    'csrfmiddlewaretoken': csrfToken  // Pass the CSRF token
+                },
+                success: function(response) {
+                    // Handle success response if needed
+                    console.log('AJAX request successful.', response);
+                    swal({
+                        position: "top-end",
+                        icon: "success",
+                        title: response.response,
+                        showConfirmButton: false,
+                        
+                    });
+                    
+                },
+                error: function(xhr, status, error) {
+                    // Handle error response if needed
+                    console.error('AJAX request failed.', error);
+                }
+            });
+        });
+
+        // Handle click event for sell buttons
+        $('.sell-button').click(function(e) {
+            e.preventDefault();
+            console.log('Sell button clicked.');
+
+            // Add your AJAX call here
+            $.ajax({
+                type: 'GET',  // Adjust the request type as needed
+                url: '{% url "close_all_positions" %}',
+                success: function(response) {
+                    // Handle success response if needed
+                    console.log('Position closed successfully.', response.message);
+                    swal({
+                        position: "top-end",
+                        icon: "success",
+                        title: response.message,
+                        showConfirmButton: false,
+                        
+                    });
+                },
+                error: function(xhr, status, error) {
+                    // Handle error response if needed
+                    console.error('Failed to close position. Error:', error);
+                    swal({
+                        position: "top-end",
+                        icon: "error",
+                        title: "some error occurred!",
+                        showConfirmButton: false,
+                        
+                    });
+                }
+            });
+        });
+    });
+</script>
 
 {% endblock %}

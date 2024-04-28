@@ -12,7 +12,6 @@ from datetime import datetime
 from django.db.models import Sum
 from django.urls import reverse_lazy
 from django.views.generic import CreateView
-
 from fyersapi.views import brokerconnect, get_accese_token, get_data_instance
 from .forms import CustomUserCreationForm
 from django.contrib.auth import authenticate, login
@@ -23,10 +22,6 @@ from django.contrib import messages
 from urllib.parse import urlparse, parse_qs
 from django.contrib.auth.decorators import login_required
 import time
-
-def homePage(request):
-    return render(request,'accounts/index.html')
-
 from django.views.generic import TemplateView
 from django.utils.decorators import method_decorator
 from django.contrib.auth.decorators import login_required
@@ -35,13 +30,15 @@ from urllib.parse import urlparse, parse_qs
 from django.contrib import messages
 import time
 
+
+def homePage(request):
+    return render(request,'accounts/index.html')
+
 class DashboardView(TemplateView):
     template_name = "trading_tool/html/index.html"
-
     @method_decorator(login_required)
     def dispatch(self, request, *args, **kwargs):
         try:
-            
             current_url = request.build_absolute_uri()
             parsed_url = urlparse(current_url)
             query_params = parse_qs(parsed_url.query)
@@ -61,60 +58,23 @@ class DashboardView(TemplateView):
         self.positions_data = data_instance.positions()
         self.order_data = data_instance.orderbook()
         self.fund_data = data_instance.funds()
-
-
-
-        # # Initialize order count variables to 0
-        # self.total_orders_status_2 = 0
-        # self.pending_orders_status_6 = 0
-        # self.expected_brokerage = 0 
-        # average_brokerage = 30
-        # self.recent_order_data = 0
-        # print("order_dataorder_dataorder_dataorder_data", self.order_data)
-        # if "orderBook" in self.order_data:
-        #     # Iterate through each order in orderBook
-        #     for order in self.order_data["orderBook"]:
-
-        #         # Check if the status of the order is 2
-        #         if order["status"] == 2:
-                    
-        #             # Increment the total order count
-        #             self.total_orders_status_2 += 1
-                    
-        #         # Check if the status of the order is 6
-        #         elif order["status"] == 6:
-        #             # Increment the pending order count
-        #             self.pending_orders_status_6 += 1
-        # Initialize order count variables to 0
         self.total_orders_status_2 = 0
         self.pending_orders_status_6 = 0
         self.expected_brokerage = 0 
         average_brokerage = 30
         self.recent_order_data = []
-
         if "orderBook" in self.order_data:
             # Filter orders with status 6
             filled_orders = [order for order in self.order_data["orderBook"] if order["status"] == 2]
-            
             # Sort pending orders by orderDateTime in descending order
             filled_orders_sorted = sorted(filled_orders, key=lambda x: x["orderDateTime"], reverse=True)
-
             # Iterate over the first 10 items in the sorted data
             for order in filled_orders_sorted[:10]:
                 self.recent_order_data.append(order)
-            
-
             # Update pending order count
             self.pending_orders_status_6 = sum(1 for order in self.order_data["orderBook"] if order["status"] == 6)
-
             # Update total order count for status 2
             self.total_orders_status_2 = sum(1 for order in self.order_data["orderBook"] if order["status"] == 2)
-
-
-
-
-       
-
         self.expected_brokerage = self.total_orders_status_2 * average_brokerage
         return super().dispatch(request, *args, **kwargs)
 
@@ -182,7 +142,6 @@ class UserloginView(View):
 
 
 class UserRegistrationView(CreateView):
-    print("============================================")
     form_class = CustomUserCreationForm
     template_name = "trading_tool/html/authentication-register.html"
     success_url = reverse_lazy('login')
@@ -215,38 +174,4 @@ class SuccessView(View):
         context={}
         print("context", context)
         return render(request, template, context)
-        
-      
-# class ProfileView(View):
-#     def __init__(self):
-#         pass
-
-#     def get(self, request):
-#         user_pk = request.user
-#         try:
-#             instance = User.objects.get(pk=user_pk.id)
-#         except User.DoesNotExist:
-#             instance = None
-#         form = UserprofileUpdate(instance=instance)
-#         template = "pages-account-settings-account.html"
-#         context={}
-#         context['form'] = form
-#         print("context", context)
-#         return render(request, template, context)
-
-#     def post(self, request):
-#         user_id = request.user.id
-#         instance = get_object_or_404(User, id=user_id)
-#         context={}
-#         form = UserprofileUpdate(request.POST or None, request.FILES or None,  instance=instance)
-#         context['form']= form
-#         template = "pages-account-settings-account.html"
-#         if form.is_valid():
-#             form.save()
-#             print("updated successfully")
-#             messages.success(request, 'Your Account details updated successfully!')
-#             return redirect('dashboard')  
-#         else:
-#             print("updating failed")
-#             return render(request, template, context)
         

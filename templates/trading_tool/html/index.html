@@ -62,15 +62,13 @@
               </li> {% endcomment %}
 
               <li class="sidebar-item">
-                <a class="sidebar-link"  href="{% url 'options_chain_view' %}" aria-expanded="false">
-                  <span>
-                    <i class="ti ti-article"></i>
-                  </span>
-                  <span class="hide-menu">MIDCAP NIFTY</span>
+                <a class="sidebar-link" href="{% url 'options_chain_view' slug='MIDCPNIFTY' %}" aria-expanded="false">
+                    <span><i class="ti ti-article"></i></span>
+                    <span class="hide-menu">MIDCAPNIFTY</span>
                 </a>
-              </li>
+            </li>
               <li class="sidebar-item">
-                <a class="sidebar-link" href="./ui-alerts.html" aria-expanded="false">
+                <a class="sidebar-link"  href="{% url 'options_chain_view' slug='FINNIFTY' %}" aria-expanded="false">
                   <span>
                     <i class="ti ti-alert-circle"></i>
                   </span>
@@ -78,7 +76,7 @@
                 </a>
               </li>
               <li class="sidebar-item">
-                <a class="sidebar-link" href="./ui-card.html" aria-expanded="false">
+                <a class="sidebar-link" href="{% url 'options_chain_view' slug='NIFTYBANK' %}" aria-expanded="false">
                   <span>
                     <i class="ti ti-cards"></i>
                   </span>
@@ -86,7 +84,7 @@
                 </a>
               </li>
               <li class="sidebar-item">
-                <a class="sidebar-link" href="./ui-forms.html" aria-expanded="false">
+                <a class="sidebar-link" href="{% url 'options_chain_view' slug='NIFTY50' %}" aria-expanded="false">
                   <span>
                     <i class="ti ti-file-description"></i>
                   </span>
@@ -204,7 +202,7 @@
                       <i class="ti ti-list-check fs-6"></i>
                       <p class="mb-0 fs-3">Broker Configurations</p>
                     </a>
-                    <a href="javascript:void(0)" class="d-flex align-items-center gap-2 dropdown-item">
+                    <a href="{% url 'configure_trading' %}" class="d-flex align-items-center gap-2 dropdown-item">
                       <i class="ti ti-list-check fs-6"></i>
                       <p class="mb-0 fs-3">Trade Configurations</p>
                     </a>
@@ -731,7 +729,6 @@
     });
   </script>
   <script>
-    var positions_data = {{ positions_data | safe }};
     $(document).ready(function() {
       $('#close_positions_button').click(function(e) {
           e.preventDefault();
@@ -792,29 +789,6 @@
       });
     });
 
-
-    $(document).ready(function() {
-      $('#optionsChainData').click(function(e) {
-          e.preventDefault();
-          console.log('option Data fetching');
-
-          $.ajax({
-              type: 'GET',  // Adjust the request type as needed
-              url: '{% url "get_options_data" %}',
-              success: function(response) {
-                  // Handle success response if needed
-                  console.log('Saved successfully.', response);
-                  swal("Saved successfully.", response, "success");
-              },
-              error: function(xhr, status, error) {
-                  // Handle error response if needed
-                  console.error('Failed to close position. Error:', error);
-                  swal("Data Not Saved", "Some Error Occured", "error");
-              }
-          });
-      });
-    });
-
     function disableButtonAtFour() {
         const now = new Date();
         const currentHour = now.getHours();
@@ -827,13 +801,10 @@
             $('#updatelatestdata').prop('disabled', true); // Disable the button
         }
     }
-    
     // Call the function initially
     disableButtonAtFour();
-    
     // Set an interval to check every minute (adjust as needed)
     setInterval(disableButtonAtFour, 60 * 1000); // 60 seconds * 1000 milliseconds
-
     </script>
 
 
