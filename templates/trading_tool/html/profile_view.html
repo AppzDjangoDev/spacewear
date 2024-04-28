@@ -113,15 +113,37 @@
                               <span class="mdi mdi-arrow-left mdi-24px"></span>
                               <span class="mdi mdi-dots-horizontal mdi-24px"></span>
                           </header>
-                          <main>
-                              <img src="{{ data.image }}" alt="">
+                          
+                              {% comment %} <img src="{{ data.image }}" alt="">
                               <h2>{{ data.name }}</h2>
                               <p class="card-text m-2">EMAIL ID: {{ data.email_id }}</p>
                               <p class="card-text m-2">FYERS ID: {{ data.fy_id }}</p>
                               <div class="actions">
                                   <a href="{% url 'logout' %}"><button class="main">Logout</button></a>
-                              </div>
-                          </main>
+                              </div> {% endcomment %}
+                          
+
+                        <div class="container-fluid">
+                            <div class="row">
+                                <div class="col-12">
+                                    <div class="text-center">
+                                        <main>
+                                        <img src="{{ data.image }}" alt="">
+                                        <h2>{{ data.name }}</h2>
+                                        <p class="card-text m-2">EMAIL: {{ data.email_id }}</p>
+                                        <p class="card-text m-2">FYERS: {{ data.fy_id }}</p>
+                                        <div class="actions">
+                                            <a href="{% url 'logout' %}">
+                                                <button class="main">Logout</button>
+                                            </a>
+                                        </div>
+                                        </main>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        
                       </div>
                   </div>
 
@@ -129,8 +151,6 @@
                   </div>
                 </div>
               </div>
-   
-
 </div>
 </div>
 

@@ -646,3 +646,4 @@
 {"level":"ERROR","location":"[get_call:142] fyersModel","message":{"API":"/positions","Error":{"code":-16,"message":"Could not authenticate the user","s":"error"}},"timestamp":"2024-04-28 04:37:11,482+0000","service":"FyersAPI"}
 {"level":"ERROR","location":"[post_call:85] fyersModel","message":{"API":"/orders/sync","Error":{"code":-50,"message":"5 not a multiple of minimum lot size 40","s":"error"}},"timestamp":"2024-04-28 11:22:31,287+0000","service":"FyersAPI"}
 {"level":"ERROR","location":"[post_call:85] fyersModel","message":{"API":"/orders/sync","Error":{"code":-50,"message":"5 not a multiple of minimum lot size 25","s":"error"}},"timestamp":"2024-04-28 11:25:50,251+0000","service":"FyersAPI"}
+{"level":"ERROR","location":"[get_call:142] fyersModel","message":{"API":"/profile","Error":{"s":"error","code":-352,"message":"Please provide a valid app id."}},"timestamp":"2024-04-28 15:48:20,722+0000","service":"FyersAPI"}
