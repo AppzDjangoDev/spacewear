@@ -303,7 +303,6 @@ def instantBuyOrderWithSL(request):
         get_lot_count = get_deafult_lotsize(ex_symbol)
         trade_config_data = TradingConfigurations.objects.first()
         order_qty = trade_config_data.default_order_qty*get_lot_count
-        i=1
         data = {
             "symbol":der_symbol,
             "qty": order_qty ,
@@ -316,81 +315,105 @@ def instantBuyOrderWithSL(request):
             "offlineOrder":False
         }
         response = data_instance.place_order(data=data)
-        print("responseresponse", response)
-        # if i ==1:
         if response["code"] == 1101:
-            print("The code is 1101")
-            # Here We need to Place Stoploss Order with default Stoploss price 
-            buy_order_id = response.get("id")
-            print("buy_order_id", buy_order_id)
-            buy_order_data = {"id":buy_order_id}
-            # get_buy_orderdata = data_instance.orderbook(data=data)
-            get_buy_orderdata = {
-                "code": 200,
-                "message": "",
-                "s": "ok",
-                "orderBook": [{
-                    "clientId": "XXXXX86",
-                    "exchange": 10,
-                    "fyToken": "101000000014366",
-                    "id": "23080444447604",
-                    "offlineOrder": False,
-                    "source": "W",
-                    "status": 2,
-                    "type": 2,
-                    "pan": "",
-                    "limitPrice": 8.1,
-                    "productType": "INTRADAY",
-                    "qty": 1,
-                    "disclosedQty": 0,
-                    "remainingQuantity": 0,
-                    "segment": 10,
-                    "symbol": "NSE:IDEA-EQ",
-                    "description": "VODAFONE IDEA LIMITED",
-                    "ex_sym": "IDEA",
-                    "orderDateTime": "02-Aug-2023 13:01:42",
-                    "side": 1,
-                    "orderValidity": "DAY",
-                    "stopPrice": 0,
-                    "tradedPrice": 117.0,
-                    "filledQty": 1,
-                    "exchOrdId": "1100000024706527",
+            # ----------------------------------------------------
+            allOrderData = data_instance.orderbook()
+            # Initialize an empty list to store order IDs with status 6
+            orders_with_status_6 = []
+            # Iterate through the orderBook
+            for order in allOrderData.get("orderBook", []):
+                # Check if the status is 6
+                if order.get("status") == 6 and order.get("symbol") == der_symbol:
+                    # Append the ID to the list
+                    orders_with_status_6.append({"id": order.get("id")})
+            order_cancel_response = []
+            # Check if there are orders to cancel
+            if orders_with_status_6:
+                print("orders_with_status_6orders_with_status_6", orders_with_status_6["id"])
+                exst_qty = orders_with_status_6[0]["qty"]
+                orderId = orders_with_status_6[0]["id"]
+                new_qty = order_qty + exst_qty
+                # modify existing sl order 
+                modify_data = {
+                    "id":orderId, 
+                    "type":4, 
+                    "qty": new_qty
+                }
+                modify_response = data_instance.modify_order(data=modify_data)
+                return JsonResponse({'response': modify_response["message"]})
+            else:
+                print("The code is 1101")
+                # Here We need to Place Stoploss Order with default Stoploss price 
+                buy_order_id = response.get("id")
+                print("buy_order_id", buy_order_id)
+                buy_order_data = {"id":buy_order_id}
+                # get_buy_orderdata = data_instance.orderbook(data=data)
+                get_buy_orderdata = {
+                    "code": 200,
                     "message": "",
-                    "ch": -0.35,
-                    "chp": -4.24,
-                    "lp": 7.9,
-                    "orderNumStatus": "23080444447604:2",
-                    "slNo": 1,
-                    "orderTag": "1:Ordertag"
-                }]
-            }
-            order_details = get_buy_orderdata["orderBook"][0]
-            traded_price = order_details["tradedPrice"]
-            symbol = order_details["symbol"]
-            qty = order_details["qty"]
-            default_stoploss = trade_config_data.default_stoploss
-            # traded_price*default_stoploss/100
-            stoploss_price = traded_price-(traded_price*default_stoploss/100)
-            print("stoploss_price", stoploss_price)
-            stoploss_limit = stoploss_price-0.25
-            print("stoploss_limitstoploss_limitstoploss_limit", stoploss_limit)
-            sl_data = {
-                "symbol":der_symbol,
-                "qty":qty,
-                "type":2, # SL-L Order
-                "side":1, # Buy
-                "productType":"INTRADAY",
-                "limitPrice":stoploss_limit,
-                "stopPrice":stoploss_price,
-                "validity":"DAY",
-                "offlineOrder":False,
-            }
-            get_sl_order_response = data_instance.place_order(data=sl_data)
-            # if get_sl_order_response and  get_sl_order_response.get("code") == 1101:
-            #     return get_sl_order_response.message
-            # else:
-            #     message="buy order Executed Without SL"e
-            return JsonResponse({'response': get_sl_order_response["message"]})
+                    "s": "ok",
+                    "orderBook": [{
+                        "clientId": "XXXXX86",
+                        "exchange": 10,
+                        "fyToken": "101000000014366",
+                        "id": "23080444447604",
+                        "offlineOrder": False,
+                        "source": "W",
+                        "status": 2,
+                        "type": 2,
+                        "pan": "",
+                        "limitPrice": 8.1,
+                        "productType": "INTRADAY",
+                        "qty": 1,
+                        "disclosedQty": 0,
+                        "remainingQuantity": 0,
+                        "segment": 10,
+                        "symbol": "NSE:IDEA-EQ",
+                        "description": "VODAFONE IDEA LIMITED",
+                        "ex_sym": "IDEA",
+                        "orderDateTime": "02-Aug-2023 13:01:42",
+                        "side": 1,
+                        "orderValidity": "DAY",
+                        "stopPrice": 0,
+                        "tradedPrice": 117.0,
+                        "filledQty": 1,
+                        "exchOrdId": "1100000024706527",
+                        "message": "",
+                        "ch": -0.35,
+                        "chp": -4.24,
+                        "lp": 7.9,
+                        "orderNumStatus": "23080444447604:2",
+                        "slNo": 1,
+                        "orderTag": "1:Ordertag"
+                    }]
+                }
+                order_details = get_buy_orderdata["orderBook"][0]
+                traded_price = order_details["tradedPrice"]
+                symbol = order_details["symbol"]
+                qty = order_details["qty"]
+                default_stoploss = trade_config_data.default_stoploss
+                # traded_price*default_stoploss/100
+                stoploss_price = traded_price-(traded_price*default_stoploss/100)
+                print("stoploss_price", stoploss_price)
+                stoploss_limit = stoploss_price-0.25
+                print("stoploss_limitstoploss_limitstoploss_limit", stoploss_limit)
+                sl_data = {
+                    "symbol":der_symbol,
+                    "qty":qty,
+                    "type":4, # SL-L Order
+                    "side":1, # Buy
+                    "productType":"INTRADAY",
+                    "limitPrice":stoploss_limit,
+                    "stopPrice":stoploss_price,
+                    "validity":"DAY",
+                    "offlineOrder":False,
+                }
+                get_sl_order_response = data_instance.place_order(data=sl_data)
+                # if get_sl_order_response and  get_sl_order_response.get("code") == 1101:
+                #     return get_sl_order_response.message
+                # else:
+                #     message="buy order Executed Without SL"e
+                return JsonResponse({'response': get_sl_order_response["message"]})
         
         else:
             # need ato add alert for buy order not worked 

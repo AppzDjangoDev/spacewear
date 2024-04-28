@@ -14,31 +14,25 @@
         <div class="card w-100">
             <div class="card-body p-4 mb-4">
               <div class="d-flex justify-content-between align-items-center mb-4">
-                <h5 class="card-title fw-semibold">OPTION CHAIN</h5>
+                <p class="card-title fw-semibold">OPTION CHAIN</p>
                 <div class="d-flex align-items-center">
                     {% for option in options_data.data.optionsChain %}
                     {% if option.option_type == ""%}
-                  {% comment %} <h5 class="card-title fw-semibold text-muted mx-3">INDEX:</h5>
-                  <input class="form-control" name="ex_symbol" value="{{ option.ex_symbol }}">
-                  <h5 class="card-title fw-semibold text-muted mx-3">POINT:</h5>
-                  <input class="form-control" name="ltp" value="{{ option.ltp }}">
-                  <h5 class="card-title fw-semibold text-muted mx-3">EXPIRY:</h5>
-                  <input class="form-control" name="ltp" value="{{expiry_response}}"> {% endcomment %}
                   <div class="container-fluid">
                     <div class="row">
                         <!-- Web View -->
                         <div class="col-lg-12 d-none d-lg-block">
                             <div class="row">
                                 <div class="col-md-3">
-                                    <h5 class="card-title fw-semibold text-muted mt-1">INDEX</h5>
+                                    <h5 class="card-title fw-semibold text-muted fs-2 mt-1">INDEX</h5>
                                     <input class="form-control" name="ex_symbol" value="{{ option.ex_symbol }}">
                                 </div>
                                 <div class="col-md-3">
-                                    <h5 class="card-title fw-semibold text-muted mt-1">POINT</h5>
+                                    <h5 class="card-title fw-semibold text-muted fs-2 mt-1">POINT</h5>
                                     <input class="form-control" name="ltp" value="{{ option.ltp }}">
                                 </div>
                                 <div class="col-md-3">
-                                    <h5 class="card-title fw-semibold text-muted mt-1">EXPIRY</h5>
+                                    <h5 class="card-title fw-semibold text-muted fs-2 mt-1">EXPIRY</h5>
                                     <input class="form-control" name="expiry" value="{{expiry_response}}">
                                 </div>
                             </div>
@@ -113,8 +107,16 @@
                         </div>
                     </div>
                 {% endif %}
-            {% endfor %}
+                {% endfor %}
             </div>
+            <div class="container-fluid">
+                <div class="alert alert-info p-0 m-0" role="alert">
+                    <button style="height: 80px;" class="btn btn-Primary btn-block w-100 h-200 fw-bolder">Trail Profit</button>
+                    {% comment %} This is a primary alert—check it out! {% endcomment %}
+                </div>
+            </div>
+            
+            
             </div>
             </ul>
           </div>
