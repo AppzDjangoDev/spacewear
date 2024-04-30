@@ -140,17 +140,6 @@
                 </a>
               </li>
             </ul>
-            {% comment %} <div class="unlimited-access hide-menu bg-light-primary position-relative mb-7 mt-5 rounded">
-              <div class="d-flex">
-                <div class="unlimited-access-title me-3">
-                  <h6 class="fw-semibold fs-4 mb-6 text-dark w-85">Save Trading Data Now</h6>
-                  <button id="updatelatestdata" target="_blank" class="btn btn-primary fs-2 fw-semibold lh-sm">Update Now</button>
-                </div>
-                <div class="unlimited-access-img">
-                  <img src="../assets/images/backgrounds/rocket.png" alt="" class="img-fluid">
-                </div>
-              </div>
-            </div>               {% endcomment %}
             </li>
           </ul>
         </nav>
@@ -185,8 +174,45 @@
                     <a href="#" class="btn btn-success fw-semibold lh-sm my-4 mx-2">Available Balance:{{ item.equityAmount|floatformat:2 }}</a>
                 {% endif %}
               {% endfor %}
+              <div class="container-fluid ">
+                <div class="alert alert-success p-0 m-0" id="data-position" role="alert">
+                    <button  style="height: 50px;" id="position" disabled class="btn btn-Primary btn-block w-100 h-10 fw-bolder fs-4"> {{text}}</button>
+                    {% comment %} This is a primary alert—check it out! {% endcomment %}
+                </div>
+              </div>
+
+              {% comment %} ======================================================================================================= {% endcomment %}
+              <script>
+                // Function to update the data container with the received message
+                function updateData(message) {
+                    var dataContainer = document.getElementById("data-position");
+                    var messageElement = document.querySelector('#position'); // Selecting the existing h1 element
+                    messageElement.textContent = message; // Replacing the content with the new message
+                }
+            
+                // WebSocket connection using secure WebSocket (wss://) protocol
+                var socket = new WebSocket("wss://c67b-2405-201-f007-402c-2ce9-bdd7-aca1-9e02.ngrok-free.app/ws/fyerspositionsdata/");
+            
+                // Event handler for receiving messages from the WebSocket server
+                socket.onmessage = function(event) {
+                    console.log("Received message:", event);
+                    var message = event.data;
+                    updateData(message);
+                };
+            
+                // Explicitly close the connection when navigating away
+                window.addEventListener('beforeunload', function() {
+                    socket.close();
+                });
+            </script>
+
+            {% comment %} ======================================================================================================= {% endcomment %}
+
+
+              
+              <a href="{% url 'explore_more' %}" class="btn btn-succes">Test</a>
               <button id="updatelatestdata" target="_blank" class="btn btn-primary fw-semibold lh-sm my-4 mx-2">Update Now</button>
-              {% comment %} <a href="{% url "get_accese_token" %}" class="btn btn-success mx-2">Get Access</a> {% endcomment %}
+              {% comment %} <a href="{% url "get_accese_token_store_session" %}" class="btn btn-success mx-2">Get Access</a> {% endcomment %}
               {% comment %} <a href="{% url "get_user_profile" %}" class="btn btn-success mx-2">Get Profile</a> {% endcomment %}
               <li class="nav-item dropdown">
                 <a class="nav-link nav-icon-hover" href="javascript:void(0)" id="drop2" data-bs-toggle="dropdown"
@@ -322,14 +348,14 @@
               <div class="card-body">
                 <div class="row alig n-items-start">
                   <div class="col-8">
-                    <h5 class="card-title mb-9 fw-semibold">Pending Orders</h5>
-                    <h4 class="fw-semibold mb-3">{{pending_orders_status}}</h4>
-                    <div class="d-flex align-items-center pb-1">
-                      <span
-                        class="me-2 rounded-circle bg-light-danger round-20 d-flex align-items-center justify-content-center">
-                        <i class="ti ti-arrow-down-right text-danger"></i>
-                      </span>
-                      <p class="fs-3 mb-0">Brokerage:{{expected_brokerage}}</p>
+                    <h5 class="card-title mb-9 fw-semibold">Orders Limit</h5>
+                    <h4 class="fw-semibold ">{{order_limit}}</h4>
+                    <div class=" align-items-center ">
+                      <div class="progress" style="height: 32px;">
+                        <div class="progress-bar {% if progress_percentage < 50 %}bg-success{% elif progress_percentage <= 80 %}bg-warning{% else %}bg-danger{% endif %}" role="progressbar" style="width: {{ progress_percentage }}%; " aria-valuenow="{{ total_order_status }}" aria-valuemin="0" aria-valuemax="{{ order_limit }}">
+                          <span class="text-dark">{{ progress_percentage }}%</span>
+                        </div>
+                      </div>
                     </div>
                   </div>
                   <div class="col-4">
@@ -344,34 +370,6 @@
               </div>
             </div>
           </div> 
-          {% comment %} <div class="col-sm-6 col-xl-3">
-            <div class="card">
-              <div class="card-body">
-                <div class="row alig n-items-start">
-                  <div class="col-12">
-                    <div class="unlimited-access-title me-2">
-                      <h6 class="fw-semibold fs-4 text-dark w-85">Option Chain</h6>
-                      <button id="optionsChainData" target="_blank" class="btn btn-primary fs-3 fw-semibold lh-sm my-4">Get Now</button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div> {% endcomment %}
-          {% comment %} <div class="col-sm-6 col-xl-3">
-            <div class="card">
-              <div class="card-body">
-                <div class="row alig n-items-start">
-                  <div class="col-12">
-                    <div class="unlimited-access-title me-2">
-                      <h6 class="fw-semibold fs-4 text-dark w-85">Save Trading Data Now</h6>
-                      <button id="updatelatestdata" target="_blank" class="btn btn-primary fs-3 fw-semibold lh-sm my-4">Update Now</button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div> {% endcomment %}
         <!--  Row 1 -->
         <div class="row">
           <div class="col-lg-12 d-flex align-items-strech">
@@ -464,6 +462,53 @@
             <div class="card w-100">
               <div class="card-body p-4">
                 <h5 class="card-title fw-semibold mb-4">Positions</h5>
+
+
+                {% comment %} <div class="table-responsive">
+                  <table class="table text-nowrap mb-0 align-middle">
+                      <thead class="text-dark fs-4">
+                          <tr>
+                              <th class="border-bottom-0">
+                                  <h6 class="fw-semibold mb-0">No</h6>
+                              </th>
+                              <th class="border-bottom-0">
+                                  <h6 class="fw-semibold mb-0">Symbol</h6>
+                              </th>
+                              <th class="border-bottom-0">
+                                  <h6 class="fw-semibold mb-0">Realized Profit</h6>
+                              </th>
+                          </tr>
+                      </thead>
+                      <tbody id="positions-table-body">
+                      </tbody>
+                  </table>
+              </div>
+              
+              <script>
+                var socket = new WebSocket("wss://c67b-2405-201-f007-402c-2ce9-bdd7-aca1-9e02.ngrok-free.app/ws/fyerspositionsdata/");
+              
+                  socket.onmessage = function(event) {
+                      console.log("pppppppppppppppppppppppppppppppppppp", event)
+                      var positionsData = JSON.parse(event);
+                      var positionsTableBody = document.getElementById("positions-table-body");
+                      positionsTableBody.innerHTML = ""; // Clear the table body
+              
+                      if (positionsData.netPositions.length > 0) {
+                          positionsData.netPositions.forEach(function(position, index) {
+                              var row = `
+                                  <tr>
+                                      <td>${index + 1}</td>
+                                      <td>${position.symbol}</td>
+                                      <td>${position.realized_profit}</td>
+                                  </tr>`;
+                              positionsTableBody.insertAdjacentHTML('beforeend', row);
+                          });
+                      } else {
+                          positionsTableBody.innerHTML = "<tr><td colspan='3'>Currently No data Found</td></tr>";
+                      }
+                  };
+              </script> {% endcomment %}
+              
 
 
               <div class="table-responsive">
@@ -765,9 +810,6 @@
           });
       });
     });
-
-
-
     $(document).ready(function() {
       $('#updatelatestdata').click(function(e) {
           e.preventDefault();
@@ -806,12 +848,32 @@
     disableButtonAtFour();
     // Set an interval to check every minute (adjust as needed)
     setInterval(disableButtonAtFour, 60 * 1000); // 60 seconds * 1000 milliseconds
-    </script>
+  </script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
   <script src="{% static 'trading_tool/assets/libs/apexcharts/dist/apexcharts.min.js' %}"></script>
   <script src="{% static 'trading_tool/assets/libs/simplebar/dist/simplebar.js' %}"></script>
-  <script src="{% static 'trading_tool/assets/js/dashboard.js' %}"></script>
+  <script>
+    var positions_data = {{ positions_data|default:"{}" | safe }};
+</script>
+
 </body>
 
 </html>

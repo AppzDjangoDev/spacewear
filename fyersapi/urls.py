@@ -9,7 +9,7 @@ from .views import ConfigureTradingView
 urlpatterns = [
     path('broker_config', views.Brokerconfig.as_view(), name='broker_config'),
     path('brokerconnect', views.brokerconnect, name='brokerconnect'),
-    path('get_accese_token', views.get_accese_token, name='get_accese_token'),
+    path('get_accese_token_store_session', views.get_accese_token_store_session, name='get_accese_token_store_session'),
     path('get_user_profile', views.ProfileView.as_view(), name='get_user_profile'),
 
     path('close_all_positions', views.close_all_positions, name='close_all_positions'),
@@ -23,6 +23,12 @@ urlpatterns = [
     path('options-chain-view/<str:slug>/', views.OptionChainView.as_view(), name='options_chain_view'),
     path('configure-trading/', ConfigureTradingView.as_view(), name='configure_trading'),
     path('instant-buy-order/', views.instantBuyOrderWithSL, name='instant_buy_order'),
+
+
+
+
+
+    path('explore-more/', views.fyer_websocket_view, name='explore_more'),
 
 
 

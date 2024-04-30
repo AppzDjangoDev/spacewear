@@ -24,9 +24,20 @@ urlpatterns = [
     path('', include('account.urls')),
     path('', include('trading_tool.urls')),
     path('', include('fyersapi.urls')),
-
-
-    
-
 ]
-urlpatterns=urlpatterns+static(settings.MEDIA_URL,document_root=settings.MEDIA_ROOT)+static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+
+# Static and Media URL patterns
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+
+# routing.py or urls.py for WebSocket routing
+from channels.routing import ProtocolTypeRouter, URLRouter
+from django.urls import path
+from fyersapi.routing import ws_urlpatterns  # Import your WebSocket URL patterns
+
+application = ProtocolTypeRouter({
+    "websocket": URLRouter(
+        ws_urlpatterns
+    ),
+})

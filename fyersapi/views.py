@@ -27,9 +27,10 @@ class Brokerconfig(View):
         template = "trading_tool/html/index.html"
         context = {}
         return render(request, template, context)
+    
 def brokerconnect(request):
     # Get client_id and secret_key from settings.py
-    client_id = settings.FYERS_CLIENT_ID
+    client_id = settings.FYERS_APP_ID
     secret_key = settings.FYERS_SECRET_ID
     redirect_uri = settings.FYERS_REDIRECT_URL+"/dashboard"
     # Replace these values with your actual API credentials
@@ -51,10 +52,48 @@ def brokerconnect(request):
     return redirect(response)  # Assuming 'home' is the name of a URL pattern you want to redirect to
 
 
+
 def get_accese_token(request):
     # return redirect('some_redirect_url')
     # Get client_id and secret_key from settings.py
-    client_id = settings.FYERS_CLIENT_ID
+    client_id = settings.FYERS_APP_ID
+    secret_key = settings.FYERS_SECRET_ID
+    redirect_uri = settings.FYERS_REDIRECT_URL+"/dashboard"
+    # redirect_uri = "https://spacewear.co.in/dashboard"
+    # redirect_uri = "https://aabe-2405-201-f007-417b-7d9c-6736-527b-61a6.ngrok-free.app/dashboard"
+    response_type = "code" 
+    grant_type = "authorization_code"  
+    # The authorization code received from Fyers after the user grants access
+    # auth_code = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJhcGkubG9naW4uZnllcnMuaW4iLCJpYXQiOjE3MTEyNzg2NDgsImV4cCI6MTcxMTMwODY0OCwibmJmIjoxNzExMjc4MDQ4LCJhdWQiOiJbXCJ4OjBcIiwgXCJ4OjFcIiwgXCJ4OjJcIiwgXCJkOjFcIiwgXCJkOjJcIiwgXCJ4OjFcIiwgXCJ4OjBcIl0iLCJzdWIiOiJhdXRoX2NvZGUiLCJkaXNwbGF5X25hbWUiOiJZUzA1MTQxIiwib21zIjoiSzEiLCJoc21fa2V5IjoiNGQ0OWQzMzA2MmM4YzMyOTA4OGEyMzZkMWVkZDI0MDhhODYyY2QyZDdlMmI2M2Y4NjI3N2JkZGUiLCJub25jZSI6IiIsImFwcF9pZCI6Ikg5TzQwNlhCWFciLCJ1dWlkIjoiNTdhYzQ2MmM0YzkxNGI0MzlmMGY3OTc3MGRmMDM0YTEiLCJpcEFkZHIiOiIwLjAuMC4wIiwic2NvcGUiOiIifQ.RhnYqWn9hqR5X_yg5wHKcOGCkGFnAb4Ms2xbToDMPAw"
+    auth_code = request.session.get(' ')
+    # Create a session object to handle the Fyers API authentication and token generation
+    session = fyersModel.SessionModel(
+        client_id=client_id,
+        secret_key=secret_key, 
+        redirect_uri=redirect_uri, 
+        response_type=response_type, 
+        grant_type=grant_type
+    )
+    print("sessionsession", session)
+    # Set the authorization code in the session object
+    session.set_token(auth_code)
+    # Generate the access token using the authorization code
+    response = session.generate_token()
+    print("responseresponse", response)
+    # Print the response, which should contain the access token and other details
+    access_token = response.get('access_token')
+    refresh_token = response.get('refresh_token')
+    if access_token:
+        return access_token
+
+    else:
+        return None
+        
+
+def get_accese_token_store_session(request):
+    # return redirect('some_redirect_url')
+    # Get client_id and secret_key from settings.py
+    client_id = settings.FYERS_APP_ID
     secret_key = settings.FYERS_SECRET_ID
     redirect_uri = settings.FYERS_REDIRECT_URL+"/dashboard"
     # redirect_uri = "https://spacewear.co.in/dashboard"
@@ -91,7 +130,7 @@ def get_accese_token(request):
 
 
 def close_all_positions(request):
-    client_id = settings.FYERS_CLIENT_ID
+    client_id = settings.FYERS_APP_ID
     access_token = request.session.get('access_token')
     if access_token:
         # Initialize the FyersModel instance with your client_id, access_token, and enable async mode
@@ -138,9 +177,10 @@ def close_all_positions(request):
 def get_data_instance(request):
     context={}
     template="trading_tool/html/profile_view.html"
-    client_id = settings.FYERS_CLIENT_ID
+    client_id = settings.FYERS_APP_ID
     access_token = request.session.get('access_token')
     if access_token:
+        print("access_tokenaccess_token", access_token)
         # Initialize the FyersModel instance with your client_id, access_token, and enable async mode
         fyers = fyersModel.FyersModel(client_id=client_id, is_async=False, token=access_token, log_path="")
         # Return the response received from the Fyers API
@@ -148,13 +188,13 @@ def get_data_instance(request):
     else:
         print("noithing here")
         # Handle the case where access_token is not found in the session
-    return fyers
+    return None
 
 
 from django.http import JsonResponse
 def update_data_instance(request):
     context = {}
-    client_id = settings.FYERS_CLIENT_ID
+    client_id = settings.FYERS_APP_ID
     access_token = request.session.get('access_token')
 
     if access_token:
@@ -168,8 +208,9 @@ def update_data_instance(request):
 
 class ProfileView(View):
   def get(self, request):
-    client_id = settings.FYERS_CLIENT_ID
+    client_id = settings.FYERS_APP_ID
     access_token = request.session.get('access_token')
+    print("access_tokenaccess_token", access_token)
 
     if access_token:
       fyers = fyersModel.FyersModel(
@@ -185,6 +226,9 @@ class ProfileView(View):
     else:
       print("no access token")
       return render(request, 'trading_tool/html/profile_view.html')
+    
+
+    
 
 class OrderHistory(View):
     def get(self, request):
@@ -216,6 +260,8 @@ class OptionChainView(View):
             "strikecount": 1,
             "timestamp": first_expiry_ts
         }
+        print("options_dataoptions_dataoptions_dataoptions_dataoptions_data", options_data)
+        print("data_instance", )
         response = data_instance.optionchain(data=options_data)
         context['expiry_response'] = first_expiry_date
         context['options_data'] = response
@@ -260,8 +306,16 @@ class ConfigureTradingView(FormView):
         form.save()
         return super().form_valid(form)
     
+
+
+
+
+
+
+    
 from .models import TradingConfigurations
 class ConfigureTradingView(FormView):
+    
     template_name = 'trading_tool/html/configure_trading.html'
     form_class = TradingConfigurationsForm
     success_url = reverse_lazy('dashboard')
@@ -302,7 +356,10 @@ def instantBuyOrderWithSL(request):
         print("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx", der_symbol, ex_symbol)
         get_lot_count = get_deafult_lotsize(ex_symbol)
         trade_config_data = TradingConfigurations.objects.first()
+        print("111111111111111111111111", trade_config_data.default_order_qty)
+        print("222222222222222222222222222", get_lot_count)
         order_qty = trade_config_data.default_order_qty*get_lot_count
+        print("order_qtyorder_qtyorder_qtyorder_qtyorder_qty", order_qty)
         data = {
             "symbol":der_symbol,
             "qty": order_qty ,
@@ -315,8 +372,13 @@ def instantBuyOrderWithSL(request):
             "offlineOrder":False
         }
         response = data_instance.place_order(data=data)
+        print("----------------------------------------------------44", response["code"])
+        # response["code"] =1101
+        
+        
+        
         if response["code"] == 1101:
-            # ----------------------------------------------------
+            print("----------------------------------------------------55")
             allOrderData = data_instance.orderbook()
             # Initialize an empty list to store order IDs with status 6
             orders_with_status_6 = []
@@ -342,66 +404,69 @@ def instantBuyOrderWithSL(request):
                 modify_response = data_instance.modify_order(data=modify_data)
                 return JsonResponse({'response': modify_response["message"]})
             else:
-                print("The code is 1101")
                 # Here We need to Place Stoploss Order with default Stoploss price 
                 buy_order_id = response.get("id")
                 print("buy_order_id", buy_order_id)
                 buy_order_data = {"id":buy_order_id}
-                # get_buy_orderdata = data_instance.orderbook(data=data)
-                get_buy_orderdata = {
-                    "code": 200,
-                    "message": "",
-                    "s": "ok",
-                    "orderBook": [{
-                        "clientId": "XXXXX86",
-                        "exchange": 10,
-                        "fyToken": "101000000014366",
-                        "id": "23080444447604",
-                        "offlineOrder": False,
-                        "source": "W",
-                        "status": 2,
-                        "type": 2,
-                        "pan": "",
-                        "limitPrice": 8.1,
-                        "productType": "INTRADAY",
-                        "qty": 1,
-                        "disclosedQty": 0,
-                        "remainingQuantity": 0,
-                        "segment": 10,
-                        "symbol": "NSE:IDEA-EQ",
-                        "description": "VODAFONE IDEA LIMITED",
-                        "ex_sym": "IDEA",
-                        "orderDateTime": "02-Aug-2023 13:01:42",
-                        "side": 1,
-                        "orderValidity": "DAY",
-                        "stopPrice": 0,
-                        "tradedPrice": 117.0,
-                        "filledQty": 1,
-                        "exchOrdId": "1100000024706527",
-                        "message": "",
-                        "ch": -0.35,
-                        "chp": -4.24,
-                        "lp": 7.9,
-                        "orderNumStatus": "23080444447604:2",
-                        "slNo": 1,
-                        "orderTag": "1:Ordertag"
-                    }]
-                }
+                get_buy_orderdata = data_instance.orderbook(data=data)
+                # get_buy_orderdata = {
+                #     "code": 200,
+                #     "message": "",
+                #     "s": "ok",
+                #     "orderBook": [{
+                #         "clientId": "XXXXX86",
+                #         "exchange": 10,
+                #         "fyToken": "101000000014366",
+                #         "id": "23080444447604",
+                #         "offlineOrder": False,
+                #         "source": "W",
+                #         "status": 2,
+                #         "type": 2,
+                #         "pan": "",
+                #         "limitPrice": 8.1,
+                #         "productType": "INTRADAY",
+                #         "qty": 1,
+                #         "disclosedQty": 0,
+                #         "remainingQuantity": 0,
+                #         "segment": 10,
+                #         "symbol": "NSE:IDEA-EQ",
+                #         "description": "VODAFONE IDEA LIMITED",
+                #         "ex_sym": "IDEA",
+                #         "orderDateTime": "02-Aug-2023 13:01:42",
+                #         "side": 1,
+                #         "orderValidity": "DAY",
+                #         "stopPrice": 0,
+                #         "tradedPrice": 117.0,
+                #         "filledQty": 1,
+                #         "exchOrdId": "1100000024706527",
+                #         "message": "",
+                #         "ch": -0.35,
+                #         "chp": -4.24,
+                #         "lp": 7.9,
+                #         "orderNumStatus": "23080444447604:2",
+                #         "slNo": 1,
+                #         "orderTag": "1:Ordertag"
+                #     }]
+                # }
                 order_details = get_buy_orderdata["orderBook"][0]
                 traded_price = order_details["tradedPrice"]
                 symbol = order_details["symbol"]
-                qty = order_details["qty"]
+                
                 default_stoploss = trade_config_data.default_stoploss
                 # traded_price*default_stoploss/100
                 stoploss_price = traded_price-(traded_price*default_stoploss/100)
+                stoploss_price = round(stoploss_price / 0.05) * 0.05
+                stoploss_price = round(stoploss_price, 2)
                 print("stoploss_price", stoploss_price)
                 stoploss_limit = stoploss_price-0.25
-                print("stoploss_limitstoploss_limitstoploss_limit", stoploss_limit)
+                stoploss_limit = round(stoploss_limit / 0.05) * 0.05
+                stoploss_limit = round(stoploss_limit, 2)
+                print("qtyqtyqtyqtyqtyqtyqtyqtyqtyqtyqty", order_qty)
                 sl_data = {
                     "symbol":der_symbol,
-                    "qty":qty,
+                    "qty":order_qty,
                     "type":4, # SL-L Order
-                    "side":1, # Buy
+                    "side":-1, # Buy
                     "productType":"INTRADAY",
                     "limitPrice":stoploss_limit,
                     "stopPrice":stoploss_price,
@@ -424,3 +489,10 @@ def instantBuyOrderWithSL(request):
         # Handle GET request
         message="Some Error Occured Before Execute"
         return JsonResponse({'response': message})
+        
+from django.shortcuts import render
+
+def fyer_websocket_view(request):
+    template_name = 'trading_tool/html/fyerwebsocket.html'
+    access_token = request.session.get('access_token')
+    return render(request, template_name)

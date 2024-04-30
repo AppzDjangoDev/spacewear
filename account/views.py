@@ -12,7 +12,8 @@ from datetime import datetime
 from django.db.models import Sum
 from django.urls import reverse_lazy
 from django.views.generic import CreateView
-from fyersapi.views import brokerconnect, get_accese_token, get_data_instance
+from fyersapi.models import TradingConfigurations, TradingData
+from fyersapi.views import brokerconnect, get_accese_token_store_session, get_data_instance
 from .forms import CustomUserCreationForm
 from django.contrib.auth import authenticate, login
 from decimal import Decimal
@@ -53,7 +54,9 @@ class DashboardView(TemplateView):
 
         # Delay the execution of get_access_token function by 1 second
         time.sleep(1)
-        get_accese_token(request)
+        get_accese_token_store_session(request)
+        access_token = request.session.get('access_token')
+        print("qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq", access_token)
         data_instance = get_data_instance(request)
         self.positions_data = data_instance.positions()
         self.order_data = data_instance.orderbook()
@@ -75,14 +78,40 @@ class DashboardView(TemplateView):
             self.pending_orders_status_6 = sum(1 for order in self.order_data["orderBook"] if order["status"] == 6)
             # Update total order count for status 2
             self.total_orders_status_2 = sum(1 for order in self.order_data["orderBook"] if order["status"] == 2)
+            trading_config = TradingConfigurations.objects.first()
+            # print("self.order_limitself.order_limit", self.order_limit) 
+            #  trading_config.max_trade_count
+            self.order_limit = 15
+
+
+
+
+
+
+
         self.expected_brokerage = self.total_orders_status_2 * average_brokerage
         return super().dispatch(request, *args, **kwargs)
 
+    
+
+
+
+
+
+
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+
+        context['order_limit'] = self.order_limit
         context['order_data'] = self.order_data
         context['fund_data'] = self.fund_data
-        context['total_orders_status'] = self.total_orders_status_2
+        # context['total_orders_status'] = self.total_orders_status_2
+        context['total_orders_status'] = 2
+        progress_percentage = (2 / 15) * 100
+        progress_percentage = round(progress_percentage, 1)
+
+        context['progress_percentage'] = progress_percentage
         context['pending_orders_status'] = self.pending_orders_status_6
         context['expected_brokerage'] = self.expected_brokerage
         context['recent_order_data'] = self.recent_order_data

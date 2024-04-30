@@ -46,13 +46,13 @@ ALLOWED_HOSTS = ['*']
 from django.contrib.messages import constants as message_constants
 MESSAGE_LEVEL = message_constants.DEBUG
 
-
 # Application definition
 
 INSTALLED_APPS = [
     'account',
     'trading_tool',
     'fyersapi',
+    "channels",
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -91,6 +91,7 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'spacewear.wsgi.application'
+ASGI_APPLICATION = 'spacewear.asgi.application'
 
 
 # Database
@@ -188,14 +189,14 @@ DATE_INPUT_FORMATS = [
 
 DEVELOPMENT_MODE=False 
 
-FYERS_CLIENT_ID="H9O406XBXW-100"
+FYERS_APP_ID="H9O406XBXW-100"
 FYERS_SECRET_ID="XOVF82L85V"
-FYERS_REDIRECT_URL="https://4d57-2405-201-f007-417b-d566-89f6-170c-1786.ngrok-free.app"
+FYERS_REDIRECT_URL="https://c67b-2405-201-f007-402c-2ce9-bdd7-aca1-9e02.ngrok-free.app"
 
 
 if not DEVELOPMENT_MODE:
     #for production
-    FYERS_CLIENT_ID="5NYKD87NTH-100"
+    FYERS_APP_ID="5NYKD87NTH-100"
     FYERS_SECRET_ID="XIXJN6AKI5"
     FYERS_REDIRECT_URL="https://spacewear.co.in"
 
