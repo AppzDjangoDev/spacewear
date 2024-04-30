@@ -250,9 +250,7 @@ class OptionChainView(View):
             "strikecount": 1,
             # "timestamp": next_thursday_timestamp
         }
-        print("datadatadata", data)
         expiry_response = data_instance.optionchain(data=data)
-        print("expiry_responseexpiry_responseexpiry_responseexpiry_response", expiry_response)
         first_expiry_ts = expiry_response['data']['expiryData'][0]['expiry']
         first_expiry_date = expiry_response['data']['expiryData'][0]['date']
         options_data = {

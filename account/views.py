@@ -77,27 +77,16 @@ class DashboardView(TemplateView):
             # Update pending order count
             self.pending_orders_status_6 = sum(1 for order in self.order_data["orderBook"] if order["status"] == 6)
             # Update total order count for status 2
-            self.total_orders_status_2 = sum(1 for order in self.order_data["orderBook"] if order["status"] == 2)
+            self.total_order_status = sum(1 for order in self.order_data["orderBook"] if order["status"] == 2)
             trading_config = TradingConfigurations.objects.first()
             # print("self.order_limitself.order_limit", self.order_limit) 
             #  trading_config.max_trade_count
-            self.order_limit = 15
+            self.order_limit =  trading_config.max_trade_count
+            progress_percentage = (self.total_order_status / self.order_limit) * 100
+            self.progress_percentage = round(progress_percentage, 1)
 
-
-
-
-
-
-
-        self.expected_brokerage = self.total_orders_status_2 * average_brokerage
+        self.expected_brokerage = self.total_order_status * average_brokerage
         return super().dispatch(request, *args, **kwargs)
-
-    
-
-
-
-
-
 
 
     def get_context_data(self, **kwargs):
@@ -106,12 +95,9 @@ class DashboardView(TemplateView):
         context['order_limit'] = self.order_limit
         context['order_data'] = self.order_data
         context['fund_data'] = self.fund_data
-        # context['total_orders_status'] = self.total_orders_status_2
-        context['total_orders_status'] = 2
-        progress_percentage = (2 / 15) * 100
-        progress_percentage = round(progress_percentage, 1)
-
-        context['progress_percentage'] = progress_percentage
+        context['total_orders_status'] = self.total_order_status
+        
+        context['progress_percentage'] = self.progress_percentage
         context['pending_orders_status'] = self.pending_orders_status_6
         context['expected_brokerage'] = self.expected_brokerage
         context['recent_order_data'] = self.recent_order_data

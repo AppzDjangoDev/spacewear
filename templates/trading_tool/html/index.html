@@ -174,15 +174,18 @@
                     <a href="#" class="btn btn-success fw-semibold lh-sm my-4 mx-2">Available Balance:{{ item.equityAmount|floatformat:2 }}</a>
                 {% endif %}
               {% endfor %}
-              <div class="container-fluid ">
-                <div class="alert alert-success p-0 m-0" id="data-position" role="alert">
-                    <button  style="height: 50px;" id="position" disabled class="btn btn-Primary btn-block w-100 h-10 fw-bolder fs-4"> {{text}}</button>
-                    {% comment %} This is a primary alert—check it out! {% endcomment %}
-                </div>
-              </div>
 
               {% comment %} ======================================================================================================= {% endcomment %}
-              <script>
+
+              {% comment %} <div class="container-fluid ">
+                <div class="alert alert-success p-0 m-0" id="data-position" role="alert">
+                    <button  style="height: 50px;" id="position" disabled class="btn btn-Primary btn-block w-100 h-10 fw-bolder fs-4"> {{text}}</button>
+                   
+                </div>
+              </div>  {% endcomment %}
+
+              {% comment %} ======================================================================================================= {% endcomment %}
+              {% comment %} <script>
                 // Function to update the data container with the received message
                 function updateData(message) {
                     var dataContainer = document.getElementById("data-position");
@@ -204,13 +207,13 @@
                 window.addEventListener('beforeunload', function() {
                     socket.close();
                 });
-            </script>
+            </script> {% endcomment %}
 
             {% comment %} ======================================================================================================= {% endcomment %}
 
 
               
-              <a href="{% url 'explore_more' %}" class="btn btn-succes">Test</a>
+              {% comment %} <a href="{% url 'explore_more' %}" class="btn btn-succes">Test</a> {% endcomment %}
               <button id="updatelatestdata" target="_blank" class="btn btn-primary fw-semibold lh-sm my-4 mx-2">Update Now</button>
               {% comment %} <a href="{% url "get_accese_token_store_session" %}" class="btn btn-success mx-2">Get Access</a> {% endcomment %}
               {% comment %} <a href="{% url "get_user_profile" %}" class="btn btn-success mx-2">Get Profile</a> {% endcomment %}
