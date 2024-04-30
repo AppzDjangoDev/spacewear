@@ -196,12 +196,22 @@ def update_data_instance(request):
     context = {}
     client_id = settings.FYERS_APP_ID
     access_token = request.session.get('access_token')
+    total_order_status=0
 
     if access_token:
-        fyers = fyersModel.FyersModel(client_id=client_id, is_async=False, token=access_token, log_path="")
-        response = fyers.positions()
+        data_instance = get_data_instance(request)
+        # fyers = fyersModel.FyersModel(client_id=client_id, is_async=False, token=access_token, log_path="")
+        positions_data = data_instance.positions()
+        order_data = data_instance.orderbook()
+        fund_data = data_instance.funds()
+        if "orderBook" in order_data:
+            total_order_status = sum(1 for order in order_data["orderBook"] if order["status"] == 2)
         # Process the response and prepare the data
-        data = { 'positions': response }  # Modify this according to your response structure
+        data = { 'positions': positions_data,
+                'total_order_status': total_order_status ,
+                'fund_data': fund_data,
+                'order_data': order_data
+                }  # Modify this according to your response structure
         return JsonResponse(data)
     else:
         return JsonResponse({'error': 'Access token not found'}, status=400)

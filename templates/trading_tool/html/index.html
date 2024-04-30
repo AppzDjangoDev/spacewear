@@ -352,13 +352,18 @@
                 <div class="row alig n-items-start">
                   <div class="col-8">
                     <h5 class="card-title mb-9 fw-semibold">Orders Limit</h5>
-                    <h4 class="fw-semibold ">{{order_limit}}</h4>
-                    <div class=" align-items-center ">
-                      <div class="progress" style="height: 32px;">
+                    <h4 id="total_order_status" class="fw-semibold"></h4>
+                    <div class=" align-items-center">
+                      {% comment %} <div class="progress" style="height: 32px;">
                         <div class="progress-bar {% if progress_percentage < 50 %}bg-success{% elif progress_percentage <= 80 %}bg-warning{% else %}bg-danger{% endif %}" role="progressbar" style="width: {{ progress_percentage }}%; " aria-valuenow="{{ total_order_status }}" aria-valuemin="0" aria-valuemax="{{ order_limit }}">
                           <span class="text-dark">{{ progress_percentage }}%</span>
                         </div>
-                      </div>
+                      </div> {% endcomment %}
+                      <div class="progress" style="height: 32px;">
+                        <div class="progress-bar {% if progress_percentage < 50 %}bg-success{% elif progress_percentage <= 80 %}bg-warning{% else %}bg-danger{% endif %}" role="progressbar" style="width: {{ progress_percentage }}%;" aria-valuenow="{{ total_order_status }}" aria-valuemin="0" aria-valuemax="{{ order_limit }}">
+                            <span class="text-dark">{{ progress_percentage|floatformat:2 }}%</span>
+                        </div>
+                    </div>
                     </div>
                   </div>
                   <div class="col-4">
@@ -740,42 +745,61 @@
     $(document).ready(function() {
       // Define a function to fetch data from the server
       function fetchData() {
-          $.ajax({
-              url: '{% url "update_data_instance" %}',
-              type: 'GET',
-              success: function(response) {
-                  // Handle the response data here
-                  console.log('Data received:', response.positions.overall);
-                  // Check if the pl_realized property exists in the response
-                  if (response.positions.overall && response.positions.overall.pl_realized !== undefined) {
-                      // Update the HTML content of the element with the received data
-                      var plRealized = response.positions.overall.pl_realized.toFixed(2);
-                      $('.pl-realized').html('<p class="fs-2 mb-0">INR ' + plRealized + '</p>');
-                  } else {
-                      console.error('Error: pl_realized property is undefined in the response');
+          // Get the current date and time
+          var now = new Date();
+          var hours = now.getHours();
+          var minutes = now.getMinutes();
+          
+          // Check if the current time is within the allowed range (9:15 AM to 3:30 PM)
+          if ((hours > 9 || (hours == 9 && minutes >= 15)) && (hours < 15 || (hours == 15 && minutes <= 30))) {
+              $.ajax({
+                  url: '{% url "update_data_instance" %}',
+                  type: 'GET',
+                  success: function(response) {
+                      // Handle the response data here
+                      console.log('Data received:', response);
+                      
+                      // Update total_order_status and order_limit
+                      var totalOrderStatus = response.total_order_status;
+                      var orderLimit = {{ order_limit }};
+                      
+                      // Update the total order status in the h4 element
+                      $('#total_order_status').text(totalOrderStatus + '/' + orderLimit);
+                      
+                      // Calculate progress percentage
+                      var progressPercentage = (totalOrderStatus / orderLimit) * 100;
+                      
+                      // Update the progress bar
+                      $('.progress-bar').css('width', progressPercentage + '%');
+                      $('.progress-bar').attr('aria-valuenow', totalOrderStatus);
+                      $('.progress-bar .text-dark').text(progressPercentage.toFixed(2) + '%');
+                      
+                      // Determine the color of the progress bar
+                      if (progressPercentage < 50) {
+                          $('.progress-bar').addClass('bg-success').removeClass('bg-warning bg-danger');
+                      } else if (progressPercentage <= 80) {
+                          $('.progress-bar').addClass('bg-warning').removeClass('bg-success bg-danger');
+                      } else {
+                          $('.progress-bar').addClass('bg-danger').removeClass('bg-success bg-warning');
+                      }
+                  },
+                  error: function(xhr, status, error) {
+                      console.error('Error fetching data:', error);
                   }
-
-                  if (response.positions.overall && response.positions.overall.pl_unrealized !== undefined) {
-                    // Update the HTML content of the element with the received data
-                    var plUnrealized = response.positions.overall.pl_unrealized.toFixed(2);
-                    $('.pl-unrealized').html('<p class="fs-2 mb-0">INR ' + plRealized + '</p>');
-                  } else {
-                      console.error('Error: pl_unrealized property is undefined in the response');
-                  }
-                
-              },
-              error: function(xhr, status, error) {
-                  console.error('Error fetching data:', error);
-              }
-          });
+              });
+          }
       }
   
-      // Call the fetchData function initially when the page is loaded
-      fetchData();
-  
-      // Set an interval to call the fetchData function every 1 second
-      setInterval(fetchData, 100000);
+        // Call the fetchData function initially when the page is loaded
+        fetchData();
+    
+        // Set an interval to call the fetchData function every 5 minutes
+        setInterval(fetchData, 300000);
     });
+    
+    
+    
+  
   </script>
   <script>
     $(document).ready(function() {

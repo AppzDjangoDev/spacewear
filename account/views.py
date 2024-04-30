@@ -78,6 +78,7 @@ class DashboardView(TemplateView):
             self.pending_orders_status_6 = sum(1 for order in self.order_data["orderBook"] if order["status"] == 6)
             # Update total order count for status 2
             self.total_order_status = sum(1 for order in self.order_data["orderBook"] if order["status"] == 2)
+            
             trading_config = TradingConfigurations.objects.first()
             # print("self.order_limitself.order_limit", self.order_limit) 
             #  trading_config.max_trade_count
