@@ -13,7 +13,7 @@
     <div class="col-lg-12 col-sm-12 d-flex align-items-stretch">
         <div class="card w-100">
             <div class="card-body p-4 mb-4">
-              <div class="d-flex justify-content-between align-items-center mt-5">
+              <div class="d-flex justify-content-between align-items-center">
                 <p class="card-title fw-semibold">OPTION CHAIN</p>
                 <div class="d-flex align-items-center">
                     {% for option in options_data.data.optionsChain %}
@@ -25,14 +25,14 @@
                             <div class="row">
                                 <div class="col-md-3">
                                     
-                                    <input class="form-control" disabled name="ex_symbol" value="{{ option.ex_symbol }}">
+                                    <input class="form-control my-3" disabled name="ex_symbol" value="{{ option.ex_symbol }}">
                                 </div>
                                 <div class="col-md-3">
                                     
-                                    <input class="form-control" disabled name="ltp" value="{{ option.ltp }}">
+                                    <input class="form-control my-3" disabled name="ltp" value="{{ option.ltp }}">
                                 </div>
                                 <div class="col-md-3">
-                                    <input class="form-control" disabled name="expiry" value="{{expiry_response}}">
+                                    <input class="form-control my-3" disabled name="expiry" value="{{expiry_response}}">
                                 </div>
                             </div>
                         </div>
@@ -41,13 +41,13 @@
                             <div class="row">
                                 <div class="col-12">
                                     
-                                    <input class="form-control" disabled name="ex_symbol" value="{{ option.ex_symbol }}">
+                                    <input class="form-control my-3" disabled name="ex_symbol" value="{{ option.ex_symbol }}">
                                 </div>
                                 <div class="col-12">
-                                    <input class="form-control" disabled name="ltp" value="{{ option.ltp }}">
+                                    <input class="form-control my-3" disabled name="ltp" value="{{ option.ltp }}">
                                 </div>
                                 <div class="col-12">
-                                    <input class="form-control" disabled name="expiry" value="{{expiry_response}}">
+                                    <input class="form-control my-3" disabled name="expiry" value="{{expiry_response}}">
                                 </div>
                             </div>
                         </div>
@@ -109,12 +109,20 @@
                 {% endfor %}
             </div>
 
-            <div class="container-fluid">
-                <div class="alert alert-info p-0 m-0" role="alert">
-                    <button style="height: 80px;" class="btn btn-Primary btn-block w-100 h-200 fw-bolder">Trail Profit</button>
-                    {% comment %} This is a primary alert—check it out! {% endcomment %}
+
+            {% comment %} <div class="container-fluid">
+            <div class="alert alert-primary" role="alert">
+                <div class="row" style="height:75px;">
+                    <div class="col-6 d-flex justify-content-center align-items-center">
+                        <button class="btn btn-primary btn-lg btn-block w-100 h-100 fw-bolder buy-button" style="border-radius: 6px;  ">TRAIL LIMIT</button>
+                    </div>
+                    
+                    <div class="col-6 d-flex justify-content-center align-items-center">
+                        <button class="btn btn-primary btn-lg btn-block w-100 h-100 fw-bolder sell-button" style="border-radius: 6px;">TRAIL TOP</button>
+                    </div>
                 </div>
             </div>
+            </div> {% endcomment %}
             
             
             </div>

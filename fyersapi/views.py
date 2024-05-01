@@ -182,7 +182,6 @@ def get_data_instance(request):
     client_id = settings.FYERS_APP_ID
     access_token = request.session.get('access_token')
     if access_token:
-        print("access_tokenaccess_token", access_token)
         # Initialize the FyersModel instance with your client_id, access_token, and enable async mode
         fyers = fyersModel.FyersModel(client_id=client_id, is_async=False, token=access_token, log_path="")
         # Return the response received from the Fyers API
@@ -223,7 +222,6 @@ class ProfileView(LoginRequiredMixin, View):
   def get(self, request):
     client_id = settings.FYERS_APP_ID
     access_token = request.session.get('access_token')
-    print("access_tokenaccess_token", access_token)
 
     if access_token:
       fyers = fyersModel.FyersModel(
