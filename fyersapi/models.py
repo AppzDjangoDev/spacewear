@@ -27,6 +27,8 @@ class TradingConfigurations(models.Model):
     max_loss = models.IntegerField(default=0)  # Field for maximum loss
     max_trade_count = models.IntegerField(default=0)  # Field for maximum trade count
     capital_usage_limit = models.IntegerField(default=0)  # Field for capital usage limit
+    forward_trailing_points = models.IntegerField(default=0)  # Field for forward trailing points
+    reverse_trailing_points = models.IntegerField(default=0)  # Field for reverse trailing points
 
     def __str__(self):
         return f"Trading Configurations - ID: {self.pk}"

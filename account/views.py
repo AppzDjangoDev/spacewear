@@ -59,24 +59,20 @@ class DashboardView(LoginRequiredMixin, TemplateView):
         get_accese_token_store_session(request)
         access_token = request.session.get('access_token')
         data_instance = get_data_instance(request)
-        print("data_instancedata_instance", data_instance)
         try:
             self.positions_data = data_instance.positions()
-            print("Positions data:", self.positions_data)
         except AttributeError as e:
             self.positions_data = {'code': -1, 'message': f'Error occurred: {str(e)}', 's': 'error'}
             print("Error occurred while fetching positions data:", e)
 
         try:
             self.order_data = data_instance.orderbook()
-            print("Order data:", self.order_data)
         except AttributeError as e:
             self.order_data = {'code': -1, 'message': f'Error occurred: {str(e)}', 's': 'error'}
             print("Error occurred while fetching order data:", e)
 
         try:
             self.fund_data = data_instance.funds()
-            print("Fund data:", self.fund_data)
         except AttributeError as e:
             self.fund_data = {'code': -1, 'message': f'Error occurred: {str(e)}', 's': 'error'}
             print("Error occurred while fetching fund data:", e)
@@ -91,7 +87,6 @@ class DashboardView(LoginRequiredMixin, TemplateView):
         #  trading_config.max_trade_count
         self.order_limit =  trading_config.max_trade_count
         self.progress_percentage= 0
-        print("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx", self.order_data)
         if self.order_data and "orderBook" in self.order_data:
             # Filter orders with status 6
             filled_orders = [order for order in self.order_data["orderBook"] if order["status"] == 2]
@@ -108,19 +103,15 @@ class DashboardView(LoginRequiredMixin, TemplateView):
 
             self.progress_percentage = (self.total_order_status / self.order_limit) * 100
             self.progress_percentage = round(self.progress_percentage, 1)
-
         self.expected_brokerage = self.total_order_status * average_brokerage
         return super().dispatch(request, *args, **kwargs)
 
-
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-
         context['order_limit'] = self.order_limit
         context['order_data'] = self.order_data
         context['fund_data'] = self.fund_data
         context['total_order_status'] = self.total_order_status
-        
         context['progress_percentage'] = self.progress_percentage
         context['pending_orders_status'] = self.pending_orders_status_6
         context['expected_brokerage'] = self.expected_brokerage
