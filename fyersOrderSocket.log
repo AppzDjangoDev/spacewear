@@ -65,3 +65,5 @@
 {"level":"ERROR","location":"[__on_message:248] order_ws","message":"Expecting value: line 1 column 1 (char 0)","timestamp":"2024-05-01 07:54:20,614+0000","service":"FyersDataSocket"}
 {"level":"ERROR","location":"[__on_message:248] order_ws","message":"Expecting value: line 1 column 1 (char 0)","timestamp":"2024-05-01 07:54:29,855+0000","service":"FyersDataSocket"}
 {"level":"ERROR","location":"[__on_message:248] order_ws","message":"Expecting value: line 1 column 1 (char 0)","timestamp":"2024-05-01 07:54:40,914+0000","service":"FyersDataSocket"}
+{"level":"ERROR","location":"[__on_message:248] order_ws","message":"Expecting value: line 1 column 1 (char 0)","timestamp":"2024-05-01 07:55:32,896+0000","service":"FyersDataSocket"}
+{"level":"ERROR","location":"[__on_message:248] order_ws","message":"Expecting value: line 1 column 1 (char 0)","timestamp":"2024-05-01 07:55:42,132+0000","service":"FyersDataSocket"}
