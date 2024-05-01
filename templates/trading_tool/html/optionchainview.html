@@ -223,11 +223,15 @@
             console.log("Type is not 'if'.");
         }
     }
+    var urlParts = window.location.pathname.split('/');
+
+    var domain = '//' + window.location.hostname ;
+    console.log(domain);
 
     var lastKeyword = window.location.pathname.split('/').filter(Boolean).pop();
   
     // WebSocket connection using secure WebSocket (wss://) protocol
-    var socket = new WebSocket("wss://c67b-2405-201-f007-402c-2ce9-bdd7-aca1-9e02.ngrok-free.app/ws/fyersindexdata/"+lastKeyword+"/");
+    var socket = new WebSocket("wss://"+domain+"/ws/fyersindexdata/"+lastKeyword+"/");
   
     // Event handler for receiving messages from the WebSocket server
     socket.onmessage = function(event) {
@@ -272,8 +276,9 @@
             }
         }
     }
+    var domain = '//' + window.location.hostname ;
     // WebSocket connection using secure WebSocket (wss://) protocol
-    var socket = new WebSocket("wss://c67b-2405-201-f007-402c-2ce9-bdd7-aca1-9e02.ngrok-free.app/ws/fyerspositionsdata/");
+    var socket = new WebSocket("wss://"+domain+"/ws/fyerspositionsdata/");
 
     // Event handler for receiving messages from the WebSocket server
     socket.onmessage = function(event) {
