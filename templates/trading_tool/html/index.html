@@ -215,8 +215,9 @@
                         }
                     }
                 }
+                var domain = '//' + window.location.hostname ;
                 // WebSocket connection using secure WebSocket (wss://) protocol
-                var socket = new WebSocket("wss://c67b-2405-201-f007-402c-2ce9-bdd7-aca1-9e02.ngrok-free.app/ws/fyerspositionsdata/");
+                var socket = new WebSocket("wss://"+domain+"/ws/fyerspositionsdata/");
             
                 // Event handler for receiving messages from the WebSocket server
                 socket.onmessage = function(event) {
