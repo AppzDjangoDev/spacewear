@@ -30,12 +30,14 @@ from django.shortcuts import render
 from urllib.parse import urlparse, parse_qs
 from django.contrib import messages
 import time
+from django.contrib.auth.mixins import LoginRequiredMixin
 
 
 def homePage(request):
     return render(request,'accounts/index.html')
 
-class DashboardView(TemplateView):
+class DashboardView(LoginRequiredMixin, TemplateView):
+    login_url = '/login'
     template_name = "trading_tool/html/index.html"
     @method_decorator(login_required)
     def dispatch(self, request, *args, **kwargs):

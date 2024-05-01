@@ -21,8 +21,10 @@ from django.db.models import Q
 from django.views.generic.edit import FormView
 from django.urls import reverse_lazy
 from .forms import TradingConfigurationsForm
+from django.contrib.auth.mixins import LoginRequiredMixin
 
-class Brokerconfig(View):
+class Brokerconfig(LoginRequiredMixin, View):
+    login_url = '/login'
     def get(self, request, *args, **kwargs):
         template = "trading_tool/html/index.html"
         context = {}
@@ -216,7 +218,8 @@ def update_data_instance(request):
     else:
         return JsonResponse({'error': 'Access token not found'}, status=400)
 
-class ProfileView(View):
+class ProfileView(LoginRequiredMixin, View):
+  login_url = '/login'
   def get(self, request):
     client_id = settings.FYERS_APP_ID
     access_token = request.session.get('access_token')
@@ -240,17 +243,21 @@ class ProfileView(View):
 
     
 
-class OrderHistory(View):
+class OrderHistory(LoginRequiredMixin, View):
+    login_url = '/login'  # Replace '/login/' with your actual login URL
+
     def get(self, request):
         context = {}
         order_data = TradingData.objects.filter(category='ORDERS')
-        paginator = Paginator(order_data, 20)  # Show 10 items per page
+        paginator = Paginator(order_data, 20)  # Show 20 items per page
         page_number = request.GET.get('page')
         page_obj = paginator.get_page(page_number)
         context['order_history_data'] = page_obj
         return render(request, 'trading_tool/html/order_history.html', context)
+    
 
-class OptionChainView(View):
+class OptionChainView(LoginRequiredMixin,View):
+    login_url = '/login'
     def get(self, request, slug):  # Modify to accept 'slug' parameter
         context = {}
         template = 'trading_tool/html/optionchainview.html'
@@ -305,7 +312,8 @@ def update_latest_data(request):
     )
     return HttpResponse('Data saved')
 
-class ConfigureTradingView(FormView):
+class ConfigureTradingView(LoginRequiredMixin,FormView):
+    login_url = '/login'
     template_name = 'trading_tool/html/configure_trading.html'
     form_class = TradingConfigurationsForm
     success_url = reverse_lazy('dashboard')
@@ -322,7 +330,9 @@ class ConfigureTradingView(FormView):
 
     
 from .models import TradingConfigurations
-class ConfigureTradingView(FormView):
+from django.contrib.auth.mixins import LoginRequiredMixin
+class ConfigureTradingView(LoginRequiredMixin,FormView):
+    login_url = '/login'
     
     template_name = 'trading_tool/html/configure_trading.html'
     form_class = TradingConfigurationsForm
