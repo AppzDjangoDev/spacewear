@@ -13,7 +13,7 @@
     <div class="col-lg-12 col-sm-12 d-flex align-items-stretch">
         <div class="card w-100">
             <div class="card-body p-4 mb-4">
-              <div class="d-flex justify-content-between align-items-center mb-4">
+              <div class="d-flex justify-content-between align-items-center mt-5">
                 <p class="card-title fw-semibold">OPTION CHAIN</p>
                 <div class="d-flex align-items-center">
                     {% for option in options_data.data.optionsChain %}
@@ -23,12 +23,10 @@
                         <!-- Web View -->
                         <div class="col-lg-12 d-none d-lg-block">
                             <div class="row">
-                                <div class="col-md-5">
-                                    <h5 class="card-title fw-semibold text-muted fs-2 mt-1">INDEX</h5>
+                                <div class="col-md-5 m-2">
                                     <input class="form-control" disabled name="ex_symbol" value="{{ option.ex_symbol }}">
                                 </div>
-                                <div class="col-md-5">
-                                    <h5 class="card-title fw-semibold text-muted fs-2 mt-1">EXPIRY</h5>
+                                <div class="col-md-5 m-2">
                                     <input class="form-control" disabled name="expiry" value="{{expiry_response}}">
                                 </div>
                             </div>
@@ -36,12 +34,10 @@
                         <!-- Mobile View -->
                         <div class="col-12 d-block d-lg-none">
                             <div class="row">
-                                <div class="col-12">
-                                    <h5 class="card-title fw-semibold text-muted mt-1">INDEX</h5>
+                                <div class="col-12 m-2">
                                     <input class="form-control" disabled name="ex_symbol" value="{{ option.ex_symbol }}">
                                 </div>
-                                <div class="col-12">
-                                    <h5 class="card-title fw-semibold text-muted mt-1">EXPIRY</h5>
+                                <div class="col-12 m-2">
                                     <input class="form-control" disabled name="expiry" value="{{expiry_response}}">
                                 </div>
                             </div>
@@ -218,7 +214,7 @@
             var ltpValue = message['ltp'];
             var symbol = message['symbol'];
             symbol = symbol.replace('NSE:', '').replace('-INDEX', '');
-            var indexData = symbol + "  " + ltpValue;
+            var indexData = symbol + " - " + ltpValue;
             console.log("messagemessagemessage",symbol);
             console.log("indexDataindexData", indexData)
             messageElement.textContent = indexData ; // Replacing the content with the new message
@@ -245,7 +241,7 @@
         socket.close();
     });
 </script>
-{% comment %} <script>
+<script>
     // Function to update the data container with the received message
     function updatePosData(message) {
         var dataContainer = document.getElementById("data-position");
@@ -255,7 +251,8 @@
             console.log("Error exists in the string.");
             var index_container = document.querySelector('#position-cont');
             // Remove the 'display: none;' style
-            index_container.style.display = 'none';
+            index_container.style.display = 'block';
+            messageElement.textContent = "No open positions";
         } else {
             message = message.replace(/'/g, '"');
             var messageObject = JSON.parse(message);
@@ -268,7 +265,7 @@
                 index_container.style.display = 'block';
                 console.log("The JSON data contains positions.", messageObject);
                 var pl_unrealized = messageObject['pl_unrealized'];
-                var positionData = "P/L" +"  "+ pl_unrealized;
+                var positionData = "P/L " + pl_unrealized;
                 messageElement.textContent = positionData;
             } else {
                 console.log("Some error occurred.");
@@ -280,7 +277,7 @@
 
     // Event handler for receiving messages from the WebSocket server
     socket.onmessage = function(event) {
-        console.log("Received message:", event);
+        console.log("position Received message:", event);
         var message = event.data;
         updatePosData(message);
     };
@@ -289,7 +286,7 @@
     window.addEventListener('beforeunload', function() {
         socket.close();
     });
-</script> {% endcomment %}
+</script>
 
 
 

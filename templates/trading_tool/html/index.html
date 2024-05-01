@@ -172,20 +172,20 @@
               {% comment %} ======================================================================================================= {% endcomment %}
               <div class="container-fluid ">
                 <div class="row">
-                {% comment %} <div class="col-sm-7  mx-2" id="position-cont" style="display: none;">
-                  <div class="alert alert-secondary p-0 m-0" id="data-position" role="alert">
-                      <button  style="height: 60px;" id="position" disabled class="btn btn-Primary btn-block w-100 h-10 fw-bolder fs-4"> {{text}}</button>
+                <div class="col-sm-6 my-2" id="position-cont" style="display: block;">
+                  <div class="alert alert-primary p-0 m-0" id="data-position" role="alert">
+                      <button  style="height: 60px;" id="position" disabled class="btn btn-Primary btn-block w-100 h-10 fw-bolder fs-4"> No open positions</button>
                   </div>
-                </div>  {% endcomment %}
-                <div class="col-sm-7  mx-2" id="index-cont" style="display: None;">
-                  <div class="alert alert-secondary p-0 m-0" id="data-index" role="alert">
+                </div> 
+                <div class="col-sm-6 my-2" id="index-cont" style="display: None;">
+                  <div class="alert alert-primary p-0 m-0" id="data-index" role="alert">
                       <button  style="height: 60px; color=blue;" id="index" disabled class="btn btn-Primary btn-block w-100 h-10 fw-bolder fs-4"> {{text}}</button>
                   </div>
                 </div>
               </div>
             </div>
               {% comment %} ======================================================================================================= {% endcomment %}
-              {% comment %} <script>
+              <script>
                 // Function to update the data container with the received message
                 function updatePosData(message) {
                     var dataContainer = document.getElementById("data-position");
@@ -229,7 +229,7 @@
                 window.addEventListener('beforeunload', function() {
                     socket.close();
                 });
-            </script> {% endcomment %}
+            </script>
             {% comment %} ======================================================================================================= {% endcomment %}
 
             {% for item in fund_data.fund_limit %}
@@ -592,7 +592,7 @@
         // Call the fetchData function initially when the page is loaded
         fetchData();
         // Set an interval to call the fetchData function every 5 minutes
-        setInterval(fetchData, 300000);
+        setInterval(fetchData, 300*1000);
     });
     
   </script>
