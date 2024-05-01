@@ -218,7 +218,7 @@
             var ltpValue = message['ltp'];
             var symbol = message['symbol'];
             symbol = symbol.replace('NSE:', '').replace('-INDEX', '');
-            var indexData = symbol + "  :" +ltpValue
+            var indexData = symbol + "  " + ltpValue;
             console.log("messagemessagemessage",symbol);
             console.log("indexDataindexData", indexData)
             messageElement.textContent = indexData ; // Replacing the content with the new message
@@ -268,7 +268,7 @@
                 index_container.style.display = 'block';
                 console.log("The JSON data contains positions.", messageObject);
                 var pl_unrealized = messageObject['pl_unrealized'];
-                var positionData = "P/L: " + pl_unrealized;
+                var positionData = "P/L" +"  "+ pl_unrealized;
                 messageElement.textContent = positionData;
             } else {
                 console.log("Some error occurred.");

@@ -59,16 +59,42 @@ class DashboardView(LoginRequiredMixin, TemplateView):
         get_accese_token_store_session(request)
         access_token = request.session.get('access_token')
         data_instance = get_data_instance(request)
-        self.positions_data = data_instance.positions()
-        self.order_data = data_instance.orderbook()
-        self.fund_data = data_instance.funds()
-        self.total_orders_status_2 = 0
+        print("data_instancedata_instance", data_instance)
+        try:
+            self.positions_data = data_instance.positions()
+            print("Positions data:", self.positions_data)
+        except AttributeError as e:
+            self.positions_data = {'code': -1, 'message': f'Error occurred: {str(e)}', 's': 'error'}
+            print("Error occurred while fetching positions data:", e)
+
+        try:
+            self.order_data = data_instance.orderbook()
+            print("Order data:", self.order_data)
+        except AttributeError as e:
+            self.order_data = {'code': -1, 'message': f'Error occurred: {str(e)}', 's': 'error'}
+            print("Error occurred while fetching order data:", e)
+
+        try:
+            self.fund_data = data_instance.funds()
+            print("Fund data:", self.fund_data)
+        except AttributeError as e:
+            self.fund_data = {'code': -1, 'message': f'Error occurred: {str(e)}', 's': 'error'}
+            print("Error occurred while fetching fund data:", e)
+
+        self.total_order_status = 0
         self.pending_orders_status_6 = 0
         self.expected_brokerage = 0 
         average_brokerage = 30
         self.recent_order_data = []
+        trading_config = TradingConfigurations.objects.first()
+        # print("self.order_limitself.order_limit", self.order_limit) 
+        #  trading_config.max_trade_count
+        self.order_limit =  trading_config.max_trade_count
+        self.progress_percentage= 0
+
+
         print("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx", self.order_data)
-        if "orderBook" in self.order_data:
+        if self.order_data and "orderBook" in self.order_data:
             # Filter orders with status 6
             filled_orders = [order for order in self.order_data["orderBook"] if order["status"] == 2]
             # Sort pending orders by orderDateTime in descending order
@@ -81,12 +107,9 @@ class DashboardView(LoginRequiredMixin, TemplateView):
             # Update total order count for status 2
             self.total_order_status = sum(1 for order in self.order_data["orderBook"] if order["status"] == 2)
             
-            trading_config = TradingConfigurations.objects.first()
-            # print("self.order_limitself.order_limit", self.order_limit) 
-            #  trading_config.max_trade_count
-            self.order_limit =  trading_config.max_trade_count
-            progress_percentage = (self.total_order_status / self.order_limit) * 100
-            self.progress_percentage = round(progress_percentage, 1)
+
+            self.progress_percentage = (self.total_order_status / self.order_limit) * 100
+            self.progress_percentage = round(self.progress_percentage, 1)
 
         self.expected_brokerage = self.total_order_status * average_brokerage
         return super().dispatch(request, *args, **kwargs)
@@ -98,7 +121,7 @@ class DashboardView(LoginRequiredMixin, TemplateView):
         context['order_limit'] = self.order_limit
         context['order_data'] = self.order_data
         context['fund_data'] = self.fund_data
-        context['total_orders_status'] = self.total_order_status
+        context['total_order_status'] = self.total_order_status
         
         context['progress_percentage'] = self.progress_percentage
         context['pending_orders_status'] = self.pending_orders_status_6

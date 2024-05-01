@@ -267,7 +267,16 @@ class OptionChainView(LoginRequiredMixin,View):
             "strikecount": 1,
             # "timestamp": next_thursday_timestamp
         }
-        expiry_response = data_instance.optionchain(data=data)
+        try:
+            expiry_response = data_instance.optionchain(data=data)
+            print("Fund data:", expiry_response)
+        except AttributeError as e:
+            expiry_response = {'code': -1, 'message': f'Error occurred: {str(e)}', 's': 'error'}
+            print("Error occurred while fetching fund data:", e)
+            return render(request, template, context)
+
+
+            
         first_expiry_ts = expiry_response['data']['expiryData'][0]['expiry']
         first_expiry_date = expiry_response['data']['expiryData'][0]['date']
         options_data = {
