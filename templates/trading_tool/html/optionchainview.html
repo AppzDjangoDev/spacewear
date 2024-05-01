@@ -23,10 +23,15 @@
                         <!-- Web View -->
                         <div class="col-lg-12 d-none d-lg-block">
                             <div class="row">
-                                <div class="col-md-5 m-2">
+                                <div class="col-md-3">
+                                    
                                     <input class="form-control" disabled name="ex_symbol" value="{{ option.ex_symbol }}">
                                 </div>
-                                <div class="col-md-5 m-2">
+                                <div class="col-md-3">
+                                    
+                                    <input class="form-control" disabled name="ltp" value="{{ option.ltp }}">
+                                </div>
+                                <div class="col-md-3">
                                     <input class="form-control" disabled name="expiry" value="{{expiry_response}}">
                                 </div>
                             </div>
@@ -34,10 +39,14 @@
                         <!-- Mobile View -->
                         <div class="col-12 d-block d-lg-none">
                             <div class="row">
-                                <div class="col-12 m-2">
+                                <div class="col-12">
+                                    
                                     <input class="form-control" disabled name="ex_symbol" value="{{ option.ex_symbol }}">
                                 </div>
-                                <div class="col-12 m-2">
+                                <div class="col-12">
+                                    <input class="form-control" disabled name="ltp" value="{{ option.ltp }}">
+                                </div>
+                                <div class="col-12">
                                     <input class="form-control" disabled name="expiry" value="{{expiry_response}}">
                                 </div>
                             </div>
@@ -197,7 +206,7 @@
         });
     });
 </script>
-<script>
+{% comment %} <script>
     // Function to update the data container with the received message
     function updateData(message) {
         var dataContainer = document.getElementById("data-index");
@@ -291,7 +300,7 @@
     window.addEventListener('beforeunload', function() {
         socket.close();
     });
-</script>
+</script> {% endcomment %}
 
 
 
