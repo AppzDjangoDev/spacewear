@@ -58,7 +58,6 @@ class DashboardView(LoginRequiredMixin, TemplateView):
         time.sleep(1)
         get_accese_token_store_session(request)
         access_token = request.session.get('access_token')
-        print("qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq", access_token)
         data_instance = get_data_instance(request)
         self.positions_data = data_instance.positions()
         self.order_data = data_instance.orderbook()
@@ -68,6 +67,7 @@ class DashboardView(LoginRequiredMixin, TemplateView):
         self.expected_brokerage = 0 
         average_brokerage = 30
         self.recent_order_data = []
+        print("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx", self.order_data)
         if "orderBook" in self.order_data:
             # Filter orders with status 6
             filled_orders = [order for order in self.order_data["orderBook"] if order["status"] == 2]
