@@ -14,12 +14,7 @@ from channels.generic.websocket import WebsocketConsumer
 from fyers_apiv3.FyersWebsocket import order_ws
 from django.conf import settings
 
-
-
-
-
 class FyersPositionDataConsumer(WebsocketConsumer):
-    
     def connect(self):
         self.accept()
         # Generate app_id_hash
@@ -92,6 +87,9 @@ class FyersPositionDataConsumer(WebsocketConsumer):
 class FyersIndexDataConsumer(WebsocketConsumer):
     def connect(self):
         self.accept()
+
+        self.last_keyword = self.scope['url_route']['kwargs']['last_keyword']  # Extract the last keyword from URL
+        print("last_keywordlast_keyword", self.last_keyword)
         # Generate app_id_hash
         app_id = settings.FYERS_APP_ID
         secret_key = settings.FYERS_SECRET_ID
@@ -146,14 +144,14 @@ class FyersIndexDataConsumer(WebsocketConsumer):
         data_type = "SymbolUpdate"
 
         # Subscribe to the specified symbols and data type
-        symbols = ["NSE:NIFTY50-INDEX"]
+        symbols = ["NSE:" + self.last_keyword + "-INDEX"]
         self.fyers.subscribe(symbols=symbols, data_type=data_type)
 
         # Keep the socket running to receive real-time data
         self.fyers.keep_running()
 
     def on_message(self, message):
-        self.send(text_data=f"Position Response: {message}")
+        self.send(text_data=f"{message}")
 
     def on_error(self, message):
         print("Error:", message)

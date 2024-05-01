@@ -7,7 +7,7 @@ from channels.auth import AuthMiddlewareStack
 from channels.routing import ProtocolTypeRouter, URLRouter
 
 ws_urlpatterns = [
-    path('ws/fyersindexdata/', FyersIndexDataConsumer.as_asgi()),
+    path('ws/fyersindexdata/<str:last_keyword>/', FyersIndexDataConsumer.as_asgi()),
     path('ws/fyerspositionsdata/', FyersPositionDataConsumer.as_asgi()),
 
 

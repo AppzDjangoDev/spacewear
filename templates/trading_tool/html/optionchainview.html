@@ -23,15 +23,11 @@
                         <!-- Web View -->
                         <div class="col-lg-12 d-none d-lg-block">
                             <div class="row">
-                                <div class="col-md-3">
+                                <div class="col-md-5">
                                     <h5 class="card-title fw-semibold text-muted fs-2 mt-1">INDEX</h5>
                                     <input class="form-control" disabled name="ex_symbol" value="{{ option.ex_symbol }}">
                                 </div>
-                                <div class="col-md-3">
-                                    <h5 class="card-title fw-semibold text-muted fs-2 mt-1">POINT</h5>
-                                    <input class="form-control" disabled name="ltp" value="{{ option.ltp }}">
-                                </div>
-                                <div class="col-md-3">
+                                <div class="col-md-5">
                                     <h5 class="card-title fw-semibold text-muted fs-2 mt-1">EXPIRY</h5>
                                     <input class="form-control" disabled name="expiry" value="{{expiry_response}}">
                                 </div>
@@ -45,10 +41,6 @@
                                     <input class="form-control" disabled name="ex_symbol" value="{{ option.ex_symbol }}">
                                 </div>
                                 <div class="col-12">
-                                    <h5 class="card-title fw-semibold text-muted mt-1">POINT</h5>
-                                    <input class="form-control" disabled name="ltp" value="{{ option.ltp }}">
-                                </div>
-                                <div class="col-12">
                                     <h5 class="card-title fw-semibold text-muted mt-1">EXPIRY</h5>
                                     <input class="form-control" disabled name="expiry" value="{{expiry_response}}">
                                 </div>
@@ -60,12 +52,17 @@
                   {% endfor %}
             </div>
         </div>
-            <div class="row">
 
+        <div class="container-fluid mb-2 ">
+            <div class="row">
+            {% comment %} <div class="container-fluid">
+                <div class="alert alert-info p-0 my-2" role="alert">
+                    <button  style="height: 50px;" id="position" disabled class="btn btn-Primary btn-block w-100 h-10 fw-bolder fs-4"> {{text}}</button>
+                </div>
+            </div> {% endcomment %}
             <div class="col-sm-6">
             {% for option in options_data.data.optionsChain %}
             {% if option.option_type == "CE"%}
-
             <div class="alert alert-success" role="alert">
                 <div class="row">
                     <div class="col-4 d-flex justify-content-center align-items-center">
@@ -86,26 +83,27 @@
             {% endfor %}
             </div>
             <div class="col-sm-6">
-                {% for option in options_data.data.optionsChain %}
-                {% if option.option_type == "PE"%}
-                    <div class="alert alert-danger" role="alert">
-                        <div class="row">
-                            <div class="col-4 d-flex justify-content-center align-items-center">
-                                <button class="btn btn-success btn-lg btn-block w-100 h-100 fw-bolder buy-button" style="border-radius: 6px">Buy</button>
-                            </div>
-                            <div class="col-4 text-center">
-                                <input type="hidden" name="der-symbol" value="{{ option.symbol }}">
-                                <h5 class="card-title text-muted fw-bolder">PE&nbsp;{{option.strike_price}}</h5>
-                                <p class="card-text fs-4 fw-bolder">LTP:{{option.ltp}}</p>
-                            </div>
-                            <div class="col-4 d-flex justify-content-center align-items-center">
-                                <button class="btn btn-danger btn-lg btn-block w-100 h-100 fw-bolder sell-button" style="border-radius: 6px">Sell</button>
-                            </div>
+            {% for option in options_data.data.optionsChain %}
+            {% if option.option_type == "PE"%}
+                <div class="alert alert-danger" role="alert">
+                    <div class="row">
+                        <div class="col-4 d-flex justify-content-center align-items-center">
+                            <button class="btn btn-success btn-lg btn-block w-100 h-100 fw-bolder buy-button" style="border-radius: 6px">Buy</button>
+                        </div>
+                        <div class="col-4 text-center">
+                            <input type="hidden" name="der-symbol" value="{{ option.symbol }}">
+                            <h5 class="card-title text-muted fw-bolder">PE&nbsp;{{option.strike_price}}</h5>
+                            <p class="card-text fs-4 fw-bolder">LTP:{{option.ltp}}</p>
+                        </div>
+                        <div class="col-4 d-flex justify-content-center align-items-center">
+                            <button class="btn btn-danger btn-lg btn-block w-100 h-100 fw-bolder sell-button" style="border-radius: 6px">Sell</button>
                         </div>
                     </div>
+                </div>
                 {% endif %}
                 {% endfor %}
             </div>
+
             <div class="container-fluid">
                 <div class="alert alert-info p-0 m-0" role="alert">
                     <button style="height: 80px;" class="btn btn-Primary btn-block w-100 h-200 fw-bolder">Trail Profit</button>
@@ -123,7 +121,6 @@
 </div>
 
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-
 <script>
     $(document).ready(function() {
         // Handle click event for buy buttons
@@ -204,5 +201,97 @@
         });
     });
 </script>
+<script>
+    // Function to update the data container with the received message
+    function updateData(message) {
+        var dataContainer = document.getElementById("data-index");
+        var messageElement = document.querySelector('#index'); // Selecting the existing h1 element
+        message = message.replace(/'/g, '"');
+        var message = JSON.parse(message);
+        console.log("messagemessagemessage", message.type);
+        // Check if the type is "if"
+        if (message.type === 'if') {
+            // Select the element by its ID
+            var container = document.querySelector('#index-cont');
+            // Remove the 'display: none;' style
+            container.style.display = 'block';
+            var ltpValue = message['ltp'];
+            var symbol = message['symbol'];
+            symbol = symbol.replace('NSE:', '').replace('-INDEX', '');
+            var indexData = symbol + "  :" +ltpValue
+            console.log("messagemessagemessage",symbol);
+            console.log("indexDataindexData", indexData)
+            messageElement.textContent = indexData ; // Replacing the content with the new message
+        } else {
+            // Do something else if the type is not "if"
+            console.log("Type is not 'if'.");
+        }
+    }
+
+    var lastKeyword = window.location.pathname.split('/').filter(Boolean).pop();
+  
+    // WebSocket connection using secure WebSocket (wss://) protocol
+    var socket = new WebSocket("wss://c67b-2405-201-f007-402c-2ce9-bdd7-aca1-9e02.ngrok-free.app/ws/fyersindexdata/"+lastKeyword+"/");
+  
+    // Event handler for receiving messages from the WebSocket server
+    socket.onmessage = function(event) {
+        console.log("Received message:", event.data);
+        var message = event.data;
+        updateData(message);
+    };
+  
+    // Close the WebSocket connection when the page is unloaded (refreshed or navigated away)
+    window.addEventListener('unload', function() {
+        socket.close();
+    });
+</script>
+<script>
+    // Function to update the data container with the received message
+    function updatePosData(message) {
+        var dataContainer = document.getElementById("data-position");
+        var messageElement = document.querySelector('#position'); // Selecting the existing h1 element
+        console.log("ppppppppppppppppppppppppp", message);
+        if (message.includes("Error:")) {
+            console.log("Error exists in the string.");
+            var index_container = document.querySelector('#position-cont');
+            // Remove the 'display: none;' style
+            index_container.style.display = 'none';
+        } else {
+            message = message.replace(/'/g, '"');
+            var messageObject = JSON.parse(message);
+            if (messageObject.hasOwnProperty('code') && messageObject.code === 1605) {
+                var index_container = document.querySelector('#position-cont');
+                // Remove the 'display: none;' style
+                index_container.style.display = 'block';
+                messageElement.textContent = "No open positions";
+            } else if (messageObject.hasOwnProperty('positions') && Object.keys(messageObject.positions).length !== 0) {
+                index_container.style.display = 'block';
+                console.log("The JSON data contains positions.", messageObject);
+                var pl_unrealized = messageObject['pl_unrealized'];
+                var positionData = "P/L: " + pl_unrealized;
+                messageElement.textContent = positionData;
+            } else {
+                console.log("Some error occurred.");
+            }
+        }
+    }
+    // WebSocket connection using secure WebSocket (wss://) protocol
+    var socket = new WebSocket("wss://c67b-2405-201-f007-402c-2ce9-bdd7-aca1-9e02.ngrok-free.app/ws/fyerspositionsdata/");
+
+    // Event handler for receiving messages from the WebSocket server
+    socket.onmessage = function(event) {
+        console.log("Received message:", event);
+        var message = event.data;
+        updatePosData(message);
+    };
+
+    // Explicitly close the connection when navigating away
+    window.addEventListener('beforeunload', function() {
+        socket.close();
+    });
+</script>
+
+
+
 
 {% endblock %}

@@ -159,40 +159,62 @@
                 <i class="ti ti-menu-2"></i>
               </a>
             </li>
-            <li class="nav-item">
+            {% comment %} <li class="nav-item">
               <a class="nav-link nav-icon-hover" href="javascript:void(0)">
                 <i class="ti ti-bell-ringing"></i>
                 <div class="notification bg-primary rounded-circle"></div>
               </a>
-            </li>
+            </li> {% endcomment %}
           </ul>
           <div class="navbar-collapse justify-content-end px-0" id="navbarNav">
             <ul class="navbar-nav flex-row ms-auto align-items-center justify-content-end">
-             
-              {% for item in fund_data.fund_limit %}
-                {% if item.id == 10 %}
-                    <a href="#" class="btn btn-success fw-semibold lh-sm my-4 mx-2">Available Balance:{{ item.equityAmount|floatformat:2 }}</a>
-                {% endif %}
-              {% endfor %}
 
               {% comment %} ======================================================================================================= {% endcomment %}
-
-              {% comment %} <div class="container-fluid ">
-                <div class="alert alert-success p-0 m-0" id="data-position" role="alert">
-                    <button  style="height: 50px;" id="position" disabled class="btn btn-Primary btn-block w-100 h-10 fw-bolder fs-4"> {{text}}</button>
-                   
+              <div class="container-fluid mb-2 ">
+                <div class="row">
+                <div class="col-sm-6" id="position-cont" style="display: none;">
+                  <div class="alert alert-secondary p-0 m-0" id="data-position" role="alert">
+                      <button  style="height: 50px;" id="position" disabled class="btn btn-Primary btn-block w-100 h-10 fw-bolder fs-3"> {{text}}</button>
+                  </div>
+                </div> 
+                <div class="col-sm-6" id="index-cont" style="display: None;">
+                  <div class="alert alert-secondary p-0 m-0" id="data-index" role="alert">
+                      <button  style="height: 50px; color=blue;" id="index" disabled class="btn btn-Primary btn-block w-100 h-10 fw-bolder fs-3"> {{text}}</button>
+                  </div>
                 </div>
-              </div>  {% endcomment %}
-
+              </div>
+            </div>
               {% comment %} ======================================================================================================= {% endcomment %}
-              {% comment %} <script>
+              <script>
                 // Function to update the data container with the received message
-                function updateData(message) {
+                function updatePosData(message) {
                     var dataContainer = document.getElementById("data-position");
                     var messageElement = document.querySelector('#position'); // Selecting the existing h1 element
-                    messageElement.textContent = message; // Replacing the content with the new message
+                    console.log("ppppppppppppppppppppppppp", message);
+                    if (message.includes("Error:")) {
+                        console.log("Error exists in the string.");
+                        var index_container = document.querySelector('#position-cont');
+                        // Remove the 'display: none;' style
+                        index_container.style.display = 'none';
+                    } else {
+                        message = message.replace(/'/g, '"');
+                        var messageObject = JSON.parse(message);
+                        if (messageObject.hasOwnProperty('code') && messageObject.code === 1605) {
+                            var index_container = document.querySelector('#position-cont');
+                            // Remove the 'display: none;' style
+                            index_container.style.display = 'block';
+                            messageElement.textContent = "No open positions";
+                        } else if (messageObject.hasOwnProperty('positions') && Object.keys(messageObject.positions).length !== 0) {
+                            index_container.style.display = 'block';
+                            console.log("The JSON data contains positions.", messageObject);
+                            var pl_unrealized = messageObject['pl_unrealized'];
+                            var positionData = "P/L: " + pl_unrealized;
+                            messageElement.textContent = positionData;
+                        } else {
+                            console.log("Some error occurred.");
+                        }
+                    }
                 }
-            
                 // WebSocket connection using secure WebSocket (wss://) protocol
                 var socket = new WebSocket("wss://c67b-2405-201-f007-402c-2ce9-bdd7-aca1-9e02.ngrok-free.app/ws/fyerspositionsdata/");
             
@@ -200,21 +222,25 @@
                 socket.onmessage = function(event) {
                     console.log("Received message:", event);
                     var message = event.data;
-                    updateData(message);
+                    updatePosData(message);
                 };
             
                 // Explicitly close the connection when navigating away
                 window.addEventListener('beforeunload', function() {
                     socket.close();
                 });
-            </script> {% endcomment %}
-
+            </script>
             {% comment %} ======================================================================================================= {% endcomment %}
 
-
+            {% for item in fund_data.fund_limit %}
+            {% if item.id == 10 %}
+                <a href="#" class="btn btn-success fw-semibold lh-sm my-4 mx-2">Available Balance:{{ item.equityAmount|floatformat:2 }}</a>
+                <button id="updatelatestdata" target="_blank" class="btn btn-primary fw-semibold lh-sm my-4 mx-2">Update Now</button>
+            {% endif %}
+            {% endfor %}
               
               {% comment %} <a href="{% url 'explore_more' %}" class="btn btn-succes">Test</a> {% endcomment %}
-              <button id="updatelatestdata" target="_blank" class="btn btn-primary fw-semibold lh-sm my-4 mx-2">Update Now</button>
+              
               {% comment %} <a href="{% url "get_accese_token_store_session" %}" class="btn btn-success mx-2">Get Access</a> {% endcomment %}
               {% comment %} <a href="{% url "get_user_profile" %}" class="btn btn-success mx-2">Get Profile</a> {% endcomment %}
               <li class="nav-item dropdown">
@@ -228,10 +254,10 @@
                       <i class="ti ti-user fs-6"></i>
                       <p class="mb-0 fs-3">My Account</p>
                     </a>
-                    <a href="{% url 'broker_config' %}" class="d-flex align-items-center gap-2 dropdown-item">
+                    {% comment %} <a href="{% url 'broker_config' %}" class="d-flex align-items-center gap-2 dropdown-item">
                       <i class="ti ti-list-check fs-6"></i>
                       <p class="mb-0 fs-3">Broker Configurations</p>
-                    </a>
+                    </a> {% endcomment %}
                     <a href="{% url 'configure_trading' %}" class="d-flex align-items-center gap-2 dropdown-item">
                       <i class="ti ti-list-check fs-6"></i>
                       <p class="mb-0 fs-3">Trade Configurations</p>
@@ -507,26 +533,14 @@
           <p class="mb-0 fs-4">Design and Developed by <a href="https://appztechblog.com/" target="_blank" class="pe-1 text-primary text-decoration-underline">Appztechblog.com</a></p>
         </div>
       </div>
-
-    
-
-    {% endblock %}
     </div>
   </div>
-
   <style>
     .container-fluid {
         max-width: none !important;
     }
   </style>
-
-
-  <script src="{% static 'trading_tool/assets/libs/jquery/dist/jquery.min.js' %}"></script>
-  <script src="{% static 'trading_tool/assets/libs/bootstrap/dist/js/bootstrap.bundle.min.js' %}"></script>
-  <script src="{% static 'trading_tool/assets/js/sidebarmenu.js' %}"></script>
-  <script src="{% static 'trading_tool/assets/js/app.min.js' %}"></script>
-  <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
-
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
   <script>
     $(document).ready(function() {
       // Define a function to fetch data from the server
@@ -575,17 +589,12 @@
               });
           }
       }
-  
         // Call the fetchData function initially when the page is loaded
         fetchData();
-    
         // Set an interval to call the fetchData function every 5 minutes
         setInterval(fetchData, 300000);
     });
     
-    
-    
-  
   </script>
   <script>
     $(document).ready(function() {
@@ -662,26 +671,14 @@
     // Set an interval to check every minute (adjust as needed)
     setInterval(disableButtonAtFour, 60 * 1000); // 60 seconds * 1000 milliseconds
   </script>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
   <script src="{% static 'trading_tool/assets/libs/apexcharts/dist/apexcharts.min.js' %}"></script>
+
+  {% endblock %}
+  <script src="{% static 'trading_tool/assets/libs/jquery/dist/jquery.min.js' %}"></script>
+  <script src="{% static 'trading_tool/assets/libs/bootstrap/dist/js/bootstrap.bundle.min.js' %}"></script>
+  <script src="{% static 'trading_tool/assets/js/sidebarmenu.js' %}"></script>
+  <script src="{% static 'trading_tool/assets/js/app.min.js' %}"></script>
+  <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
   <script src="{% static 'trading_tool/assets/libs/simplebar/dist/simplebar.js' %}"></script>
   <script>
     var positions_data = {{ positions_data|default:"{}" | safe }};
