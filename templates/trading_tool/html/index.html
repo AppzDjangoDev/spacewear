@@ -172,11 +172,11 @@
               {% comment %} ======================================================================================================= {% endcomment %}
               <div class="container-fluid ">
                 <div class="row">
-                <div class="col-sm-7  mx-2" id="position-cont" style="display: none;">
+                {% comment %} <div class="col-sm-7  mx-2" id="position-cont" style="display: none;">
                   <div class="alert alert-secondary p-0 m-0" id="data-position" role="alert">
                       <button  style="height: 60px;" id="position" disabled class="btn btn-Primary btn-block w-100 h-10 fw-bolder fs-4"> {{text}}</button>
                   </div>
-                </div> 
+                </div>  {% endcomment %}
                 <div class="col-sm-7  mx-2" id="index-cont" style="display: None;">
                   <div class="alert alert-secondary p-0 m-0" id="data-index" role="alert">
                       <button  style="height: 60px; color=blue;" id="index" disabled class="btn btn-Primary btn-block w-100 h-10 fw-bolder fs-4"> {{text}}</button>
@@ -185,7 +185,7 @@
               </div>
             </div>
               {% comment %} ======================================================================================================= {% endcomment %}
-              <script>
+              {% comment %} <script>
                 // Function to update the data container with the received message
                 function updatePosData(message) {
                     var dataContainer = document.getElementById("data-position");
@@ -229,7 +229,7 @@
                 window.addEventListener('beforeunload', function() {
                     socket.close();
                 });
-            </script>
+            </script> {% endcomment %}
             {% comment %} ======================================================================================================= {% endcomment %}
 
             {% for item in fund_data.fund_limit %}

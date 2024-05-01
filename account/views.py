@@ -91,8 +91,6 @@ class DashboardView(LoginRequiredMixin, TemplateView):
         #  trading_config.max_trade_count
         self.order_limit =  trading_config.max_trade_count
         self.progress_percentage= 0
-
-
         print("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx", self.order_data)
         if self.order_data and "orderBook" in self.order_data:
             # Filter orders with status 6

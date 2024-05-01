@@ -245,7 +245,7 @@
         socket.close();
     });
 </script>
-<script>
+{% comment %} <script>
     // Function to update the data container with the received message
     function updatePosData(message) {
         var dataContainer = document.getElementById("data-position");
@@ -289,7 +289,7 @@
     window.addEventListener('beforeunload', function() {
         socket.close();
     });
-</script>
+</script> {% endcomment %}
 
 
 
