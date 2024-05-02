@@ -183,23 +183,25 @@
                 </div> {% endcomment %}
 
               {% comment %} ======================================================================================================= {% endcomment %}
+            {% if options_data.data.optionsChain %}
             <div class="container-fluid ">
                 <div class="row">
-                <div class="col-sm-6 my-2" id="position-cont" style="display: block;">
-                  <div class="alert alert-primary p-0 m-0" style="height:65px;"  id="data-position" role="alert">
-                    <button class="btn btn-primary btn-lg btn-block w-100 h-100 fw-bolder buy-button" style="border-radius: 6px;  ">TRAIL LIMIT</button>
+                <div class="col-sm-6 my-2">
+                  <div class="alert alert-primary p-0 m-0" style="height:65px;" role="alert">
+                    <button  id="trailingwithlimit" class="btn btn-primary btn-lg btn-block w-100 h-100 fw-bold" style="border-radius: 6px;  ">TRAIL LIMIT</button>
                       {% comment %} <button  style="height: 60px;" id="position" disabled class="btn btn-Primary btn-block w-100 h-10 fw-bolder fs-4"> No open positions</button> {% endcomment %}
                   </div>
                 </div> 
-                <div class="col-sm-6 my-2" id="index-cont" style="display: block;">
-                  <div class="alert alert-primary p-0 m-0" style="height:65px;"  id="data-index" role="alert">
-                    <button class="btn btn-primary btn-lg btn-block w-100 h-100 fw-bolder sell-button" style="border-radius: 6px;">TRAIL TOP</button>
+                <div class="col-sm-6 my-2"  style="display: block;">
+                  <div class="alert alert-primary p-0 m-0" style="height:65px;" role="alert">
+                    <button  id="trailingtotop" class="btn btn-primary btn-lg btn-block w-100 h-100 fw-bold sell-button" style="border-radius: 6px;">TRAIL TOP</button>
 
                       {% comment %} <button  style="height: 60px; color=blue;" id="index" disabled class="btn btn-Primary btn-block w-100 h-10 fw-bolder fs-4"> {{text}}</button> {% endcomment %}
                   </div>
                 </div>
               </div>
             </div> 
+            {% endif%}
               {% comment %} ======================================================================================================= {% endcomment %}
               {% comment %} <script>
                 // Function to update the data container with the received message
@@ -649,6 +651,14 @@
           });
       });
     });
+
+
+    
+
+
+
+
+
     $(document).ready(function() {
       $('#updatelatestdata').click(function(e) {
           e.preventDefault();
@@ -691,6 +701,43 @@
   <script src="{% static 'trading_tool/assets/libs/apexcharts/dist/apexcharts.min.js' %}"></script>
 
   {% endblock %}
+  <script>
+      $(document).ready(function() {
+      $('#trailingwithlimit').click(function(e) {
+          e.preventDefault();
+          console.log('Position closed successfully.');
+
+          $.ajax({
+              type: 'GET',  // Adjust the request type as needed
+              url: '{% url "trailingwithlimit" %}',
+              success: function(response) {
+                  // Handle success response if needed
+                  console.log('Position closed successfully.', response.message);
+                  swal({
+                    position: "top-end",
+                    icon: "success",
+                    title: response.message,
+                    showConfirmButton: false,
+                    timer: 1500
+                  })
+                 
+              },
+              error: function(xhr, status, error) {
+                  // Handle error response if needed
+                  console.error('Failed to close position. Error:', error);
+                  swal({
+                    position: "top-end",
+                    icon: "error",
+                    title: "some error occured!",
+                    showConfirmButton: false,
+                    timer: 1500
+                  })
+                 
+              }
+          });
+      });
+    });
+  </script>
   <script src="{% static 'trading_tool/assets/libs/jquery/dist/jquery.min.js' %}"></script>
   <script src="{% static 'trading_tool/assets/libs/bootstrap/dist/js/bootstrap.bundle.min.js' %}"></script>
   <script src="{% static 'trading_tool/assets/js/sidebarmenu.js' %}"></script>

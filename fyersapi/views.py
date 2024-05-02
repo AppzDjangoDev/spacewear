@@ -141,9 +141,9 @@ def close_all_positions(request):
         # Initialize an empty list to store order IDs with status 6
         orders_with_status_6 = []
         # Iterate through the orderBook
-        for order in order_data.get("orderBook", []):
+        for order in order_data["orderBook"]:
             # Check if the status is 6
-            if order.get("status") == 6:
+            if order["status"] == 6:
                 # Append the ID to the list
                 orders_with_status_6.append({"id": order.get("id")})
         order_cancel_response = []
@@ -399,26 +399,16 @@ def instantBuyOrderWithSL(request):
         response = data_instance.place_order(data=data)
         print("----------------------------------------------------44", response["code"])
         # response["code"] =1101
-        
-        
-        
         if response["code"] == 1101:
-            print("----------------------------------------------------55")
             allOrderData = data_instance.orderbook()
-            # Initialize an empty list to store order IDs with status 6
-            orders_with_status_6 = []
-            # Iterate through the orderBook
-            for order in allOrderData.get("orderBook", []):
-                # Check if the status is 6
-                if order.get("status") == 6 and order.get("symbol") == der_symbol:
-                    # Append the ID to the list
-                    orders_with_status_6.append({"id": order.get("id")})
-            order_cancel_response = []
-            # Check if there are orders to cancel
-            if orders_with_status_6:
-                print("orders_with_status_6orders_with_status_6", orders_with_status_6["id"])
-                exst_qty = orders_with_status_6[0]["qty"]
-                orderId = orders_with_status_6[0]["id"]
+            # Find the order with status 6, if any
+            order_with_status_6 = next((order for order in allOrderData["orderBook"] if order['status'] == 6 and order["symbol"] == der_symbol), None)
+            print("order_with_status_6order_with_status_6", order_with_status_6)
+            # Check if there ae orders to cancel
+            if order_with_status_6:
+                print("orders_with_status_6orders_with_status_6", order_with_status_6["id"])
+                exst_qty = order_with_status_6['qty']
+                orderId = order_with_status_6['id']
                 new_qty = order_qty + exst_qty
                 # modify existing sl order 
                 modify_data = {
@@ -426,14 +416,15 @@ def instantBuyOrderWithSL(request):
                     "type":4, 
                     "qty": new_qty
                 }
+                print("modify_datamodify_datamodify_data", modify_data)
                 modify_response = data_instance.modify_order(data=modify_data)
                 return JsonResponse({'response': modify_response["message"]})
             else:
                 # Here We need to Place Stoploss Order with default Stoploss price 
-                buy_order_id = response.get("id")
+                buy_order_id = response["id"]
                 print("buy_order_id", buy_order_id)
                 buy_order_data = {"id":buy_order_id}
-                get_buy_orderdata = data_instance.orderbook(data=data)
+                get_buy_orderdata = data_instance.orderbook(data=buy_order_data)
                 # get_buy_orderdata = {
                 #     "code": 200,
                 #     "message": "",
@@ -475,6 +466,7 @@ def instantBuyOrderWithSL(request):
                 # }
                 order_details = get_buy_orderdata["orderBook"][0]
                 traded_price = order_details["tradedPrice"]
+                print("traded_price", traded_price)
                 symbol = order_details["symbol"]
                 
                 default_stoploss = trade_config_data.default_stoploss
@@ -521,3 +513,52 @@ def fyer_websocket_view(request):
     template_name = 'trading_tool/html/fyerwebsocket.html'
     access_token = request.session.get('access_token')
     return render(request, template_name)
+
+
+def trailingwithlimit(request):
+    client_id = settings.FYERS_APP_ID
+    access_token = request.session.get('access_token')
+    trade_config_data = TradingConfigurations.objects.first()
+    forwrd_trail_limit = trade_config_data.forward_trailing_points
+    print("forwrd_trail_limitforwrd_trail_limitforwrd_trail_limit", forwrd_trail_limit)
+    if access_token:
+        # Initialize the FyersModel instance with your client_id, access_token, and enable async mode
+        fyers = fyersModel.FyersModel(client_id=client_id, token=access_token, log_path="")
+        order_data = fyers.orderbook()
+        # print("order_dataorder_dataorder_dataorder_dataorder_data", order_data)
+        # Initialize an empty list to store order IDs with status 6
+        orders_with_status_6 = []
+        # Iterate through the orderBook
+        for order in order_data["orderBook"]:
+            print("orderorderorderorderorderorderorderorderorder", order)
+            # Check if the status is 6
+            if order["status"] == 5:
+                # Append the ID to the list
+                orders_with_status_6.append(order["id"])
+                existing_stop_price = order["stopPrice"]
+                existing_limit_price = order["limitPrice"]
+        new_stop_price = existing_stop_price + forwrd_trail_limit
+        new_limit_price = existing_limit_price + forwrd_trail_limit
+        order_cancel_response = []
+        # Check if there are orders to cancel
+        if orders_with_status_6:
+            # Cancel the orders
+            orderId =orders_with_status_6[0]
+            data = {
+                "id":orderId, 
+                "limitPrice": new_limit_price, 
+                "stopPrice": new_stop_price,
+            }
+            trailing_order_update = fyers.modify_order(data=data)
+            # trailing_order_update = fyers.cancel_basket_orders(data=orders_with_status_6)
+        # Code indicates successful cancellation or order not found
+        if 'message' in trailing_order_update:
+            message = trailing_order_update['message']
+            messages.success(request, message)
+            return JsonResponse({'message': message})
+        else:
+            # Handle the case where 'data' key is missing
+            message = "Error: Response format is unexpected"
+            messages.error(request, "Error: Response format is unexpected")
+            return JsonResponse({'message': message})
+    return redirect('dashboard')  
