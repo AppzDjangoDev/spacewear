@@ -28,7 +28,10 @@ class TradingConfigurations(models.Model):
     max_trade_count = models.IntegerField(default=0)  # Field for maximum trade count
     capital_usage_limit = models.IntegerField(default=0)  # Field for capital usage limit
     forward_trailing_points = models.IntegerField(default=0)  # Field for forward trailing points
+    trailing_to_top_points = models.IntegerField(default=0)  # Field for trailing to top points
     reverse_trailing_points = models.IntegerField(default=0)  # Field for reverse trailing points
+    stoploss_limit_slippage = models.DecimalField(max_digits=5, decimal_places=2, default=0)
+    
 
     def __str__(self):
         return f"Trading Configurations - ID: {self.pk}"

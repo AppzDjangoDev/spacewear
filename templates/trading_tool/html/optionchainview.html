@@ -168,6 +168,7 @@
                         icon: "success",
                         title: response.response,
                         showConfirmButton: false,
+                        timer: 500,
                         
                     });
                     
@@ -175,6 +176,14 @@
                 error: function(xhr, status, error) {
                     // Handle error response if needed
                     console.error('AJAX request failed.', error);
+                    swal({
+                        position: "top-end",
+                        icon: "error",
+                        title: "some error occurred!",
+                        showConfirmButton: false,
+                        timer: 500,
+                        
+                    });
                 }
             });
         });
@@ -196,6 +205,7 @@
                         icon: "success",
                         title: response.message,
                         showConfirmButton: false,
+                        timer: 500,
                         
                     });
                 },
@@ -207,6 +217,7 @@
                         icon: "error",
                         title: "some error occurred!",
                         showConfirmButton: false,
+                        timer: 500,
                         
                     });
                 }

@@ -22,6 +22,7 @@ from django.views.generic.edit import FormView
 from django.urls import reverse_lazy
 from .forms import TradingConfigurationsForm
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.shortcuts import render
 
 class Brokerconfig(LoginRequiredMixin, View):
     login_url = '/login'
@@ -260,6 +261,9 @@ class OptionChainView(LoginRequiredMixin,View):
         context = {}
         template = 'trading_tool/html/optionchainview.html'
         data_instance = get_data_instance(request)
+        confData = TradingConfigurations.objects.first()
+        forward_trailing_points = confData.forward_trailing_points
+        reverse_trailing_points = confData.reverse_trailing_points
         data = {
             "symbol":"NSE:"+slug+"-INDEX" ,  # Update 'symbol' to use 'slug' parameter
             "strikecount": 1,
@@ -267,7 +271,6 @@ class OptionChainView(LoginRequiredMixin,View):
         }
         try:
             expiry_response = data_instance.optionchain(data=data)
-            print("Fund data:", expiry_response)
         except AttributeError as e:
             expiry_response = {'code': -1, 'message': f'Error occurred: {str(e)}', 's': 'error'}
             print("Error occurred while fetching fund data:", e)
@@ -285,6 +288,8 @@ class OptionChainView(LoginRequiredMixin,View):
         print("options_dataoptions_dataoptions_dataoptions_dataoptions_data", options_data)
         print("data_instance", )
         response = data_instance.optionchain(data=options_data)
+        context['forward_trailing_points'] = forward_trailing_points
+        context['reverse_trailing_points'] = reverse_trailing_points
         context['expiry_response'] = first_expiry_date
         context['options_data'] = response
         return render(request, template, context)
@@ -328,14 +333,7 @@ class ConfigureTradingView(LoginRequiredMixin,FormView):
     def form_valid(self, form):
         form.save()
         return super().form_valid(form)
-    
-
-
-
-
-
-
-    
+   
 from .models import TradingConfigurations
 from django.contrib.auth.mixins import LoginRequiredMixin
 class ConfigureTradingView(LoginRequiredMixin,FormView):
@@ -370,195 +368,394 @@ def get_deafult_lotsize(index):
     else:
         return False
 
-    
 
 def instantBuyOrderWithSL(request):
     if request.method == 'POST':
-        # Retrieve values from POST data
         data_instance = get_data_instance(request)
         der_symbol = request.POST.get('der_symbol')
         ex_symbol = request.POST.get('ex_symbol')
-        print("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx", der_symbol, ex_symbol)
         get_lot_count = get_deafult_lotsize(ex_symbol)
+        
+        # Retrieve default order quantity from trade configurations
         trade_config_data = TradingConfigurations.objects.first()
-        print("111111111111111111111111", trade_config_data.default_order_qty)
-        print("222222222222222222222222222", get_lot_count)
-        order_qty = trade_config_data.default_order_qty*get_lot_count
-        print("order_qtyorder_qtyorder_qtyorder_qtyorder_qty", order_qty)
+        order_qty = trade_config_data.default_order_qty * get_lot_count
+
+        # Prepare order data for market buy order
         data = {
-            "symbol":der_symbol,
-            "qty": order_qty ,
-            "type":2, # Market Order
-            "side":1, # Buy
-            "productType":"INTRADAY",
-            "limitPrice":0,
-            "stopPrice":0,
-            "validity":"DAY",
-            "offlineOrder":False
+            "symbol": der_symbol,
+            "qty": order_qty,
+            "type": 2,  # Market Order
+            "side": 1,  # Buy
+            "productType": "INTRADAY",
+            "validity": "DAY",
+            "offlineOrder": False
         }
+
+        # Place market buy order
         response = data_instance.place_order(data=data)
-        print("----------------------------------------------------44", response["code"])
-        # response["code"] =1101
+        print("BUY ORDER RESPONSE :", response["code"])
+
         if response["code"] == 1101:
+            # Check if there's an existing pending order with status 6 for the same symbol
             allOrderData = data_instance.orderbook()
-            # Find the order with status 6, if any
             order_with_status_6 = next((order for order in allOrderData["orderBook"] if order['status'] == 6 and order["symbol"] == der_symbol), None)
-            print("order_with_status_6order_with_status_6", order_with_status_6)
-            # Check if there ae orders to cancel
+
             if order_with_status_6:
-                print("orders_with_status_6orders_with_status_6", order_with_status_6["id"])
+                # Modify the existing order by adding the new quantity to it
                 exst_qty = order_with_status_6['qty']
                 orderId = order_with_status_6['id']
                 new_qty = order_qty + exst_qty
-                # modify existing sl order 
-                modify_data = {
-                    "id":orderId, 
-                    "type":4, 
-                    "qty": new_qty
-                }
-                print("modify_datamodify_datamodify_data", modify_data)
+                modify_data = {"id": orderId, "type": 4, "qty": new_qty}
                 modify_response = data_instance.modify_order(data=modify_data)
                 return JsonResponse({'response': modify_response["message"]})
             else:
-                # Here We need to Place Stoploss Order with default Stoploss price 
+                # Place stop-loss order
                 buy_order_id = response["id"]
-                print("buy_order_id", buy_order_id)
-                buy_order_data = {"id":buy_order_id}
+                buy_order_data = {"id": buy_order_id}
                 get_buy_orderdata = data_instance.orderbook(data=buy_order_data)
-                # get_buy_orderdata = {
-                #     "code": 200,
-                #     "message": "",
-                #     "s": "ok",
-                #     "orderBook": [{
-                #         "clientId": "XXXXX86",
-                #         "exchange": 10,
-                #         "fyToken": "101000000014366",
-                #         "id": "23080444447604",
-                #         "offlineOrder": False,
-                #         "source": "W",
-                #         "status": 2,
-                #         "type": 2,
-                #         "pan": "",
-                #         "limitPrice": 8.1,
-                #         "productType": "INTRADAY",
-                #         "qty": 1,
-                #         "disclosedQty": 0,
-                #         "remainingQuantity": 0,
-                #         "segment": 10,
-                #         "symbol": "NSE:IDEA-EQ",
-                #         "description": "VODAFONE IDEA LIMITED",
-                #         "ex_sym": "IDEA",
-                #         "orderDateTime": "02-Aug-2023 13:01:42",
-                #         "side": 1,
-                #         "orderValidity": "DAY",
-                #         "stopPrice": 0,
-                #         "tradedPrice": 117.0,
-                #         "filledQty": 1,
-                #         "exchOrdId": "1100000024706527",
-                #         "message": "",
-                #         "ch": -0.35,
-                #         "chp": -4.24,
-                #         "lp": 7.9,
-                #         "orderNumStatus": "23080444447604:2",
-                #         "slNo": 1,
-                #         "orderTag": "1:Ordertag"
-                #     }]
-                # }
                 order_details = get_buy_orderdata["orderBook"][0]
                 traded_price = order_details["tradedPrice"]
-                print("traded_price", traded_price)
-                symbol = order_details["symbol"]
                 
+                # Calculate stop-loss and limit price
                 default_stoploss = trade_config_data.default_stoploss
-                # traded_price*default_stoploss/100
-                stoploss_price = traded_price-(traded_price*default_stoploss/100)
+                stoploss_limit_slippage = trade_config_data.stoploss_limit_slippage
+                stoploss_price = traded_price - (traded_price * default_stoploss / 100)
                 stoploss_price = round(stoploss_price / 0.05) * 0.05
                 stoploss_price = round(stoploss_price, 2)
-                print("stoploss_price", stoploss_price)
-                stoploss_limit = stoploss_price-0.25
+                stoploss_limit = stoploss_price - float(stoploss_limit_slippage)
                 stoploss_limit = round(stoploss_limit / 0.05) * 0.05
                 stoploss_limit = round(stoploss_limit, 2)
-                print("qtyqtyqtyqtyqtyqtyqtyqtyqtyqtyqty", order_qty)
-                sl_data = {
-                    "symbol":der_symbol,
-                    "qty":order_qty,
-                    "type":4, # SL-L Order
-                    "side":-1, # Buy
-                    "productType":"INTRADAY",
-                    "limitPrice":stoploss_limit,
-                    "stopPrice":stoploss_price,
-                    "validity":"DAY",
-                    "offlineOrder":False,
-                }
-                get_sl_order_response = data_instance.place_order(data=sl_data)
-                # if get_sl_order_response and  get_sl_order_response.get("code") == 1101:
-                #     return get_sl_order_response.message
-                # else:
-                #     message="buy order Executed Without SL"e
-                return JsonResponse({'response': get_sl_order_response["message"]})
-        
-        else:
-            # need ato add alert for buy order not worked 
-            print("The code is not 1101", response["message"])
-            return JsonResponse({'response': response["message"]})
 
+                sl_data = {
+                    "symbol": der_symbol,
+                    "qty": order_qty,
+                    "type": 4,  # SL-L Order
+                    "side": -1,  # Sell
+                    "productType": "INTRADAY",
+                    "limitPrice": stoploss_limit,
+                    "stopPrice": stoploss_price,
+                    "validity": "DAY",
+                    "offlineOrder": False,
+                }
+
+                stoploss_order_response = data_instance.place_order(data=sl_data)
+                if stoploss_order_response["code"] == 1101:
+                    message = "BUY/SL-L Placed Successfully"
+                    return JsonResponse({'response': message})
+                elif response["code"] == -99:
+                    message = "SL-L not Placed, Insufficient Fund"
+                    return JsonResponse({'response': message})
+                else:
+                    return JsonResponse({'response': stoploss_order_response["message"]})
+        elif response["code"] == -99:
+            message = "Insufficient Fund"
+            return JsonResponse({'response': message})
+        else:
+            return JsonResponse({'response': response["message"]})
     else:
-        # Handle GET request
-        message="Some Error Occured Before Execute"
+        message = "Some Error Occurred Before Execution"
         return JsonResponse({'response': message})
+
+# def instantBuyOrderWithSL(request):
+#     if request.method == 'POST':
+#         # Retrieve values from POST data
+#         data_instance = get_data_instance(request)
+#         der_symbol = request.POST.get('der_symbol')
+#         ex_symbol = request.POST.get('ex_symbol')
+#         get_lot_count = get_deafult_lotsize(ex_symbol)
+#         # get config data from table 
+#         trade_config_data = TradingConfigurations.objects.first()
+#         order_qty = trade_config_data.default_order_qty*get_lot_count
+#         # Preparing Order Data 
+#         data = {
+#             "symbol":der_symbol,
+#             "qty": order_qty ,
+#             "type":2, # Market Order
+#             "side":1, # Buy
+#             "productType":"INTRADAY",
+#             "validity":"DAY",
+#             "offlineOrder":False
+#         }
+#         # order Placement
+#         response = data_instance.place_order(data=data)
+#         print("BUY ORDER RESPONSE :", response["code"])
+#         # check response status success
+#         if response["code"] == 1101:
+#             allOrderData = data_instance.orderbook()
+#             # Find the order with status 6, if any which is PENDING
+#             order_with_status_6 = next((order for order in allOrderData["orderBook"] if order['status'] == 6 and order["symbol"] == der_symbol), None)
+#             print("CHECK PENDING ORDERS:", order_with_status_6)
+#             if order_with_status_6:
+#                 print("orders_with_status_6orders_with_status_6", order_with_status_6["id"])
+#                 exst_qty = order_with_status_6['qty']
+#                 orderId = order_with_status_6['id']
+#                 new_qty = order_qty + exst_qty
+#                 # modify existing sl order 
+#                 modify_data = {
+#                     "id":orderId, 
+#                     "type":4, 
+#                     "qty": new_qty
+#                 }
+#                 print("*******************************************")
+#                 print("OrderID :", orderId)
+#                 print("Symbol :", der_symbol)
+#                 print("Existing Qty:", exst_qty)
+#                 print("New Qty :", new_qty)
+#                 print("*******************************************")
+#                 modify_response = data_instance.modify_order(data=modify_data)
+#                 return JsonResponse({'response': modify_response["message"]})
+#             else:
+#                 # Here We need to Place Stoploss Order with default Stoploss price 
+#                 buy_order_id = response["id"]
+#                 print("BUY ORDER ID:", buy_order_id)
+#                 buy_order_data = {"id":buy_order_id}
+#                 get_buy_orderdata = data_instance.orderbook(data=buy_order_data)
+#                 # get_buy_orderdata = {
+#                 #     "code": 200,
+#                 #     "message": "",
+#                 #     "s": "ok",
+#                 #     "orderBook": [{
+#                 #         "clientId": "XXXXX86",
+#                 #         "exchange": 10,
+#                 #         "fyToken": "101000000014366",
+#                 #         "id": "23080444447604",
+#                 #         "offlineOrder": False,
+#                 #         "source": "W",
+#                 #         "status": 2,
+#                 #         "type": 2,
+#                 #         "pan": "",
+#                 #         "limitPrice": 8.1,
+#                 #         "productType": "INTRADAY",
+#                 #         "qty": 1,
+#                 #         "disclosedQty": 0,
+#                 #         "remainingQuantity": 0,
+#                 #         "segment": 10,
+#                 #         "symbol": "NSE:IDEA-EQ",
+#                 #         "description": "VODAFONE IDEA LIMITED",
+#                 #         "ex_sym": "IDEA",
+#                 #         "orderDateTime": "02-Aug-2023 13:01:42",
+#                 #         "side": 1,
+#                 #         "orderValidity": "DAY",
+#                 #         "stopPrice": 0,
+#                 #         "tradedPrice": 117.0,
+#                 #         "filledQty": 1,
+#                 #         "exchOrdId": "1100000024706527",
+#                 #         "message": "",
+#                 #         "ch": -0.35,
+#                 #         "chp": -4.24,
+#                 #         "lp": 7.9,
+#                 #         "orderNumStatus": "23080444447604:2",
+#                 #         "slNo": 1,
+#                 #         "orderTag": "1:Ordertag"
+#                 #     }]
+#                 # }
+#                 order_details = get_buy_orderdata["orderBook"][0]
+#                 traded_price = order_details["tradedPrice"]
+#                 traded_price=10
+#                 #************CALCULATING SL AND SL_TRIGGER****************
+#                 default_stoploss = trade_config_data.default_stoploss
+#                 stoploss_limit_slippage = trade_config_data.stoploss_limit_slippage
+#                 stoploss_price = traded_price-(traded_price*default_stoploss/100)
+#                 stoploss_price = round(stoploss_price / 0.05) * 0.05
+#                 stoploss_price = round(stoploss_price, 2)
+#                 stoploss_limit = stoploss_price-float(stoploss_limit_slippage)
+#                 stoploss_limit = round(stoploss_limit / 0.05) * 0.05
+#                 stoploss_limit = round(stoploss_limit, 2)
+#                 print("*******************************************")
+#                 print("BUY_SYMBOL:", der_symbol)
+#                 print("TRADED_PRICE_BUY", traded_price)
+#                 print("DEFAULT SL:", default_stoploss)
+#                 print("STOPLOSS:",stoploss_price)
+#                 print("STOPLOSS-LIMIT:",stoploss_limit)
+#                 print("ORDER-QUANTITY:",order_qty)
+#                 print("*******************************************")
+#                 sl_data = {
+#                     "symbol":der_symbol,
+#                     "qty":order_qty,
+#                     "type":4, # SL-L Order
+#                     "side":-1, # SELL
+#                     "productType":"INTRADAY",
+#                     "limitPrice":stoploss_limit,
+#                     "stopPrice":stoploss_price,
+#                     "validity":"DAY",
+#                     "offlineOrder":False,
+#                 }
+#                 stoploss_order_response = data_instance.place_order(data=sl_data)
+#                 print("SL ORDER RESPONSE :", stoploss_order_response)
+#                 if stoploss_order_response["code"] == 1101:
+#                     message="BUY/SL-L Placed Successfully"
+#                     return JsonResponse({'response': message})
+#                 elif response["code"] == -99:
+#                     print("The code is -99", response)
+#                     message="SL-L not Placed, Insufficient Fund"
+#                     return JsonResponse({'response': message})
+#                 else:
+#                     print("The code is not 1101", response)
+#                     return JsonResponse({'response': response["message"]})
+                
+#         elif response["code"] == -99:
+#             print("The code is -99", response)
+#             message="Insufficient Fund"
+#             return JsonResponse({'response': message})
         
-from django.shortcuts import render
+#         else:
+#             # need ato add alert for buy order not worked 
+#             print("The code is not 1101", response)
+#             return JsonResponse({'response': response["message"]})
+
+#     else:
+#         # Handle GET request
+#         message="Some Error Occured Before Execute"
+#         return JsonResponse({'response': message})
+        
+# def trailingtotop(request):
+#     client_id = settings.FYERS_APP_ID
+#     access_token = request.session.get('access_token')
+#     trade_config_data = TradingConfigurations.objects.first()
+#     forwrd_trail_limit = trade_config_data.forward_trailing_points
+#     if access_token:
+#         # Initialize the FyersModel instance with your client_id, access_token, and enable async mode
+#         fyers = fyersModel.FyersModel(client_id=client_id, token=access_token, log_path="")
+#         order_data = fyers.orderbook()
+#         # Initialize an empty list to store order IDs with status 6
+#         orders_with_status_6 = []
+#         # Iterate through the orderBook
+#         for order in order_data["orderBook"]:
+#             # Check if the status is 6
+#             if order["status"] == 5:
+#                 # Append the ID to the list
+#                 orders_with_status_6.append(order["id"])
+#                 existing_stop_price = order["stopPrice"]
+#                 existing_limit_price = order["limitPrice"]
+#         new_stop_price = existing_stop_price + forwrd_trail_limit
+#         new_limit_price = existing_limit_price + forwrd_trail_limit
+#         # Check if there are orders to cancel
+#         if orders_with_status_6:
+#             # Cancel the orders
+#             orderId =orders_with_status_6[0]
+#             data = {
+#                 "id":orderId, 
+#                 "limitPrice": new_limit_price, 
+#                 "stopPrice": new_stop_price,
+#             }
+#             trailing_order_update = fyers.modify_order(data=data)
+#             # trailing_order_update = fyers.cancel_basket_orders(data=orders_with_status_6)
+#         # Code indicates successful cancellation or order not found
+#         if 'message' in trailing_order_update:
+#             message = trailing_order_update['message']
+#             messages.success(request, message)
+#             return JsonResponse({'message': message})
+#         else:
+#             # Handle the case where 'data' key is missing
+#             message = "Error: Response format is unexpected"
+#             messages.error(request, "Error: Response format is unexpected")
+#             return JsonResponse({'message': message})
+#     return redirect('dashboard')  
+
+def trailingtotop(request):
+    client_id = settings.FYERS_APP_ID
+    access_token = request.session.get('access_token')
+    
+    if access_token:
+        # Initialize the FyersModel instance with your client_id, access_token, and enable async mode
+        fyers = fyersModel.FyersModel(client_id=client_id, token=access_token, log_path="")
+        order_data = fyers.orderbook()
+        print("pppppppppppppppp", order_data)
+        
+        # Initialize variables to store stop and limit prices
+        existing_stop_price = None
+        existing_limit_price = None
+        
+        # Iterate through the orderBook
+        for order in order_data.get("orderBook", []):
+            print("pppppppppppppppp", order)
+            # Check if the status is 6
+            if order.get("status") == 6:
+                # Get the stop and limit prices
+                existing_stop_price = order.get("stopPrice", existing_stop_price)
+                existing_limit_price = order.get("limitPrice", existing_limit_price)
+                symbol = order["symbol"]
+        if existing_stop_price is not None and existing_limit_price is not None:
+            trade_config_data = TradingConfigurations.objects.first()
+            forwrd_trail_limit = trade_config_data.forward_trailing_points
+
+            # Calculate new stop and limit prices
+            new_stop_price = existing_stop_price + forwrd_trail_limit
+            new_limit_price = existing_limit_price + forwrd_trail_limit
+            
+            # Check if there are orders to cancel
+            if existing_stop_price is not None:
+                # Modify the order with new stop and limit prices
+                data = {"id": order["id"], "limitPrice": new_limit_price, "stopPrice": new_stop_price}
+                trailing_order_update = fyers.modify_order(data=data)
+                
+                # Check the response
+                if 'message' in trailing_order_update:
+                    message = trailing_order_update['message']
+                    messages.success(request, message)
+                    return JsonResponse({'message': message})
+        
+        # Handle the case where 'data' key is missing
+        message = "No SL/Pending Orders"
+        messages.error(request, message)
+        return JsonResponse({'message': message})
+    
+    return redirect('dashboard')
+
+
+def trailingtodown(request):
+    client_id = settings.FYERS_APP_ID
+    access_token = request.session.get('access_token')
+    
+    if access_token:
+        # Initialize the FyersModel instance with your client_id, access_token, and enable async mode
+        fyers = fyersModel.FyersModel(client_id=client_id, token=access_token, log_path="")
+        order_data = fyers.orderbook()
+        
+        
+        # Initialize variables to store stop and limit prices
+        existing_stop_price = None
+        existing_limit_price = None
+        
+        # Iterate through the orderBook
+        for order in order_data.get("orderBook", []):
+            # Check if the status is 6
+            if order.get("status") == 6:
+                # Get the stop and limit prices
+                existing_stop_price = order.get("stopPrice", existing_stop_price)
+                existing_limit_price = order.get("limitPrice", existing_limit_price)
+                symbol = order["symbol"]
+        if existing_stop_price is not None and existing_limit_price is not None:
+            trade_config_data = TradingConfigurations.objects.first()
+            reverse_trail_limit = trade_config_data.reverse_trailing_points
+
+            # Calculate new stop and limit prices
+            new_stop_price = existing_stop_price - reverse_trail_limit
+            new_limit_price = existing_limit_price - reverse_trail_limit
+            
+            # Check if there are orders to cancel
+            if existing_stop_price is not None:
+                # Modify the order with new stop and limit prices
+                data = {"id": order["id"], "limitPrice": new_limit_price, "stopPrice": new_stop_price}
+                trailing_order_update = fyers.modify_order(data=data)
+                
+                # Check the response
+                if 'message' in trailing_order_update:
+                    message = trailing_order_update['message']
+                    messages.success(request, message)
+                    return JsonResponse({'message': message})
+        
+        # Handle the case where 'data' key is missing
+        message = "No SL/Pending Orders"
+        messages.error(request, message)
+        return JsonResponse({'message': message})
+    
+    return redirect('dashboard')
+
+
+
 
 def fyer_websocket_view(request):
     template_name = 'trading_tool/html/fyerwebsocket.html'
     access_token = request.session.get('access_token')
     return render(request, template_name)
-
-
-def trailingwithlimit(request):
-    client_id = settings.FYERS_APP_ID
-    access_token = request.session.get('access_token')
-    trade_config_data = TradingConfigurations.objects.first()
-    forwrd_trail_limit = trade_config_data.forward_trailing_points
-    print("forwrd_trail_limitforwrd_trail_limitforwrd_trail_limit", forwrd_trail_limit)
-    if access_token:
-        # Initialize the FyersModel instance with your client_id, access_token, and enable async mode
-        fyers = fyersModel.FyersModel(client_id=client_id, token=access_token, log_path="")
-        order_data = fyers.orderbook()
-        # print("order_dataorder_dataorder_dataorder_dataorder_data", order_data)
-        # Initialize an empty list to store order IDs with status 6
-        orders_with_status_6 = []
-        # Iterate through the orderBook
-        for order in order_data["orderBook"]:
-            print("orderorderorderorderorderorderorderorderorder", order)
-            # Check if the status is 6
-            if order["status"] == 5:
-                # Append the ID to the list
-                orders_with_status_6.append(order["id"])
-                existing_stop_price = order["stopPrice"]
-                existing_limit_price = order["limitPrice"]
-        new_stop_price = existing_stop_price + forwrd_trail_limit
-        new_limit_price = existing_limit_price + forwrd_trail_limit
-        order_cancel_response = []
-        # Check if there are orders to cancel
-        if orders_with_status_6:
-            # Cancel the orders
-            orderId =orders_with_status_6[0]
-            data = {
-                "id":orderId, 
-                "limitPrice": new_limit_price, 
-                "stopPrice": new_stop_price,
-            }
-            trailing_order_update = fyers.modify_order(data=data)
-            # trailing_order_update = fyers.cancel_basket_orders(data=orders_with_status_6)
-        # Code indicates successful cancellation or order not found
-        if 'message' in trailing_order_update:
-            message = trailing_order_update['message']
-            messages.success(request, message)
-            return JsonResponse({'message': message})
-        else:
-            # Handle the case where 'data' key is missing
-            message = "Error: Response format is unexpected"
-            messages.error(request, "Error: Response format is unexpected")
-            return JsonResponse({'message': message})
-    return redirect('dashboard')  

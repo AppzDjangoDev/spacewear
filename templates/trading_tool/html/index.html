@@ -188,19 +188,19 @@
                 <div class="row">
                 <div class="col-sm-6 my-2">
                   <div class="alert alert-primary p-0 m-0" style="height:65px;" role="alert">
-                    <button  id="trailingwithlimit" class="btn btn-primary btn-lg btn-block w-100 h-100 fw-bold" style="border-radius: 6px;  ">TRAIL LIMIT</button>
+                    <button  id="trailingtotop" class="btn btn-primary btn-lg btn-block w-100 h-100 fw-bold" style="border-radius: 6px;">TRAIL <i class="ti ti-arrow-up text-success"></i> &nbsp;&nbsp;{{forward_trailing_points}}</button>
                       {% comment %} <button  style="height: 60px;" id="position" disabled class="btn btn-Primary btn-block w-100 h-10 fw-bolder fs-4"> No open positions</button> {% endcomment %}
                   </div>
                 </div> 
                 <div class="col-sm-6 my-2"  style="display: block;">
                   <div class="alert alert-primary p-0 m-0" style="height:65px;" role="alert">
-                    <button  id="trailingtotop" class="btn btn-primary btn-lg btn-block w-100 h-100 fw-bold sell-button" style="border-radius: 6px;">TRAIL TOP</button>
-
-                      {% comment %} <button  style="height: 60px; color=blue;" id="index" disabled class="btn btn-Primary btn-block w-100 h-10 fw-bolder fs-4"> {{text}}</button> {% endcomment %}
+                    <button id="trailingtodown" class="btn btn-primary btn-lg btn-block w-100 h-100 fw-bold sell-button" style="border-radius: 6px;">TRAIL <i class="ti ti-arrow-down text-warning"></i> &nbsp;&nbsp;{{reverse_trailing_points}}</button>
                   </div>
-                </div>
+                </div> 
               </div>
             </div> 
+            {% comment %} <button  style="height: 60px; color=blue;" id="index" disabled class="btn btn-Primary btn-block w-100 h-10 fw-bolder fs-4"> {{text}}</button> {% endcomment %}
+
             {% endif%}
               {% comment %} ======================================================================================================= {% endcomment %}
               {% comment %} <script>
@@ -632,7 +632,7 @@
                     icon: "success",
                     title: response.message,
                     showConfirmButton: false,
-                    timer: 1500
+                    timer: 500
                   })
                  
               },
@@ -644,7 +644,7 @@
                     icon: "error",
                     title: "some error occured!",
                     showConfirmButton: false,
-                    timer: 1500
+                    timer: 500
                   })
                  
               }
@@ -703,13 +703,13 @@
   {% endblock %}
   <script>
       $(document).ready(function() {
-      $('#trailingwithlimit').click(function(e) {
+      $('#trailingtotop').click(function(e) {
           e.preventDefault();
           console.log('Position closed successfully.');
 
           $.ajax({
               type: 'GET',  // Adjust the request type as needed
-              url: '{% url "trailingwithlimit" %}',
+              url: '{% url "trailingtotop" %}',
               success: function(response) {
                   // Handle success response if needed
                   console.log('Position closed successfully.', response.message);
@@ -718,7 +718,7 @@
                     icon: "success",
                     title: response.message,
                     showConfirmButton: false,
-                    timer: 1500
+                    timer: 500
                   })
                  
               },
@@ -730,11 +730,49 @@
                     icon: "error",
                     title: "some error occured!",
                     showConfirmButton: false,
-                    timer: 1500
+                    timer: 500
                   })
                  
               }
           });
+      });
+    });
+  </script>
+
+  <script>
+    $(document).ready(function() {
+    $('#trailingtodown').click(function(e) {
+        e.preventDefault();
+        console.log('Position closed successfully.');
+
+        $.ajax({
+            type: 'GET',  // Adjust the request type as needed
+            url: '{% url "trailingtodown" %}',
+            success: function(response) {
+                // Handle success response if needed
+                console.log('Position closed successfully.', response.message);
+                swal({
+                  position: "top-end",
+                  icon: "success",
+                  title: response.message,
+                  showConfirmButton: false,
+                  timer: 500
+                })
+               
+            },
+            error: function(xhr, status, error) {
+                // Handle error response if needed
+                console.error('Failed to close position. Error:', error);
+                swal({
+                  position: "top-end",
+                  icon: "error",
+                  title: "some error occured!",
+                  showConfirmButton: false,
+                  timer: 500
+                })
+               
+            }
+        });
       });
     });
   </script>

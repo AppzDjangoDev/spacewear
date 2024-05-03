@@ -25,7 +25,11 @@ urlpatterns = [
     path('instant-buy-order/', views.instantBuyOrderWithSL, name='instant_buy_order'),
 
     # Trailing Orders
-    path('trailingwithlimit/', views.trailingwithlimit, name='trailingwithlimit'),
+    path('trailingtotop/', views.trailingtotop, name='trailingtotop'),
+    path('trailingtodown/', views.trailingtodown, name='trailingtodown'),
+
+
+    
 
     
 
