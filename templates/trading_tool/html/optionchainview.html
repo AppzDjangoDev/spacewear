@@ -16,8 +16,8 @@
               <div class="d-flex justify-content-between align-items-center">
                 <p class="card-title fw-semibold">OPTION CHAIN</p>
                 <div class="d-flex align-items-center">
-                    {% for option in options_data.data.optionsChain %}
-                    {% if option.option_type == ""%}
+                {% for option in options_data.data.optionsChain %}
+                {% if option.option_type == ""%}
                   <div class="container-fluid">
                     <div class="row">
                         <!-- Web View -->
@@ -40,31 +40,26 @@
                         <div class="col-12 d-block d-lg-none">
                             <div class="row">
                                 <div class="col-12 mt-5">
-                                    <input class="form-control my-3 " disabled name="expiry" value="{{expiry_response}}">
+                                    <input class="form-control my-2 " disabled name="expiry" value="{{expiry_response}}">
                                 </div>
                                 <div class="col-6">
-                                    <input class="form-control my-3" disabled name="ex_symbol" value="{{ option.ex_symbol }}">
+                                    <input class="form-control my-2" disabled name="ex_symbol" value="{{ option.ex_symbol }}">
                                 </div>
                                 <div class="col-6">
-                                    <input class="form-control my-3" disabled name="ltp" value="{{ option.ltp }}">
+                                    <input class="form-control my-2" disabled name="ltp" value="{{ option.ltp }}">
                                 </div>
 
                             </div>
                         </div>
                     </div>
                 </div>
-                  {% endif %}
-                  {% endfor %}
+                {% endif %}
+                {% endfor %}
             </div>
         </div>
 
         <div class="container-fluid mb-2 ">
             <div class="row">
-            {% comment %} <div class="container-fluid">
-                <div class="alert alert-info p-0 my-2" role="alert">
-                    <button  style="height: 50px;" id="position" disabled class="btn btn-Primary btn-block w-100 h-10 fw-bolder fs-4"> {{text}}</button>
-                </div>
-            </div> {% endcomment %}
             <div class="col-sm-6">
             {% for option in options_data.data.optionsChain %}
             {% if option.option_type == "CE"%}
@@ -75,9 +70,18 @@
                     </div>
                     <div class="col-4  text-center">
                         <input type="hidden" name="der-symbol" value="{{ option.symbol }}">
-                        <h5 class="card-title text-muted fw-bolder">CE&nbsp;{{option.strike_price}}</h5>
-                        <p class="card-text fs-4 fw-bolder ">LTP:{{option.ltp}}</p>
-                        {% comment %} <p class="card-text">Expiry: 02-05-2024</p> {% endcomment %}
+                        <h5 class="card-title text-muted fw-bolder mb-0">
+                            {% if forloop.counter == 3 %}
+                                <span style="color: #6a7dfb; font-size: 70%;">ITM&nbsp;1</span>
+                            {% elif forloop.counter == 7 %}
+                                <span style="color: #6a7dfb; font-size: 70%;">OTM&nbsp;1</span>
+                            {% elif forloop.counter == 5 %}
+                                <span style="color: #6a7dfb; font-size: 70%;">ATM</span>
+                            {% endif %}
+                            <br>
+                            CE&nbsp;{{ option.strike_price }}
+                        </h5>
+                        <p class="card-text fs-4 fw-bolder">LTP:{{option.ltp}}</p>
                     </div>
                     <div class="col-4 d-flex justify-content-center align-items-center">
                         <button class="btn btn-danger btn-lg btn-block w-100 h-100 fw-bolder sell-button" style="border-radius: 6px">Sell</button>
@@ -97,7 +101,18 @@
                         </div>
                         <div class="col-4 text-center">
                             <input type="hidden" name="der-symbol" value="{{ option.symbol }}">
-                            <h5 class="card-title text-muted fw-bolder">PE&nbsp;{{option.strike_price}}</h5>
+                            {% comment %} <h5 class="card-title text-muted fw-bolder">PE&nbsp;{{option.strike_price}}</h5> {% endcomment %}
+                            <h5 class="card-title text-muted fw-bolder mb-0">
+                                {% if forloop.counter == 6 %}
+                                    <span style="color: #6a7dfb; font-size: 70%;">ITM&nbsp;1</span>
+                                {% elif forloop.counter == 2 %}
+                                    <span style="color: #6a7dfb; font-size: 70%;">OTM&nbsp;1</span>
+                                {% elif forloop.counter == 4  %}
+                                    <span style="color: #6a7dfb; font-size: 70%;">ATM</span>
+                                {% endif %}
+                                <br>
+                                PE&nbsp;{{ option.strike_price }}
+                            </h5>
                             <p class="card-text fs-4 fw-bolder">LTP:{{option.ltp}}</p>
                         </div>
                         <div class="col-4 d-flex justify-content-center align-items-center">
@@ -105,31 +120,14 @@
                         </div>
                     </div>
                 </div>
-                {% endif %}
-                {% endfor %}
+            {% endif %}
+            {% endfor %}
             </div>
-
-
-            {% comment %} <div class="container-fluid">
-            <div class="alert alert-primary" role="alert">
-                <div class="row" style="height:75px;">
-                    <div class="col-6 d-flex justify-content-center align-items-center">
-                        <button class="btn btn-primary btn-lg btn-block w-100 h-100 fw-bolder buy-button" style="border-radius: 6px;  ">TRAIL LIMIT</button>
-                    </div>
-                    
-                    <div class="col-6 d-flex justify-content-center align-items-center">
-                        <button class="btn btn-primary btn-lg btn-block w-100 h-100 fw-bolder sell-button" style="border-radius: 6px;">TRAIL TOP</button>
-                    </div>
-                </div>
-            </div>
-            </div> {% endcomment %}
-            
-            
             </div>
             </ul>
-          </div>
+            </div>
         </div>
-      </div>
+        </div>
     </div>
 </div>
 
