@@ -608,7 +608,7 @@ def instantBuyOrderWithSL(request):
 #         message="Some Error Occured Before Execute"
 #         return JsonResponse({'response': message})
         
-# def trailingtotop(request):
+# def trailingwithlimit(request):
 #     client_id = settings.FYERS_APP_ID
 #     access_token = request.session.get('access_token')
 #     trade_config_data = TradingConfigurations.objects.first()
@@ -652,7 +652,7 @@ def instantBuyOrderWithSL(request):
 #             return JsonResponse({'message': message})
 #     return redirect('dashboard')  
 
-def trailingtotop(request):
+def trailingwithlimit(request):
     client_id = settings.FYERS_APP_ID
     access_token = request.session.get('access_token')
     
@@ -749,6 +749,147 @@ def trailingtodown(request):
         message = "No SL/Pending Orders"
         messages.error(request, message)
         return JsonResponse({'message': message})
+    
+    return redirect('dashboard')
+
+
+def trailingtotop(request):
+    client_id = settings.FYERS_APP_ID
+    access_token = request.session.get('access_token')
+    symbol=None
+    
+    if access_token:
+        # Initialize the FyersModel instance with your client_id, access_token, and enable async mode
+        fyers = fyersModel.FyersModel(client_id=client_id, token=access_token, log_path="")
+        order_data = fyers.orderbook()
+        
+        # Iterate through the orderBook
+        for order in order_data.get("orderBook", []):
+            # Check if the status is 6
+            if order.get("status") == 6:
+                # Get the stop and limit prices
+                symbol = order["symbol"]
+
+        # symbol="MCX:SILVERMIC20AUGFUT"
+        if symbol is not None:
+            response = fyers.positions()
+            # response = {
+            #             "s": "ok",
+            #             "code": 200,
+            #             "message": "",
+            #             "netPositions":
+            #                         [{
+            #                         "netQty":1,
+            #                         "qty":1,
+            #                         "avgPrice":72256.0,
+            #                         "netAvg": 71856.0,
+            #                         "side":1,
+            #                         "productType":"MARGIN",
+            #                         "realized_profit":400.0,
+            #                         "unrealized_profit":461.0,
+            #                         "pl":861.0,
+            #                         "ltp":72717.0,
+            #                         "buyQty":2,
+            #                         "buyAvg":72256.0,
+            #                         "buyVal":144512.0,
+            #                         "sellQty":1,
+            #                         "sellAvg":72656.0,
+            #                         "sellVal":72656.0,
+            #                         "slNo":0,
+            #                         "fyToken":"1120200831217406",
+            #                         "crossCurrency":"N",
+            #                         "rbiRefRate":1.0,
+            #                         "qtyMulti_com":1.0,
+            #                         "segment":20,
+            #                         "symbol":"MCX:SILVERMIC20AUGFUT",
+            #                         "id":"MCX:SILVERMIC20AUGFUT-MARGIN",
+            #                         "cfBuyQty": 0,
+            #                         "cfSellQty": 0,
+            #                         "dayBuyQty": 0,
+            #                         "daySellQty": 1,
+            #                         "exchange": 10,
+            #                         },{
+            #                         "netQty":1,
+            #                         "qty":1,
+            #                         "avgPrice":72256.0,
+            #                         "netAvg": 71856.0,
+            #                         "side":1,
+            #                         "productType":"MARGIN",
+            #                         "realized_profit":400.0,
+            #                         "unrealized_profit":461.0,
+            #                         "pl":861.0,
+            #                         "ltp":72717.0,
+            #                         "buyQty":2,
+            #                         "buyAvg":72256.0,
+            #                         "buyVal":144512.0,
+            #                         "sellQty":1,
+            #                         "sellAvg":72656.0,
+            #                         "sellVal":72656.0,
+            #                         "slNo":0,
+            #                         "fyToken":"1120200831217406",
+            #                         "crossCurrency":"N",
+            #                         "rbiRefRate":1.0,
+            #                         "qtyMulti_com":1.0,
+            #                         "segment":20,
+            #                         "symbol":"MCX:SILVERMIC20AUGOPT",
+            #                         "id":"MCX:SILVERMIC20AUGFUT-MARGIN",
+            #                         "cfBuyQty": 0,
+            #                         "cfSellQty": 0,
+            #                         "dayBuyQty": 0,
+            #                         "daySellQty": 1,
+            #                         "exchange": 10,
+            #                         }
+            #                         ],
+            #             "overall":
+            #                         {
+            #                         "count_total":1,
+            #                         "count_open":1,
+            #                         "pl_total":861.0,
+            #                         "pl_realized":400.0,
+            #                         "pl_unrealized":461.0
+            #                         }            
+            #         }
+
+            dersymbol = symbol
+            filtered_positions = []
+            for position in response["netPositions"]:
+                if position["symbol"] == dersymbol:
+                    filtered_positions.append(position)
+                    break  # Stop iterating once a matching position is found
+
+            print("00000000000000000000000000",filtered_positions)
+            ltp = filtered_positions[0]["ltp"]
+            print("Last Traded Price:", ltp)
+            trade_config_data = TradingConfigurations.objects.first()
+            trailing_to_top_points = trade_config_data.trailing_to_top_points
+            stoploss_limit_slippage = trade_config_data.stoploss_limit_slippage
+
+            # Calculate new stop and limit prices
+            new_stop_price = ltp - trailing_to_top_points
+            new_limit_price = (ltp - trailing_to_top_points) - float(stoploss_limit_slippage)
+            print("new_limit_pricenew_limit_price", new_stop_price, "new_limit_price", new_limit_price)
+
+            # todo 
+            # Check if there are orders to cancel
+            if symbol is not None:
+                # Modify the order with new stop and limit prices
+                data = {"id": order["id"], "limitPrice": new_limit_price, "stopPrice": new_stop_price}
+                print("******************************************")
+                print("data", data)
+                print("******************************************")
+                trailing_order_update = fyers.modify_order(data=data)
+                
+                # Check the response
+                if 'message' in trailing_order_update:
+                    message = trailing_order_update['message']
+                    messages.success(request, message)
+                    return JsonResponse({'message': message})
+                
+        else:    
+            # Handle the case where 'data' key is missing
+            message = "No SL/Pending Orders"
+            messages.error(request, message)
+            return JsonResponse({'message': message})
     
     return redirect('dashboard')
 
