@@ -71,9 +71,9 @@
                         <div class="col-4  text-center">
                             <input type="hidden" name="der-symbol" value="{{ option.symbol }}">
                             <h5 class="card-title text-muted fw-bolder mb-0">
-                                {% if option.serial_number == 3 %}
+                                {% if option.serial_number == 1 %}
                                     <span style="color: #6a7dfb; font-size: 70%;">ITM&nbsp;1</span>
-                                {% elif option.serial_number == 1 %}
+                                {% elif option.serial_number == 3 %}
                                     <span style="color: #6a7dfb; font-size: 70%;">OTM&nbsp;1</span>
                                 {% elif option.serial_number == 2  %}
                                     <span style="color: #6a7dfb; font-size: 70%;">ATM</span>
@@ -103,9 +103,9 @@
                             <input type="hidden" name="der-symbol" value="{{ option.symbol }}">
                             {% comment %} <h5 class="card-title text-muted fw-bolder">PE&nbsp;{{option.strike_price}}</h5> {% endcomment %}
                             <h5 class="card-title text-muted fw-bolder mb-0">
-                                {% if option.serial_number == 3 %}
+                                {% if option.serial_number == 1 %}
                                     <span style="color: #6a7dfb; font-size: 70%;">ITM&nbsp;1</span>
-                                {% elif option.serial_number == 1 %}
+                                {% elif option.serial_number == 3 %}
                                     <span style="color: #6a7dfb; font-size: 70%;">OTM&nbsp;1</span>
                                 {% elif option.serial_number == 2  %}
                                     <span style="color: #6a7dfb; font-size: 70%;">ATM</span>

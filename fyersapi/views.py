@@ -297,7 +297,7 @@ class OptionChainView(LoginRequiredMixin, View):
         pe_options = [option for option in response['data']['optionsChain'] if option['option_type'] == 'PE']
 
         # Sort the filtered data by strike_price in ascending order
-        pe_options_sorted = sorted(pe_options, key=lambda x: x['strike_price'])
+        pe_options_sorted = sorted(pe_options, key=lambda x: x['strike_price'], reverse=True)
 
         # Add serial numbers to the sorted list
         for index, option in enumerate(pe_options_sorted, start=1):
@@ -319,7 +319,7 @@ class OptionChainView(LoginRequiredMixin, View):
         ce_options = [option for option in response['data']['optionsChain'] if option['option_type'] == 'CE']
 
         # Sort the filtered data by strike_price in ascending order
-        ce_options_sorted = sorted(ce_options, key=lambda x: x['strike_price'], reverse=True)
+        ce_options_sorted = sorted(ce_options, key=lambda x: x['strike_price'])
 
         # Add serial numbers to the sorted list
         for index, option in enumerate(ce_options_sorted, start=1):
