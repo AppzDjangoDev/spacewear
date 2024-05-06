@@ -253,11 +253,11 @@ class OrderHistory(LoginRequiredMixin, View):
         page_obj = paginator.get_page(page_number)
         context['order_history_data'] = page_obj
         return render(request, 'trading_tool/html/order_history.html', context)
-    
 
-class OptionChainView(LoginRequiredMixin,View):
+class OptionChainView(LoginRequiredMixin, View):
     login_url = '/login'
-    def get(self, request, slug):  # Modify to accept 'slug' parameter
+
+    def get(self, request, slug):
         context = {}
         template = 'trading_tool/html/optionchainview.html'
         data_instance = get_data_instance(request)
@@ -265,34 +265,129 @@ class OptionChainView(LoginRequiredMixin,View):
         forward_trailing_points = confData.forward_trailing_points
         reverse_trailing_points = confData.reverse_trailing_points
         data = {
-            "symbol":"NSE:"+slug+"-INDEX" ,  # Update 'symbol' to use 'slug' parameter
+            "symbol": "NSE:" + slug + "-INDEX",
             "strikecount": 1,
-            # "timestamp": next_thursday_timestamp
         }
         try:
             expiry_response = data_instance.optionchain(data=data)
-        except AttributeError as e:
-            expiry_response = {'code': -1, 'message': f'Error occurred: {str(e)}', 's': 'error'}
-            print("Error occurred while fetching fund data:", e)
+            first_expiry_ts = expiry_response['data']['expiryData'][0]['expiry']
+            first_expiry_date = expiry_response['data']['expiryData'][0]['date']
+        except (KeyError, AttributeError, IndexError) as e:
+            # Handle the error gracefully
+            error_message = f'Error occurred: {str(e)}'
+            print("Error occurred while fetching expiry data:", error_message)
+            context['expiry_response'] = error_message
             return render(request, template, context)
 
-
-            
-        first_expiry_ts = expiry_response['data']['expiryData'][0]['expiry']
-        first_expiry_date = expiry_response['data']['expiryData'][0]['date']
         options_data = {
-            "symbol":"NSE:"+slug+"-INDEX" ,  # Update 'symbol' to use 'slug' parameter
+            "symbol": "NSE:" + slug + "-INDEX",
             "strikecount": 1,
             "timestamp": first_expiry_ts
         }
-        print("options_dataoptions_dataoptions_dataoptions_dataoptions_data", options_data)
-        print("data_instance", )
-        response = data_instance.optionchain(data=options_data)
+        try:
+            response = data_instance.optionchain(data=options_data)
+        except AttributeError as e:
+            error_message = f'Error occurred while fetching options data: {str(e)}'
+            print(error_message)
+            context['options_data'] = error_message
+            return render(request, template, context)
+        
+
+        # Filter optionsChain data for option type 'PE'
+        pe_options = [option for option in response['data']['optionsChain'] if option['option_type'] == 'PE']
+
+        # Sort the filtered data by strike_price in ascending order
+        pe_options_sorted = sorted(pe_options, key=lambda x: x['strike_price'])
+
+        # Add serial numbers to the sorted list
+        for index, option in enumerate(pe_options_sorted, start=1):
+            option['serial_number'] = index
+
+        # Add serial numbers to the sorted list
+        pe_options_with_serial = []    
+        # Print the modified data
+        for option in pe_options_sorted:
+            print(option)
+            pe_options_with_serial.append(option)
+
+        print("**************************************")
+        print(pe_options_with_serial)
+        print("**************************************")
+
+
+        # Filter optionsChain data for option type 'CE'
+        ce_options = [option for option in response['data']['optionsChain'] if option['option_type'] == 'CE']
+
+        # Sort the filtered data by strike_price in ascending order
+        ce_options_sorted = sorted(ce_options, key=lambda x: x['strike_price'], reverse=True)
+
+        # Add serial numbers to the sorted list
+        for index, option in enumerate(ce_options_sorted, start=1):
+            option['serial_number'] = index
+
+        # Add serial numbers to the sorted list
+        ce_options_with_serial = []    
+        # Print the modified data
+        for option in ce_options_sorted:
+            print(option)
+            ce_options_with_serial.append(option)
+
+        print("**************************************")
+        print(ce_options_with_serial)
+        print("**************************************")
+            
+
+
+
+
+
         context['forward_trailing_points'] = forward_trailing_points
         context['reverse_trailing_points'] = reverse_trailing_points
+        context['ce_options_with_serial'] = ce_options_with_serial
+        context['pe_options_with_serial'] = pe_options_with_serial
         context['expiry_response'] = first_expiry_date
         context['options_data'] = response
         return render(request, template, context)
+
+
+# class OptionChainView(LoginRequiredMixin,View):
+#     login_url = '/login'
+#     def get(self, request, slug):  # Modify to accept 'slug' parameter
+#         context = {}
+#         template = 'trading_tool/html/optionchainview.html'
+#         data_instance = get_data_instance(request)
+#         confData = TradingConfigurations.objects.first()
+#         forward_trailing_points = confData.forward_trailing_points
+#         reverse_trailing_points = confData.reverse_trailing_points
+#         data = {
+#             "symbol":"NSE:"+slug+"-INDEX" ,  # Update 'symbol' to use 'slug' parameter
+#             "strikecount": 1,
+#             # "timestamp": next_thursday_timestamp
+#         }
+#         try:
+#             expiry_response = data_instance.optionchain(data=data)
+#         except AttributeError as e:
+#             expiry_response = {'code': -1, 'message': f'Error occurred: {str(e)}', 's': 'error'}
+#             print("Error occurred while fetching fund data:", e)
+#             return render(request, template, context)
+
+
+            
+#         first_expiry_ts = expiry_response['data']['expiryData'][0]['expiry']
+#         first_expiry_date = expiry_response['data']['expiryData'][0]['date']
+#         options_data = {
+#             "symbol":"NSE:"+slug+"-INDEX" ,  # Update 'symbol' to use 'slug' parameter
+#             "strikecount": 1,
+#             "timestamp": first_expiry_ts
+#         }
+#         print("options_dataoptions_dataoptions_dataoptions_dataoptions_data", options_data)
+#         print("data_instance", )
+#         response = data_instance.optionchain(data=options_data)
+#         context['forward_trailing_points'] = forward_trailing_points
+#         context['reverse_trailing_points'] = reverse_trailing_points
+#         context['expiry_response'] = first_expiry_date
+#         context['options_data'] = response
+#         return render(request, template, context)
 
 def update_latest_data(request):
     # Call API to get data

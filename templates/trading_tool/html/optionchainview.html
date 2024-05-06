@@ -61,38 +61,38 @@
         <div class="container-fluid mb-2 ">
             <div class="row">
             <div class="col-sm-6">
-            {% for option in options_data.data.optionsChain %}
-            {% if option.option_type == "CE"%}
-            <div class="alert alert-success" role="alert">
-                <div class="row">
-                    <div class="col-4 d-flex justify-content-center align-items-center">
-                        <button class="btn btn-success btn-lg btn-block w-100 h-100 fw-bolder buy-button" style="border-radius: 6px">Buy</button>
+            {% for option in ce_options_with_serial %}
+                {% if option.option_type == "CE"%}
+                <div class="alert alert-success" role="alert">
+                    <div class="row">
+                        <div class="col-4 d-flex justify-content-center align-items-center">
+                            <button class="btn btn-success btn-lg btn-block w-100 h-100 fw-bolder buy-button" style="border-radius: 6px">Buy</button>
+                        </div>
+                        <div class="col-4  text-center">
+                            <input type="hidden" name="der-symbol" value="{{ option.symbol }}">
+                            <h5 class="card-title text-muted fw-bolder mb-0">
+                                {% if option.serial_number == 3 %}
+                                    <span style="color: #6a7dfb; font-size: 70%;">ITM&nbsp;1</span>
+                                {% elif option.serial_number == 1 %}
+                                    <span style="color: #6a7dfb; font-size: 70%;">OTM&nbsp;1</span>
+                                {% elif option.serial_number == 2  %}
+                                    <span style="color: #6a7dfb; font-size: 70%;">ATM</span>
+                                {% endif %}
+                                <br>
+                                CE&nbsp;{{ option.strike_price }}
+                            </h5>
+                            <p class="card-text fs-4 fw-bolder">LTP:{{option.ltp}}</p>
+                        </div>
+                        <div class="col-4 d-flex justify-content-center align-items-center">
+                            <button class="btn btn-danger btn-lg btn-block w-100 h-100 fw-bolder sell-button" style="border-radius: 6px">Sell</button>
+                        </div>
                     </div>
-                    <div class="col-4  text-center">
-                        <input type="hidden" name="der-symbol" value="{{ option.symbol }}">
-                        <h5 class="card-title text-muted fw-bolder mb-0">
-                            {% if forloop.counter == 3 %}
-                                <span style="color: #6a7dfb; font-size: 70%;">ITM&nbsp;1</span>
-                            {% elif forloop.counter == 7 %}
-                                <span style="color: #6a7dfb; font-size: 70%;">OTM&nbsp;1</span>
-                            {% elif forloop.counter == 5 %}
-                                <span style="color: #6a7dfb; font-size: 70%;">ATM</span>
-                            {% endif %}
-                            <br>
-                            CE&nbsp;{{ option.strike_price }}
-                        </h5>
-                        <p class="card-text fs-4 fw-bolder">LTP:{{option.ltp}}</p>
-                    </div>
-                    <div class="col-4 d-flex justify-content-center align-items-center">
-                        <button class="btn btn-danger btn-lg btn-block w-100 h-100 fw-bolder sell-button" style="border-radius: 6px">Sell</button>
-                    </div>
-                </div>
-            </div>        
-            {% endif %}
+                </div>        
+                {% endif %}
             {% endfor %}
             </div>
             <div class="col-sm-6">
-            {% for option in options_data.data.optionsChain %}
+            {% for option in pe_options_with_serial %}
             {% if option.option_type == "PE"%}
                 <div class="alert alert-danger" role="alert">
                     <div class="row">
@@ -103,11 +103,11 @@
                             <input type="hidden" name="der-symbol" value="{{ option.symbol }}">
                             {% comment %} <h5 class="card-title text-muted fw-bolder">PE&nbsp;{{option.strike_price}}</h5> {% endcomment %}
                             <h5 class="card-title text-muted fw-bolder mb-0">
-                                {% if forloop.counter == 6 %}
+                                {% if option.serial_number == 3 %}
                                     <span style="color: #6a7dfb; font-size: 70%;">ITM&nbsp;1</span>
-                                {% elif forloop.counter == 2 %}
+                                {% elif option.serial_number == 1 %}
                                     <span style="color: #6a7dfb; font-size: 70%;">OTM&nbsp;1</span>
-                                {% elif forloop.counter == 4  %}
+                                {% elif option.serial_number == 2  %}
                                     <span style="color: #6a7dfb; font-size: 70%;">ATM</span>
                                 {% endif %}
                                 <br>
