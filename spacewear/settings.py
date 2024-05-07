@@ -200,5 +200,5 @@ if not DEVELOPMENT_MODE:
     #for production
     FYERS_APP_ID="5NYKD87NTH-100"
     FYERS_SECRET_ID="XIXJN6AKI5"
-    FYERS_REDIRECT_URL="https://spacewear.co.in"
+    FYERS_REDIRECT_URL="https://spacewear.onrender.com"
 
