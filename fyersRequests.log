@@ -14018,3 +14018,5 @@
 {"level":"DEBUG","location":"[get_call:136] fyersModel","message":{"Status Code":200,"API":"/funds"},"timestamp":"2024-05-07 14:43:05,643+0000","service":"FyersAPIRequest"}
 {"level":"DEBUG","location":"[get_call:136] fyersModel","message":{"Status Code":200,"API":"/options-chain-v3"},"timestamp":"2024-05-07 14:43:09,435+0000","service":"FyersAPIRequest"}
 {"level":"DEBUG","location":"[get_call:136] fyersModel","message":{"Status Code":200,"API":"/options-chain-v3"},"timestamp":"2024-05-07 14:43:09,625+0000","service":"FyersAPIRequest"}
+{"level":"DEBUG","location":"[get_call:136] fyersModel","message":{"Status Code":200,"API":"/options-chain-v3"},"timestamp":"2024-05-07 15:42:15,297+0000","service":"FyersAPIRequest"}
+{"level":"DEBUG","location":"[get_call:136] fyersModel","message":{"Status Code":200,"API":"/options-chain-v3"},"timestamp":"2024-05-07 15:42:15,492+0000","service":"FyersAPIRequest"}
