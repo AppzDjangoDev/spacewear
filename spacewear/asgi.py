@@ -21,7 +21,7 @@ django_asgi_application = get_asgi_application()
 # Django Channels WebSocket application
 application = ProtocolTypeRouter(
     {
-        "http": django_asgi_application,
+        "https": django_asgi_application,
         "websocket": AuthMiddlewareStack(
             URLRouter(
                 ws_urlpatterns
