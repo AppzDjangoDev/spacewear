@@ -14,13 +14,15 @@ from channels.generic.websocket import WebsocketConsumer
 from fyers_apiv3.FyersWebsocket import order_ws
 from django.conf import settings
 
+from fyersapi.views import get_data_instance
+
 class FyersPositionDataConsumer(WebsocketConsumer):
     def connect(self):
         self.accept()
         # Generate app_id_hash
-        app_id = settings.FYERS_APP_ID
+        self.app_id = settings.FYERS_APP_ID
         secret_key = settings.FYERS_SECRET_ID
-        app_id_hash = self.generate_app_id_hash(app_id, secret_key)
+        app_id_hash = self.generate_app_id_hash(self.app_id, secret_key)
         pin = "2255"
         session = self.scope["session"]
         refresh_token = session.get("refresh_token")
@@ -41,7 +43,7 @@ class FyersPositionDataConsumer(WebsocketConsumer):
         if response.status_code == 200:
             json_response = response.json()
             access_token = json_response.get("access_token")
-            access_token = app_id + ":" + access_token
+            access_token = self.app_id + ":" + access_token
 
             self.fyers = order_ws.FyersOrderSocket(
                 access_token=access_token,  # Your access token for authenticating with the Fyers API.
@@ -90,13 +92,15 @@ class FyersIndexDataConsumer(WebsocketConsumer):
 
         self.last_keyword = self.scope['url_route']['kwargs']['last_keyword']  # Extract the last keyword from URL
         print("last_keywordlast_keyword", self.last_keyword)
+        self.symbols = ["NSE:" + self.last_keyword + "-INDEX"]
         # Generate app_id_hash
-        app_id = settings.FYERS_APP_ID
+        self.app_id = settings.FYERS_APP_ID
         secret_key = settings.FYERS_SECRET_ID
-        app_id_hash = self.generate_app_id_hash(app_id, secret_key)
+        app_id_hash = self.generate_app_id_hash(self.app_id, secret_key)
         pin = "2255"
         session = self.scope["session"]
         refresh_token = session.get("refresh_token")
+        
 
         url = "https://api-t1.fyers.in/api/v3/validate-refresh-token"
         headers = {
@@ -113,10 +117,12 @@ class FyersIndexDataConsumer(WebsocketConsumer):
         json_response = response.json()
         if response.status_code == 200:
             json_response = response.json()
-            access_token = json_response.get("access_token")
+            self.access_token = json_response.get("access_token")
+            self.getoptionsymbols = self.getOptionStrikes()
+            print("=================================================", self.getoptionsymbols)
             # Connect to FyersOrderSocket with the new access token
             self.fyers = data_ws.FyersDataSocket(
-                access_token=access_token,       # Access token in the format "appid:accesstoken"
+                access_token=self.access_token,       # Access token in the format "appid:accesstoken"
                 log_path="",                     # Path to save logs. Leave empty to auto-create logs in the current directory.
                 litemode=True,                  # Lite mode disabled. Set to True if you want a lite response.
                 write_to_file=False,              # Save response in a log file instead of printing it.
@@ -142,11 +148,10 @@ class FyersIndexDataConsumer(WebsocketConsumer):
         """
         # Specify the data type and symbols you want to subscribe to
         data_type = "SymbolUpdate"
+        self.allsymbols = self.symbols+self.getoptionsymbols
 
         # Subscribe to the specified symbols and data type
-        symbols = ["NSE:" + self.last_keyword + "-INDEX"]
-        self.fyers.subscribe(symbols=symbols, data_type=data_type)
-
+        self.fyers.subscribe(symbols=self.allsymbols, data_type=data_type)
         # Keep the socket running to receive real-time data
         self.fyers.keep_running()
 
@@ -166,5 +171,64 @@ class FyersIndexDataConsumer(WebsocketConsumer):
         concatenated_string = f"{client_id}:{secret_key}"
         hash_object = hashlib.sha256(concatenated_string.encode())
         return hash_object.hexdigest()
+    
+    def getOptionStrikes(self):
+        response=None
+        # Initialize the FyersModel instance with your client_id, access_token, and enable async mode
+        fyers = fyersModel.FyersModel(client_id=self.app_id, is_async=False, token=self.access_token, log_path="")
+        print("self.symbolsself.symbols", type(self.symbols))
+      
+        data = {
+            "symbol": self.symbols[0],
+            "strikecount": 1,
+        }
+        try:
+            self.expiry_response = fyers.optionchain(data=data)
+            print("self.expiry_responseself.expiry_response", self.expiry_response)
+            first_expiry_ts = self.expiry_response['data']['expiryData'][0]['expiry']
+            # first_expiry_date = expiry_response['data']['expiryData'][0]['date']
+            # return render(request, template, context)
+            if first_expiry_ts:
+                options_data = {
+                    "symbol":self.symbols[0],
+                    "strikecount": 1,
+                    "timestamp": first_expiry_ts
+                }
+
+                response = fyers.optionchain(data=options_data)
+                print("77777777777777777777777777777777777777777777777777777777777777777777", response)
+                # Filter optionsChain data for option type 'PE'
+                pe_options = [option for option in response['data']['optionsChain'] if option['option_type'] == 'PE']
+                # Sort the filtered data by strike_price in ascending order
+                pe_options_sorted = sorted(pe_options, key=lambda x: x['strike_price'], reverse=True)
+                print("**************************************")
+                print(pe_options_sorted)
+                pe_symbols = [option['symbol'] for option in pe_options_sorted]
+                print("**************************************")
+
+
+
+                # Filter optionsChain data for option type 'CE'
+                ce_options = [option for option in response['data']['optionsChain'] if option['option_type'] == 'CE']
+                # Sort the filtered data by strike_price in ascending order
+                ce_options_sorted = sorted(ce_options, key=lambda x: x['strike_price'])
+                print("**************************************")
+                print(ce_options_sorted)
+                ce_symbols = [option['symbol'] for option in ce_options_sorted]
+                symbol_list =  ce_symbols + pe_symbols
+                print("**************************************")
+                return symbol_list
+            
+
+        except (KeyError, AttributeError, IndexError) as e:
+            # Handle the error gracefully
+            error_message = f'Error occurred: {str(e)}'
+            print("Error occurred while fetching expiry data:", error_message)
+          
+        return response
+
+    
+
+
 
 

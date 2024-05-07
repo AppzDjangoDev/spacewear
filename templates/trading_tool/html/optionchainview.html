@@ -11,7 +11,8 @@
 <div class="container-fluid" style="max-width: initial;">
   <div class="row">
     <div class="col-lg-12 col-sm-12 d-flex align-items-stretch">
-        <div class="card w-100">
+        
+        <div class="card w-100" id="card_body" >
             <div class="card-body p-4 mb-4">
               <div class="d-flex justify-content-between align-items-center">
                 <p class="card-title fw-semibold">OPTION CHAIN</p>
@@ -45,8 +46,8 @@
                                 <div class="col-6">
                                     <input class="form-control my-2" disabled name="ex_symbol" value="{{ option.ex_symbol }}">
                                 </div>
-                                <div class="col-6">
-                                    <input class="form-control my-2" disabled name="ltp" value="{{ option.ltp }}">
+                                <div class="col-6" id="index-cont" >
+                                    <input class="form-control my-2" id="index" disabled name="ltp" value="0">
                                 </div>
 
                             </div>
@@ -57,19 +58,8 @@
                 {% endfor %}
             </div>
         </div>
-
         <div class="container-fluid mb-2 ">
             <div class="row">   
-                <div class="container mt-5">TEST
-                    <div class="row">
-                        <div class="col-md-6 offset-md-3">
-                            <!-- Data Container -->
-                            <div id="index-cont" class="text-center" style="display: none;">
-                                <h1 id="index"></h1>
-                            </div>
-                        </div>
-                    </div>
-                </div>
             <div class="col-sm-6">
             {% for option in ce_options_with_serial %}
                 {% if option.option_type == "CE"%}
@@ -78,8 +68,10 @@
                         <div class="col-4 d-flex justify-content-center align-items-center">
                             <button class="btn btn-success btn-lg btn-block w-100 h-100 fw-bolder buy-button" style="border-radius: 6px">Buy</button>
                         </div>
+
                         <div class="col-4  text-center">
-                            <input type="hidden" name="der-symbol" value="{{ option.symbol }}">
+                            <input type="hidden" name="der-symbol-{{option.symbol}}" value="{{ option.symbol }}">
+                            <input type="hidden" name="opt-symbol" value="{{ option.symbol }}">
                             <h5 class="card-title text-muted fw-bolder mb-0">
                                 {% if option.serial_number == 1 %}
                                     <span style="color: #6a7dfb; font-size: 70%;">ITM&nbsp;1</span>
@@ -91,7 +83,9 @@
                                 <br>
                                 CE&nbsp;{{ option.strike_price }}
                             </h5>
-                            <p class="card-text fs-4 fw-bolder">LTP:{{option.ltp}}</p>
+                            
+                            <p class="card-text fs-4 fw-bolder" id="der-ltp-{{ option.symbol }}">LTP: {{ option.ltp }}</p>
+
                         </div>
                         <div class="col-4 d-flex justify-content-center align-items-center">
                             <button class="btn btn-danger btn-lg btn-block w-100 h-100 fw-bolder sell-button" style="border-radius: 6px">Sell</button>
@@ -102,35 +96,36 @@
             {% endfor %}
             </div>
             <div class="col-sm-6">
-            {% for option in pe_options_with_serial %}
-            {% if option.option_type == "PE"%}
-                <div class="alert alert-danger" role="alert">
-                    <div class="row">
-                        <div class="col-4 d-flex justify-content-center align-items-center">
-                            <button class="btn btn-success btn-lg btn-block w-100 h-100 fw-bolder buy-button" style="border-radius: 6px">Buy</button>
-                        </div>
-                        <div class="col-4 text-center">
-                            <input type="hidden" name="der-symbol" value="{{ option.symbol }}">
-                            {% comment %} <h5 class="card-title text-muted fw-bolder">PE&nbsp;{{option.strike_price}}</h5> {% endcomment %}
-                            <h5 class="card-title text-muted fw-bolder mb-0">
-                                {% if option.serial_number == 1 %}
-                                    <span style="color: #6a7dfb; font-size: 70%;">ITM&nbsp;1</span>
-                                {% elif option.serial_number == 3 %}
-                                    <span style="color: #6a7dfb; font-size: 70%;">OTM&nbsp;1</span>
-                                {% elif option.serial_number == 2  %}
-                                    <span style="color: #6a7dfb; font-size: 70%;">ATM</span>
-                                {% endif %}
-                                <br>
-                                PE&nbsp;{{ option.strike_price }}
-                            </h5>
-                            <p class="card-text fs-4 fw-bolder">LTP:{{option.ltp}}</p>
-                        </div>
-                        <div class="col-4 d-flex justify-content-center align-items-center">
-                            <button class="btn btn-danger btn-lg btn-block w-100 h-100 fw-bolder sell-button" style="border-radius: 6px">Sell</button>
+                {% for option in pe_options_with_serial %}
+                {% if option.option_type == "PE"%}
+                    <div class="alert alert-danger" role="alert">
+                        <div class="row">
+                            <div class="col-4 d-flex justify-content-center align-items-center">
+                                <button class="btn btn-success btn-lg btn-block w-100 h-100 fw-bolder buy-button" style="border-radius: 6px">Buy</button>
+                            </div>
+                            <div class="col-4 text-center">
+                                <input type="hidden" name="der-symbol-{{option.symbol}}" value="{{ option.symbol }}">
+                                <input type="hidden" name="opt-symbol" value="{{ option.symbol }}">
+                                <h5 class="card-title text-muted fw-bolder mb-0">
+                                    {% if option.serial_number == 1 %}
+                                        <span style="color: #6a7dfb; font-size: 70%;">ITM&nbsp;1</span>
+                                    {% elif option.serial_number == 3 %}
+                                        <span style="color: #6a7dfb; font-size: 70%;">OTM&nbsp;1</span>
+                                    {% elif option.serial_number == 2  %}
+                                        <span style="color: #6a7dfb; font-size: 70%;">ATM</span>
+                                    {% endif %}
+                                    <br>
+                                    PE&nbsp;{{ option.strike_price }}
+                                </h5>
+                                <p class="card-text fs-4 fw-bolder" id="der-ltp-{{ option.symbol }}">LTP:  {{ option.ltp }}</p>
+
+                            </div>
+                            <div class="col-4 d-flex justify-content-center align-items-center">
+                                <button class="btn btn-danger btn-lg btn-block w-100 h-100 fw-bolder sell-button" style="border-radius: 6px">Sell</button>
+                            </div>
                         </div>
                     </div>
-                </div>
-            {% endif %}
+                {% endif %}
             {% endfor %}
             </div>
             </div>
@@ -141,6 +136,7 @@
     </div>
 </div>
 
+
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 <script>
     $(document).ready(function() {
@@ -149,7 +145,7 @@
             e.preventDefault();
             
             // Get the value of the hidden input field
-            var derSymbol = $(this).closest('.alert').find('input[name="der-symbol"]').val();
+            var derSymbol = $(this).closest('.alert').find('input[name="opt-symbol"]').val();
             
             // Get the value of ex_symbol and ltp fields
             var exSymbol = $('input[name="ex_symbol"]').val();
@@ -234,13 +230,15 @@
     });
 </script>
  <script>
+
     // Function to update the data container with the received message
     function updateData(message) {
+        // Show spinner initially
         var dataContainer = document.getElementById("data-index");
         var messageElement = document.querySelector('#index'); // Selecting the existing h1 element
         message = message.replace(/'/g, '"');
         var message = JSON.parse(message);
-        console.log("messagemessagemessage", message.type);
+        console.log("messagemessagemessage", message);
         // Check if the type is "if"
         if (message.type === 'if') {
             // Select the element by its ID
@@ -251,14 +249,37 @@
             var symbol = message['symbol'];
             symbol = symbol.replace('NSE:', '').replace('-INDEX', '');
             var indexData = symbol + " - " + ltpValue;
-            console.log("messagemessagemessage",symbol);
+            console.log("messagemessagemessage", symbol);
             console.log("indexDataindexData", indexData)
-            messageElement.textContent = indexData ; // Replacing the content with the new message
+            messageElement.value = ltpValue; // Replacing the content with the new message
+        } else if (message.type === 'sf') {
+            // Handle the case when message type is 'sf'
+            console.log("Type is 'sf'.");
+            var symbol = message['symbol'];
+            // Retrieve the hidden input value if it exists
+           
+            var hiddenSymbolInput = document.querySelector('input[name="der-symbol-' + message['symbol'] + '"]');
+            var hiddenSymbol = hiddenSymbolInput ? hiddenSymbolInput.value : null;
+            var escapedSymbol = message['symbol'].replace(/(:|\.|\[|\]|,|=|@)/g, "\\$1");
+
+            console.log("hiddenSymbolhiddenSymbol", hiddenSymbol);
+            console.log("***************************", escapedSymbol);
+            // Compare the symbols
+            if (symbol === hiddenSymbol) {
+                // Update the corresponding LTP value
+                var ltpValue = message['ltp'];
+                console.log("ltpValueltpValue", ltpValue);
+                var ltpElement = document.querySelector('#der-ltp-'+escapedSymbol);
+                ltpElement.textContent = "LTP: " + ltpValue;
+                console.log("ltpElementltpElement", ltpElement);
+              
+            }
         } else {
-            // Do something else if the type is not "if"
-            console.log("Type is not 'if'.");
+            // Do something else if the type is neither 'if' nor 'sf'
+            console.log("Type is not 'if' or 'sf'.");
         }
     }
+    
     var urlParts = window.location.pathname.split('/');
 
     var domain = '//' + window.location.hostname ;
@@ -281,28 +302,22 @@
         socket.close();
     });
 </script>
-{% comment %} <script>
+ {% comment %} <script>
     // Function to update the data container with the received message
     function updatePosData(message) {
-        var dataContainer = document.getElementById("data-position");
         var messageElement = document.querySelector('#position'); // Selecting the existing h1 element
         console.log("ppppppppppppppppppppppppp", message);
         if (message.includes("Error:")) {
             console.log("Error exists in the string.");
-            var index_container = document.querySelector('#position-cont');
-            // Remove the 'display: none;' style
-            index_container.style.display = 'block';
             messageElement.textContent = "No open positions";
         } else {
             message = message.replace(/'/g, '"');
             var messageObject = JSON.parse(message);
             if (messageObject.hasOwnProperty('code') && messageObject.code === 1605) {
-                var index_container = document.querySelector('#position-cont');
-                // Remove the 'display: none;' style
-                index_container.style.display = 'block';
+              
                 messageElement.textContent = "No open positions";
             } else if (messageObject.hasOwnProperty('positions') && Object.keys(messageObject.positions).length !== 0) {
-                index_container.style.display = 'block';
+
                 console.log("The JSON data contains positions.", messageObject);
                 var pl_unrealized = messageObject['pl_unrealized'];
                 var positionData = "P/L " + pl_unrealized;
@@ -327,7 +342,7 @@
     window.addEventListener('beforeunload', function() {
         socket.close();
     });
-</script> {% endcomment %}
+</script>  {% endcomment %}
 
 
 

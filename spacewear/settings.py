@@ -187,13 +187,13 @@ DATE_INPUT_FORMATS = [
     '%Y-%m-%d',  # Default format
 ]
 
-DEVELOPMENT_MODE=False  
-# DEVELOPMENT_MODE=True  
+# DEVELOPMENT_MODE=False  
+DEVELOPMENT_MODE=True  
 
 
 FYERS_APP_ID="H9O406XBXW-100"
 FYERS_SECRET_ID="XOVF82L85V"
-FYERS_REDIRECT_URL="https://c67b-2405-201-f007-402c-2ce9-bdd7-aca1-9e02.ngrok-free.app"
+FYERS_REDIRECT_URL="https://86f8-2405-201-f007-40e3-9dfe-35b2-60a0-1c9d.ngrok-free.app"
 
 
 if not DEVELOPMENT_MODE:

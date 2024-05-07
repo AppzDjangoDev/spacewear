@@ -313,9 +313,9 @@ class OptionChainView(LoginRequiredMixin, View):
             print(option)
             pe_options_with_serial.append(option)
 
-        print("**************************************")
-        print(pe_options_with_serial)
-        print("**************************************")
+        # print("**************************************")
+        # print(pe_options_with_serial)
+        # print("**************************************")
         # Filter optionsChain data for option type 'CE'
         ce_options = [option for option in response['data']['optionsChain'] if option['option_type'] == 'CE']
 
@@ -333,10 +333,10 @@ class OptionChainView(LoginRequiredMixin, View):
             print(option)
             ce_options_with_serial.append(option)
 
-        print("**************************************")
-        print(ce_options_with_serial)
-        print("**************************************")
-            
+        # print("**************************************")
+        # print(ce_options_with_serial)
+        # print("**************************************")
+        context['access_token'] = request.session.get('access_token')
         context['forward_trailing_points'] = forward_trailing_points
         context['reverse_trailing_points'] = reverse_trailing_points
         context['ce_options_with_serial'] = ce_options_with_serial

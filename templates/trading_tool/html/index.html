@@ -169,23 +169,19 @@
           <div class="navbar-collapse justify-content-end px-0" id="navbarNav">
             <ul class="navbar-nav flex-row ms-auto align-items-center justify-content-end">
             
-                {% comment %} <div class="alert alert-primary" role="alert">
-                    <div class="row">
-                        <div class="col-6 d-flex justify-content-center align-items-center">
-                            <button class="btn btn-primary btn-lg btn-block w-100 h-100 fw-bolder buy-button" style="border-radius: 6px;  ">TRAIL LIMIT</button>
-                        </div>
-                        
-                        <div class="col-6 d-flex justify-content-center align-items-center">
-                            <button class="btn btn-primary btn-lg btn-block w-100 h-100 fw-bolder sell-button" style="border-radius: 6px;">TRAIL TOP</button>
-                        </div>
-                    </div>
-                
-                </div> {% endcomment %}
+  
 
               {% comment %} ======================================================================================================= {% endcomment %}
             {% if options_data.data.optionsChain %}
-            <div class="container-fluid ">
+            <div class="container-fluid p-0 ">
                 <div class="row">
+                  {% comment %} <div class="col-sm-3 my-1 "  style="display: block;">
+                    <div class="alert alert-success d-flex flex-column justify-content-center align-items-center p-0 m-0" style="height:55px;" role="alert">
+                      <p id="position" class="mb-0 fs-3 fw-bolder">P/L: </p>
+                      <!-- <button id="Portfolio" class="btn btn-success btn-lg btn-block w-100 h-100 fw-bold" style="border-radius: 6px;">P/L:</button> -->
+                  </div>
+                  
+                  </div>  {% endcomment %}
                   <div class="col-sm-4 my-2"  style="display: block;">
                     <div class="alert alert-primary p-0 m-0" style="height:65px;" role="alert">
                       <button id="trailingtotop" class="btn btn-primary btn-lg btn-block w-100 h-100 fw-bold" style="border-radius: 6px;">TRAIL TP</button>
@@ -196,7 +192,7 @@
                     <button  id="trailingwithlimit" class="btn btn-primary btn-lg btn-block w-100 h-100 m-0 fw-bold" style="border-radius: 6px;">TRAIL <i class="ti ti-arrow-up text-success"></i>{{forward_trailing_points}}</button>
                   </div>
                 </div> 
-                <div class="col-sm-4 my-2"  style="display: block;">
+                <div class="col-sm-4 my-2 mb-2"  style="display: block;">
                   <div class="alert alert-primary p-0 m-0" style="height:65px;" role="alert">
                     <button id="trailingtodown" class="btn btn-primary btn-lg btn-block w-100 h-100 m-0 fw-bold" style="border-radius: 6px;">TRAIL <i class="ti ti-arrow-down text-warning"></i>{{reverse_trailing_points}}</button>
                   </div>
@@ -208,7 +204,7 @@
 
             {% endif%}
               {% comment %} ======================================================================================================= {% endcomment %}
-              {% comment %} <script>
+               {% comment %} <script>
                 // Function to update the data container with the received message
                 function updatePosData(message) {
                     var dataContainer = document.getElementById("data-position");
@@ -216,19 +212,15 @@
                     console.log("ppppppppppppppppppppppppp", message);
                     if (message.includes("Error:")) {
                         console.log("Error exists in the string.");
-                        var index_container = document.querySelector('#position-cont');
                         // Remove the 'display: none;' style
-                        index_container.style.display = 'none';
                     } else {
                         message = message.replace(/'/g, '"');
                         var messageObject = JSON.parse(message);
                         if (messageObject.hasOwnProperty('code') && messageObject.code === 1605) {
-                            var index_container = document.querySelector('#position-cont');
                             // Remove the 'display: none;' style
                             index_container.style.display = 'block';
                             messageElement.textContent = "No open positions";
                         } else if (messageObject.hasOwnProperty('positions') && Object.keys(messageObject.positions).length !== 0) {
-                            index_container.style.display = 'block';
                             console.log("The JSON data contains positions.", messageObject);
                             var pl_unrealized = messageObject['pl_unrealized'];
                             var positionData = "P/L: " + pl_unrealized;
@@ -253,7 +245,7 @@
                 window.addEventListener('beforeunload', function() {
                     socket.close();
                 });
-            </script> {% endcomment %}
+            </script>  {% endcomment %}
             {% comment %} ======================================================================================================= {% endcomment %}
 
             {% for item in fund_data.fund_limit %}
