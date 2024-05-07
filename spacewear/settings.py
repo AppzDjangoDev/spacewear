@@ -198,7 +198,11 @@ FYERS_REDIRECT_URL="https://c67b-2405-201-f007-402c-2ce9-bdd7-aca1-9e02.ngrok-fr
 
 if not DEVELOPMENT_MODE:
     #for production
-    FYERS_APP_ID="5NYKD87NTH-100"
-    FYERS_SECRET_ID="XIXJN6AKI5"
+    # FYERS_APP_ID="5NYKD87NTH-100"
+    # FYERS_SECRET_ID="XIXJN6AKI5"
+    # FYERS_REDIRECT_URL="https://spacewear.co.in"
+
+    FYERS_APP_ID="4CIPNEEHU0-100"
+    FYERS_SECRET_ID="6BF3KJFCID"
     FYERS_REDIRECT_URL="https://spacewear.onrender.com"
 
