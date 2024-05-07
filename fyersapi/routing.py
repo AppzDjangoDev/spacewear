@@ -1,23 +1,16 @@
-# routing.py
-
 from django.urls import re_path
-from .consumers import  FyersPositionDataConsumer, FyersIndexDataConsumer
-from django.urls import path
-from channels.auth import AuthMiddlewareStack
+from .consumers import FyersPositionDataConsumer, FyersIndexDataConsumer
 from channels.routing import ProtocolTypeRouter, URLRouter
 
 ws_urlpatterns = [
-    re_path('ws/fyersindexdata/<str:last_keyword>/', FyersIndexDataConsumer.as_asgi()),
-    re_path('ws/fyerspositionsdata/', FyersPositionDataConsumer.as_asgi()),
+    # WebSocket route for FyersIndexDataConsumer with a dynamic parameter 'last_keyword'
+    re_path(r'^ws/fyersindexdata/(?P<last_keyword>\w+)/$', FyersIndexDataConsumer.as_asgi()),
 
-
-    
+    # WebSocket route for FyersPositionDataConsumer
+    re_path(r'^ws/fyerspositionsdata/$', FyersPositionDataConsumer.as_asgi()),
 ]
 
-application = ProtocolTypeRouter(
-    {
-        "websocket": AuthMiddlewareStack(
-            URLRouter(ws_urlpatterns)
-        ),
-    }
-)
+application = ProtocolTypeRouter({
+    # WebSocket protocol router
+    "websocket": URLRouter(ws_urlpatterns),
+})
