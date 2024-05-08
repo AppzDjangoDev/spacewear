@@ -85,6 +85,10 @@ class FyersPositionDataConsumer(WebsocketConsumer):
         hash_object = hashlib.sha256(concatenated_string.encode())
         return hash_object.hexdigest()
 
+# from channels.generic.websocket import WebsocketConsumer
+# import hashlib
+# import requests
+# import json
 
 class FyersIndexDataConsumer(WebsocketConsumer):
     def connect(self):
@@ -139,6 +143,11 @@ class FyersIndexDataConsumer(WebsocketConsumer):
             self.send(text_data=f"Error: {response.text}")
 
     def disconnect(self, close_code):
+        # Unsubscribe from symbols when disconnecting WebSocket
+        data_type = "SymbolUpdate"
+        self.fyers.unsubscribe(symbols=self.allsymbols, data_type=data_type)
+
+        # Close the WebSocket connection
         self.close()
 
     def on_open(self):
@@ -150,12 +159,15 @@ class FyersIndexDataConsumer(WebsocketConsumer):
         data_type = "SymbolUpdate"
         self.allsymbols = self.symbols+self.getoptionsymbols
 
+        print("self.allsymbolsself.allsymbols", self.allsymbols)
+
         # Subscribe to the specified symbols and data type
         self.fyers.subscribe(symbols=self.allsymbols, data_type=data_type)
         # Keep the socket running to receive real-time data
         self.fyers.keep_running()
 
     def on_message(self, message):
+        print("Message:", message)
         self.send(text_data=f"{message}")
 
     def on_error(self, message):
@@ -175,15 +187,17 @@ class FyersIndexDataConsumer(WebsocketConsumer):
     def getOptionStrikes(self):
         response=None
         # Initialize the FyersModel instance with your client_id, access_token, and enable async mode
-        fyers = fyersModel.FyersModel(client_id=self.app_id, is_async=False, token=self.access_token, log_path="")
+        self.fyers = fyersModel.FyersModel(client_id=self.app_id, is_async=False, token=self.access_token, log_path="")
         print("self.symbolsself.symbols", type(self.symbols))
+        self.ce_symbols=[]
+        self.pe_symbols=[]
       
         data = {
             "symbol": self.symbols[0],
             "strikecount": 1,
         }
         try:
-            self.expiry_response = fyers.optionchain(data=data)
+            self.expiry_response = self.fyers.optionchain(data=data)
             print("self.expiry_responseself.expiry_response", self.expiry_response)
             first_expiry_ts = self.expiry_response['data']['expiryData'][0]['expiry']
             # first_expiry_date = expiry_response['data']['expiryData'][0]['date']
@@ -195,7 +209,7 @@ class FyersIndexDataConsumer(WebsocketConsumer):
                     "timestamp": first_expiry_ts
                 }
 
-                response = fyers.optionchain(data=options_data)
+                response = self.fyers.optionchain(data=options_data)
                 print("77777777777777777777777777777777777777777777777777777777777777777777", response)
                 # Filter optionsChain data for option type 'PE'
                 pe_options = [option for option in response['data']['optionsChain'] if option['option_type'] == 'PE']
@@ -203,7 +217,7 @@ class FyersIndexDataConsumer(WebsocketConsumer):
                 pe_options_sorted = sorted(pe_options, key=lambda x: x['strike_price'], reverse=True)
                 print("**************************************")
                 print(pe_options_sorted)
-                pe_symbols = [option['symbol'] for option in pe_options_sorted]
+                self.pe_symbols = [option['symbol'] for option in pe_options_sorted]
                 print("**************************************")
 
 
@@ -214,8 +228,8 @@ class FyersIndexDataConsumer(WebsocketConsumer):
                 ce_options_sorted = sorted(ce_options, key=lambda x: x['strike_price'])
                 print("**************************************")
                 print(ce_options_sorted)
-                ce_symbols = [option['symbol'] for option in ce_options_sorted]
-                symbol_list =  ce_symbols + pe_symbols
+                self.ce_symbols = [option['symbol'] for option in ce_options_sorted]
+                symbol_list =  self.ce_symbols + self.pe_symbols
                 print("**************************************")
                 return symbol_list
             
