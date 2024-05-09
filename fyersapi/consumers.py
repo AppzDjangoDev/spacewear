@@ -1,3 +1,4 @@
+import json
 from channels.generic.websocket import AsyncWebsocketConsumer,WebsocketConsumer
 from fyers_apiv3.FyersWebsocket.data_ws import FyersDataSocket
 from asgiref.sync import async_to_sync
@@ -15,6 +16,7 @@ from fyers_apiv3.FyersWebsocket import order_ws
 from django.conf import settings
 
 from fyersapi.views import get_data_instance
+import time
 
 class FyersPositionDataConsumer(WebsocketConsumer):
     def connect(self):
@@ -123,7 +125,7 @@ class FyersIndexDataConsumer(WebsocketConsumer):
             json_response = response.json()
             self.access_token = json_response.get("access_token")
             self.getoptionsymbols = self.getOptionStrikes()
-            print("=================================================", self.getoptionsymbols)
+            # print("=================================================", self.getoptionsymbols)
             # Connect to FyersOrderSocket with the new access token
             self.fyers = data_ws.FyersDataSocket(
                 access_token=self.access_token,       # Access token in the format "appid:accesstoken"
@@ -144,9 +146,10 @@ class FyersIndexDataConsumer(WebsocketConsumer):
 
     def disconnect(self, close_code):
         # Unsubscribe from symbols when disconnecting WebSocket
+        print("Disconnecting WebSocket")
+        print("***********************", self.allsymbols)
         data_type = "SymbolUpdate"
         self.fyers.unsubscribe(symbols=self.allsymbols, data_type=data_type)
-
         # Close the WebSocket connection
         self.close()
 
@@ -176,6 +179,8 @@ class FyersIndexDataConsumer(WebsocketConsumer):
 
     def on_close(self, message):
         print("Connection closed:", message)
+        data_type = "SymbolUpdate"
+        self.fyers.unsubscribe(symbols=self.allsymbols, data_type=data_type)
         self.send(text_data=f"Connection closed: {message}")
 
     @staticmethod
@@ -198,7 +203,6 @@ class FyersIndexDataConsumer(WebsocketConsumer):
         }
         try:
             self.expiry_response = self.fyers.optionchain(data=data)
-            print("self.expiry_responseself.expiry_response", self.expiry_response)
             first_expiry_ts = self.expiry_response['data']['expiryData'][0]['expiry']
             # first_expiry_date = expiry_response['data']['expiryData'][0]['date']
             # return render(request, template, context)
@@ -210,13 +214,13 @@ class FyersIndexDataConsumer(WebsocketConsumer):
                 }
 
                 response = self.fyers.optionchain(data=options_data)
-                print("77777777777777777777777777777777777777777777777777777777777777777777", response)
+                # print("77777777777777777777777777777777777777777777777777777777777777777777", response)
                 # Filter optionsChain data for option type 'PE'
                 pe_options = [option for option in response['data']['optionsChain'] if option['option_type'] == 'PE']
                 # Sort the filtered data by strike_price in ascending order
                 pe_options_sorted = sorted(pe_options, key=lambda x: x['strike_price'], reverse=True)
                 print("**************************************")
-                print(pe_options_sorted)
+                # print(pe_options_sorted)
                 self.pe_symbols = [option['symbol'] for option in pe_options_sorted]
                 print("**************************************")
 
@@ -227,7 +231,7 @@ class FyersIndexDataConsumer(WebsocketConsumer):
                 # Sort the filtered data by strike_price in ascending order
                 ce_options_sorted = sorted(ce_options, key=lambda x: x['strike_price'])
                 print("**************************************")
-                print(ce_options_sorted)
+                # print(ce_options_sorted)
                 self.ce_symbols = [option['symbol'] for option in ce_options_sorted]
                 symbol_list =  self.ce_symbols + self.pe_symbols
                 print("**************************************")
@@ -240,6 +244,19 @@ class FyersIndexDataConsumer(WebsocketConsumer):
             print("Error occurred while fetching expiry data:", error_message)
           
         return response
+
+    def receive(self, text_data):
+        # Parse the incoming message
+        message = json.loads(text_data)
+        action = message.get('action')
+
+        # Check if the client requested a disconnect action
+        if action == 'disconnect':
+            # Unsubscribe from symbols when disconnecting WebSocket
+            data_type = "SymbolUpdate"
+            self.fyers.unsubscribe(symbols=self.allsymbols, data_type=data_type)
+            # Close the WebSocket connection
+            self.close()
 
     
 

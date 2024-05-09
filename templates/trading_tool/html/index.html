@@ -256,7 +256,8 @@
             {% endfor %}
               
               {% comment %} <a href="{% url 'explore_more' %}" class="btn btn-succes">Test</a> {% endcomment %}
-              
+             
+
               {% comment %} <a href="{% url "get_accese_token_store_session" %}" class="btn btn-success mx-2">Get Access</a> {% endcomment %}
               {% comment %} <a href="{% url "get_user_profile" %}" class="btn btn-success mx-2">Get Profile</a> {% endcomment %}
               <li class="nav-item dropdown">
@@ -278,6 +279,7 @@
                       <i class="ti ti-list-check fs-6"></i>
                       <p class="mb-0 fs-3">Trade Configurations</p>
                     </a>
+                    <button class="btn btn-outline-primary mx-3 mt-2 d-block" id="disconnect-reconnect-btn">Reconnect</button>
                     <a href="{% url 'logout' %}" class="btn btn-outline-primary mx-3 mt-2 d-block">Logout</a>
                   </div>
                 </div>

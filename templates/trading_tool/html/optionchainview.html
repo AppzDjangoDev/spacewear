@@ -230,6 +230,11 @@
     });
 </script>
  <script>
+    // Function to send message to server before page unload
+    function sendMessageBeforeUnload() {
+        // Send a message to the server to unsubscribe and close the WebSocket connection
+        socket.send(JSON.stringify({ action: 'disconnect' }));
+    }
 
     // Function to update the data container with the received message
     function updateData(message) {
@@ -257,8 +262,7 @@
             console.log("Type is 'sf'.");
             var symbol = message['symbol'];
             // Retrieve the hidden input value if it exists
-           
-            var hiddenSymbolInput = document.querySelector('input[name="der-symbol-' + message['symbol'] + '"]');
+            var hiddenSymbolInput = document.querySelector('input[name="der-symbol-' + symbol + '"]');
             var hiddenSymbol = hiddenSymbolInput ? hiddenSymbolInput.value : null;
             var escapedSymbol = message['symbol'].replace(/(:|\.|\[|\]|,|=|@)/g, "\\$1");
 
@@ -269,82 +273,43 @@
                 // Update the corresponding LTP value
                 var ltpValue = message['ltp'];
                 console.log("ltpValueltpValue", ltpValue);
-                var ltpElement = document.querySelector('#der-ltp-'+escapedSymbol);
+                var ltpElement = document.querySelector('#der-ltp-' + escapedSymbol);
                 ltpElement.textContent = "LTP: " + ltpValue;
                 console.log("ltpElementltpElement", ltpElement);
-              
+
             }
         } else {
             // Do something else if the type is neither 'if' nor 'sf'
             console.log("Type is not 'if' or 'sf'.");
         }
     }
-    
+
     var urlParts = window.location.pathname.split('/');
 
-    var domain = '//' + window.location.hostname ;
+    var domain = '//' + window.location.hostname;
     console.log(domain);
 
     var lastKeyword = window.location.pathname.split('/').filter(Boolean).pop();
-  
+
     // WebSocket connection using secure WebSocket (wss://) protocol
-    var socket = new WebSocket("wss://"+domain+"/ws/fyersindexdata/"+lastKeyword+"/");
-  
+    var socket = new WebSocket("wss://" + domain + "/ws/fyersindexdata/" + lastKeyword + "/");
+
     // Event handler for receiving messages from the WebSocket server
     socket.onmessage = function(event) {
         console.log("Received message:", event.data);
         var message = event.data;
         updateData(message);
     };
-  
+
     // Close the WebSocket connection when the page is unloaded (refreshed or navigated away)
     window.addEventListener('unload', function() {
         socket.close();
     });
+
+    // Attach the function to the 'beforeunload' event
+    window.addEventListener('beforeunload', sendMessageBeforeUnload);
+
 </script>
- {% comment %} <script>
-    // Function to update the data container with the received message
-    function updatePosData(message) {
-        var messageElement = document.querySelector('#position'); // Selecting the existing h1 element
-        console.log("ppppppppppppppppppppppppp", message);
-        if (message.includes("Error:")) {
-            console.log("Error exists in the string.");
-            messageElement.textContent = "No open positions";
-        } else {
-            message = message.replace(/'/g, '"');
-            var messageObject = JSON.parse(message);
-            if (messageObject.hasOwnProperty('code') && messageObject.code === 1605) {
-              
-                messageElement.textContent = "No open positions";
-            } else if (messageObject.hasOwnProperty('positions') && Object.keys(messageObject.positions).length !== 0) {
-
-                console.log("The JSON data contains positions.", messageObject);
-                var pl_unrealized = messageObject['pl_unrealized'];
-                var positionData = "P/L " + pl_unrealized;
-                messageElement.textContent = positionData;
-            } else {
-                console.log("Some error occurred.");
-            }
-        }
-    }
-    var domain = '//' + window.location.hostname ;
-    // WebSocket connection using secure WebSocket (wss://) protocol
-    var socket = new WebSocket("wss://"+domain+"/ws/fyerspositionsdata/");
-
-    // Event handler for receiving messages from the WebSocket server
-    socket.onmessage = function(event) {
-        console.log("position Received message:", event);
-        var message = event.data;
-        updatePosData(message);
-    };
-
-    // Explicitly close the connection when navigating away
-    window.addEventListener('beforeunload', function() {
-        socket.close();
-    });
-</script>  {% endcomment %}
-
-
 
 
 {% endblock %}

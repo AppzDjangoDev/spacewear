@@ -182,7 +182,6 @@ def get_data_instance(request):
     template="trading_tool/html/profile_view.html"
     client_id = settings.FYERS_APP_ID
     access_token = request.session.get('access_token')
-    print("access_token", access_token)
     if access_token:
         # Initialize the FyersModel instance with your client_id, access_token, and enable async mode
         fyers = fyersModel.FyersModel(client_id=client_id, is_async=False, token=access_token, log_path="")
@@ -263,7 +262,6 @@ class OptionChainView(LoginRequiredMixin, View):
         context = {}
         template = 'trading_tool/html/optionchainview.html'
         data_instance = get_data_instance(request)
-        print("data_instance", data_instance)
         confData = TradingConfigurations.objects.first()
         forward_trailing_points = confData.forward_trailing_points
         reverse_trailing_points = confData.reverse_trailing_points
