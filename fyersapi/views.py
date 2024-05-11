@@ -169,12 +169,12 @@ def close_all_positions(request):
         if 'message' in response:
             message = response['message']
             messages.success(request, message)
-            return JsonResponse({'message': message})
+            return JsonResponse({'message': message, 'code': response['code'] })
         else:
             # Handle the case where 'data' key is missing
             message = "Error: Response format is unexpected"
             messages.error(request, "Error: Response format is unexpected")
-            return JsonResponse({'message': message})
+            return JsonResponse({'message': message, 'code': response['code'] })
     return redirect('dashboard')  
 
 def get_data_instance(request):
@@ -239,21 +239,153 @@ class ProfileView(LoginRequiredMixin, View):
     else:
       print("no access token")
       return render(request, 'trading_tool/html/profile_view.html')
-    
 
-    
+
+from datetime import datetime, timedelta
+import calendar
+from django.shortcuts import render
+from django.views import View
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.http import JsonResponse
+from django.conf import settings   
+
+class CalenderView(LoginRequiredMixin, View):
+    login_url = '/login'
+
+    def get(self, request):
+        client_id = settings.FYERS_APP_ID
+        access_token = request.session.get('access_token')
+
+        if access_token:
+            fyers = fyersModel.FyersModel(
+                client_id=client_id, 
+                is_async=False, 
+                token=access_token,
+                log_path=""
+            )
+            response = fyers.get_profile()
+
+            # Get current month calendar
+            now = datetime.now()
+            year = now.year
+            month = now.month
+            cal = calendar.monthcalendar(year, month)
+            month_name = calendar.month_name[month]
+
+            if request.is_ajax() and 'prev_month' in request.GET:
+                # If the request is AJAX and it's for the previous month data
+                year = request.GET.get('year')
+                month = request.GET.get('month')
+
+                print("#########################################", month, year)
+
+                year, month = self.calculate_previous_month(int(year), int(month))  # Function to calculate the previous month
+                cal = calendar.monthcalendar(year, month)
+                print("calendarcalendar", cal)
+                month_name = calendar.month_name[month]
+                return JsonResponse({'calendar': cal, 'month_name': month_name, 'month': month, 'year': year})
+
+            context = {
+                'calendar': cal, 
+                'month_name': month_name,
+                'month': month,
+                'year': year
+            }
+            return render(request, 'trading_tool/html/calender_view.html', context)
+        
+        else:
+            print("no access token")
+            return render(request, 'trading_tool/html/calender_view.html')
+
+    def calculate_previous_month(self, year, month):
+        # Calculate the previous month
+        month -= 1
+        if month == 0:
+            # If the current month is January, go to the previous year
+            year -= 1
+            month = 12
+
+        return year, month
+
+
+   
+
+
+from django.http import JsonResponse
 
 class OrderHistory(LoginRequiredMixin, View):
-    login_url = '/login'  # Replace '/login/' with your actual login URL
+    login_url = '/login'
 
     def get(self, request):
         context = {}
-        order_data = TradingData.objects.filter(category='ORDERS')
-        paginator = Paginator(order_data, 20)  # Show 20 items per page
+        data_instance = get_data_instance(request)
+        order_data = data_instance.orderbook()
+        page_count = 10
+
+        # Ensure order_data is a list or a queryset
+        if not isinstance(order_data, list):
+            # If order_data is not a list, assume it's a dictionary and extract the 'orderBook' key
+            order_data = order_data.get('orderBook', [])
+
+        # Map status values to their descriptions
+        for order in order_data:
+            order['status_description'] = settings.STATUS_DESCRIPTIONS.get(order.get('status', 'Unknown'))
+
+        if request.is_ajax():
+            load_more = request.GET.get('load_more', None)
+            if load_more:
+                page_count=200
+
+
+        paginator = Paginator(order_data, page_count)  # Show 20 items per page
         page_number = request.GET.get('page')
         page_obj = paginator.get_page(page_number)
+
+        if request.is_ajax():
+            # If the request is AJAX, fetch the filter value and filter the queryset
+
+            status_filter = request.GET.get('status', None)  # Assuming AJAX passes 'status' parameter for filtering
+         
+            
+            # Get the current page's data
+            current_page_data = list(page_obj)
+            filtered_data=[]
+
+            # Filter the current page's data based on the status
+            if status_filter:
+                filtered_data = [order for order in current_page_data if order.get('status') == int(status_filter)]
+                print("filtered_datafiltered_datafiltered_data", filtered_data)
+            else:
+                filtered_data = current_page_data
+
+            # Create a new paginator for the filtered data
+            filtered_paginator = Paginator(filtered_data, page_count )
+            filtered_page_number = request.GET.get('page')
+            filtered_page_obj = filtered_paginator.get_page(filtered_page_number)
+
+            # Return the filtered data as JSON response
+            return render(request, 'trading_tool/html/order_ajaxtemp.html', {'order_history_data': filtered_page_obj})
+
+        # Otherwise, return the entire rendered page
         context['order_history_data'] = page_obj
         return render(request, 'trading_tool/html/order_history.html', context)
+
+
+    
+# class OrderHistory(LoginRequiredMixin, View):
+#     login_url = '/login'  # Replace '/login/' with your actual login URL
+
+#     def get(self, request):
+#         context = {}
+#         data_instance = get_data_instance(request)
+#         order_data = data_instance.orderbook()
+#         print("order_dataorder_dataorder_dataorder_data", order_data)
+#         # order_data = TradingData.objects.filter(category='ORDERS')
+#         paginator = Paginator(order_data, 20)  # Show 20 items per page
+#         page_number = request.GET.get('page')
+#         page_obj = paginator.get_page(page_number)
+#         context['order_history_data'] = page_obj
+#         return render(request, 'trading_tool/html/order_history.html', context)
 
 class OptionChainView(LoginRequiredMixin, View):
     login_url = '/login'
@@ -464,7 +596,7 @@ def instantBuyOrderWithSL(request):
         der_symbol = request.POST.get('der_symbol')
         ex_symbol = request.POST.get('ex_symbol')
         get_lot_count = get_deafult_lotsize(ex_symbol)
-        
+        traded_price=15
         # Retrieve default order quantity from trade configurations
         trade_config_data = TradingConfigurations.objects.first()
         order_qty = trade_config_data.default_order_qty * get_lot_count
@@ -530,7 +662,7 @@ def instantBuyOrderWithSL(request):
                 stoploss_order_response = data_instance.place_order(data=sl_data)
                 if stoploss_order_response["code"] == 1101:
                     message = "BUY/SL-L Placed Successfully"
-                    return JsonResponse({'response': message})
+                    return JsonResponse({'response': message , 'symbol': der_symbol, 'qty': order_qty, 'traded_price': traded_price })
                 elif response["code"] == -99:
                     message = "SL-L not Placed, Insufficient Fund"
                     return JsonResponse({'response': message})
@@ -538,7 +670,7 @@ def instantBuyOrderWithSL(request):
                     return JsonResponse({'response': stoploss_order_response["message"]})
         elif response["code"] == -99:
             message = "Insufficient Fund"
-            return JsonResponse({'response': message})
+            return JsonResponse({'response': message, 'symbol': der_symbol, 'qty': order_qty , 'traded_price': traded_price, 'code': response["code"]})
         else:
             return JsonResponse({'response': response["message"]})
     else:
@@ -989,3 +1121,57 @@ def fyer_websocket_view(request):
     template_name = 'trading_tool/html/fyerwebsocket.html'
     access_token = request.session.get('access_token')
     return render(request, template_name)
+
+
+
+
+from django.http import JsonResponse
+def store_current_value_in_session(request):
+    if request.method == 'POST':
+        # Retrieve data from POST request
+        open_symbol = request.POST.get('open_symbol')
+        open_qty = request.POST.get('open_qty')
+        open_traded_price = request.POST.get('open_traded_price')
+        
+        # Store data in session
+        request.session['open_symbol'] = open_symbol
+        request.session['open_qty'] = open_qty
+        request.session['open_traded_price'] = open_traded_price
+        
+        print("Values stored in session:", request.session.items())
+        
+        return JsonResponse({'message': 'Current values stored in session successfully.'})
+    else:
+        return JsonResponse({'error': 'Invalid request method.'}, status=400)
+    
+
+def get_session_data(request):
+    if request.method == 'GET':
+        # Retrieve session data
+        open_symbol = request.session.get('open_symbol')
+        open_qty = request.session.get('open_qty')
+        open_traded_price = request.session.get('open_traded_price')
+
+        # Check if session data exists
+        if open_symbol is not None and open_qty is not None and open_traded_price is not None:
+            return JsonResponse({
+                'open_symbol': open_symbol,
+                'open_qty': open_qty,
+                'open_traded_price': open_traded_price
+            })
+        else:
+            return JsonResponse({'error': 'Session data not found'}, status=404)
+    else:
+        return JsonResponse({'error': 'Invalid request method.'}, status=400)
+    
+
+def remove_session_data(request):
+    if request.method == 'POST':
+        # Remove session data
+        request.session.pop('open_symbol', None)
+        request.session.pop('open_qty', None)
+        request.session.pop('open_traded_price', None)
+        print("Session data removed:", request.session.items())
+        return JsonResponse({'message': 'Session data removed successfully.'})
+    else:
+        return JsonResponse({'error': 'Invalid request method.'}, status=400)

@@ -1,29 +1,3 @@
-{% extends 'trading_tool/html/index.html' %}
-{% load static %}
-{% block content %}
-<!--  Header End -->
-<div class="container-fluid" style="max-width: initial;">
-  <div class="row">
-    <div class="col-lg-12 col-sm-12 d-flex align-items-stretch">
-        <div class="card w-100">
-          <div class="card-body p-4 mb-4">
-            <div class="mb-4">
-              <h5 class="card-title fw-semibold">Orders History</h5>
-            </div>
-            <!-- Filter by Status dropdown -->
-            <div class="mb-3">
-                <label for="status-filter" class="form-label">Filter by Status:</label>
-                <select class="form-select" id="status-filter">
-                  <option value="">All</option>
-                  <option value="1">Cancelled</option>
-                  <option value="2">Traded / Filled</option>
-                  <option value="3">For future use</option>
-                  <option value="4">Transit</option>
-                  <option value="5">Rejected</option>
-                  <option value="6">Pending</option>
-                </select>
-            </div>
-            <button id="load-more-btn" class="btn btn-primary mt-3">Load All</button>
             <div id="order-history-table" class="table-responsive">
               <table class="table text-nowrap mb-0 align-middle">
                 {% if order_history_data %}
@@ -90,6 +64,7 @@
                             </tr>
                         {% endfor %}
                     </tbody>
+                    
                 {% else %}
                     <tbody>
                         <tr>
@@ -98,6 +73,9 @@
                     </tbody>
                 {% endif %}
               </table>
+
+
+              
             
               {% comment %} <!-- Pagination links -->
               <div class="pagination">
@@ -116,52 +94,7 @@
                   </span>
               </div> {% endcomment %}
 
-            <!-- Your existing table content -->
+                        <!-- Your existing table content -->
 
             <!-- Load More Button -->
             
-
-            </div>
-          </div>
-        </div>
-      </div>
-  </div>
-</div>
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-<script>
-  $(document).ready(function() {
-    $('#status-filter').change(function() {
-      var selectedStatus = $(this).val();
-      $.ajax({
-        type: 'GET',
-        url: '{% url "order_history" %}',
-        data: {
-          status: selectedStatus
-        },
-        success: function(data) {
-          $('#order-history-table').html(data);
-        }
-      });
-    });
-
-    function loadMoreData() {
-        var selectedStatus = $('#status-filter').val();
-        $.ajax({
-          type: 'GET',
-          url: '{% url "order_history" %}',
-          data: {
-            load_more: true // Add load_more parameter with value true
-          },
-          success: function(data) {
-            $('#order-history-table').html(data);
-          }
-        });
-      }
-  
-      // Event listener for the "Load More" button click
-      $('#load-more-btn').click(function() {
-        loadMoreData(); // Call the loadMoreData function
-      });
-  });
-</script>
-{% endblock %}

@@ -190,10 +190,20 @@ DATE_INPUT_FORMATS = [
 # DEVELOPMENT_MODE=False  
 DEVELOPMENT_MODE=True  
 
+# Define a dictionary mapping status values to their descriptions
+STATUS_DESCRIPTIONS = {
+    1: 'Cancelled',
+    2: 'Traded / Filled',
+    3: 'For future use',
+    4: 'Transit',
+    5: 'Rejected',
+    6: 'Pending',
+}
+
 
 FYERS_APP_ID="H9O406XBXW-100"
 FYERS_SECRET_ID="XOVF82L85V"
-FYERS_REDIRECT_URL="https://0735-2405-201-f007-40e3-dc48-1a40-1dd5-f8de.ngrok-free.app"
+FYERS_REDIRECT_URL="https://9bc1-2405-201-f007-40e3-711c-a7d4-95b6-f8ae.ngrok-free.app"
 
 
 if not DEVELOPMENT_MODE:

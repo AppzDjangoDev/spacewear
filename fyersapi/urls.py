@@ -12,6 +12,11 @@ urlpatterns = [
     path('get_accese_token_store_session', views.get_accese_token_store_session, name='get_accese_token_store_session'),
     path('get_user_profile', views.ProfileView.as_view(), name='get_user_profile'),
 
+    path('trading-calender-view', views.CalenderView.as_view(), name='trading_calender_view'),
+
+
+    
+
     path('close_all_positions', views.close_all_positions, name='close_all_positions'),
     path('update-data-instance/', views.update_data_instance, name='update_data_instance'),
 
@@ -28,6 +33,13 @@ urlpatterns = [
     path('trailingwithlimit/', views.trailingwithlimit, name='trailingwithlimit'),
     path('trailingtodown/', views.trailingtodown, name='trailingtodown'),
     path('trailingtotop/', views.trailingtotop, name='trailingtotop'),
+
+
+    path('store_current_value_in_session/', views.store_current_value_in_session, name='store_current_value_in_session'),
+    path('get_session_data/', views.get_session_data, name='get_session_data'),
+    path('remove_session_data/', views.remove_session_data, name='remove_session_data'),
+
+
     
 
 

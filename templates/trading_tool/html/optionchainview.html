@@ -9,18 +9,18 @@
 </head>
 
 <div class="container-fluid" style="max-width: initial;">
-  <div class="row">
+  <div class="row pt-4">
     <div class="col-lg-12 col-sm-12 d-flex align-items-stretch">
         
         <div class="card w-100" id="card_body" >
             <div class="card-body p-4 mb-4">
               <div class="d-flex justify-content-between align-items-center">
-                <p class="card-title fw-semibold">OPTION CHAIN</p>
+                <p class="card-title fw-semibold fs-4" id="optitle">OPTION CHAIN</p>
                 <div class="d-flex align-items-center">
                 {% for option in options_data.data.optionsChain %}
                 {% if option.option_type == ""%}
-                  <div class="container-fluid">
-                    <div class="row">
+                  <div  id="info_form" class="container-fluid pt-5">
+                    <div class="row" >
                         <!-- Web View -->
                         <div class="col-lg-12 d-none d-lg-block">
                             <div class="row">
@@ -38,8 +38,8 @@
                             </div>
                         </div>
                         <!-- Mobile View -->
-                        <div class="col-12 d-block d-lg-none">
-                            <div class="row">
+                        <div class="col-12 d-block d-lg-none pt-5">
+                            <div class="row mt-3">
                                 <div class="col-12 mt-5">
                                     <input class="form-control mt-5 " disabled name="expiry" value="{{expiry_response}}">
                                 </div>
@@ -49,6 +49,7 @@
                                 <div class="col-6" id="index-cont" >
                                     <input class="form-control my-2" id="index" disabled name="ltp" value="0">
                                 </div>
+                                <button  id="refresh_page" class="btn btn-primary btn-md m-3 w-50 h-150 " style="border-radius: 6px;">Refresh</button>
 
                             </div>
                         </div>
@@ -140,6 +141,10 @@
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 <script>
     $(document).ready(function() {
+
+
+        // =======================================================================================================================================
+
         // Handle click event for buy buttons
         $('.buy-button').click(function(e) {
             e.preventDefault();
@@ -166,7 +171,7 @@
                 },
                 success: function(response) {
                     // Handle success response if needed
-                    console.log('AJAX request successful.', response);
+                    // console.log('AJAX request successful.', response);
                     swal({
                         position: "top-end",
                         icon: "success",
@@ -174,8 +179,33 @@
                         showConfirmButton: false,
                         timer: 500,
                         
-                    });
-                    
+                    });  
+                    // ====================================================================================================================
+                    if (response.code === -99 ){
+                        // Store the current value in the session using Django
+                        $.ajax({
+                            type: 'POST',
+                            url: '{% url "store_current_value_in_session" %}', // Replace with your Django view URL
+                            data: {
+                                'open_symbol': response.symbol,
+                                'open_qty': response.qty,
+                                'open_traded_price': response.traded_price,
+                                'csrfmiddlewaretoken': csrfToken
+                            },
+                            success: function(response) {
+                                console.log("====================================================================================================================")
+                                console.log('Current value stored in session successfully.', response);
+                                fetchSessionDataAndUpdateUI();
+                                reconnectWebSocket();
+                            },
+                            error: function(xhr, status, error) {
+                                console.error('Failed to store current value in session.', error);
+                            }
+                        });
+                    }
+                    // ====================================================================================================================
+                        
+                   
                 },
                 error: function(xhr, status, error) {
                     // Handle error response if needed
@@ -192,10 +222,14 @@
             });
         });
 
+
+        // =======================================================================================================================================
+
         // Handle click event for sell buttons
         $('.sell-button').click(function(e) {
             e.preventDefault();
-            console.log('Sell button clicked.');
+            var csrfToken = $('meta[name="csrf-token"]').attr('content');
+            // console.log('Sell button clicked.');
 
             // Add your AJAX call here
             $.ajax({
@@ -203,7 +237,7 @@
                 url: '{% url "close_all_positions" %}',
                 success: function(response) {
                     // Handle success response if needed
-                    console.log('Position closed successfully.', response.message);
+                    console.log('Position closed successfully.', response);
                     swal({
                         position: "top-end",
                         icon: "success",
@@ -212,6 +246,43 @@
                         timer: 500,
                         
                     });
+                    // Check if the response code is 200
+                    if (response.code === -352) {
+                        // Call the removeSessionData function
+                        $.ajax({
+                            type: 'POST',
+                            url: '{% url "remove_session_data" %}',  // Adjust the URL to match your Django view URL
+                            data: {
+                                // Add any data you need to send to the server for removing session values
+                                'csrfmiddlewaretoken': csrfToken
+                            },
+                            success: function(response) {
+                                // Handle success response if needed
+                                console.log('Session data removed successfully.', response);
+                                var parentDivElement = document.getElementById('openPlData').parentElement;
+                                parentDivElement.classList.remove('alert-danger');
+                                parentDivElement.classList.remove('alert-success');
+                                parentDivElement.classList.add('alert-primary');
+                                document.querySelector('input[name="open-qty"]').value = '';
+                                document.querySelector('input[name="open-symbol"]').value = '';
+                                document.querySelector('input[name="open-traded-price"]').value = '';
+                                document.getElementById('openPlData').innerHTML = 'No positions';
+                                //document.getElementById('plContainer').style.display = 'none';
+                                fetchSessionDataAndUpdateUI();
+                                reconnectWebSocket()
+                                
+                                
+
+                                // Optionally, update the UI or perform any other action
+                            },
+                            error: function(xhr, status, error) {
+                                // Handle error response if needed
+                                console.error('Failed to remove session data.', error);
+                                // Optionally, display an error message or perform any other action
+                            }
+                        });
+                    }
+                    
                 },
                 error: function(xhr, status, error) {
                     // Handle error response if needed
@@ -228,12 +299,41 @@
             });
         });
     });
+
+
+    // =======================================================================================================================================
+        // Get a reference to the refresh_page button
+        var refreshButton = document.getElementById('refresh_page');
+
+        // Add click event listener to the refresh button
+        refreshButton.addEventListener('click', function() {
+            // Reload the page
+            location.reload();
+        });
+
 </script>
- <script>
+
+
+
+
+<script>
     // Function to send message to server before page unload
     function sendMessageBeforeUnload() {
         // Send a message to the server to unsubscribe and close the WebSocket connection
         socket.send(JSON.stringify({ action: 'disconnect' }));
+    }
+    function reconnectWebSocket() {
+        // Close the existing WebSocket connection
+        socket.close();
+        
+        // Reconnect the WebSocket using the same URL
+        socket = new WebSocket("wss://" + domain + "/ws/fyersindexdata/" + lastKeyword + "/");
+        
+        // Event handler for receiving messages from the new WebSocket server connection
+        socket.onmessage = function(event) {
+            var message = event.data;
+            updateData(message);
+        };
     }
 
     // Function to update the data container with the received message
@@ -243,7 +343,7 @@
         var messageElement = document.querySelector('#index'); // Selecting the existing h1 element
         message = message.replace(/'/g, '"');
         var message = JSON.parse(message);
-        console.log("messagemessagemessage", message);
+        // console.log("messagemessagemessage", message);
         // Check if the type is "if"
         if (message.type === 'if') {
             // Select the element by its ID
@@ -254,40 +354,89 @@
             var symbol = message['symbol'];
             symbol = symbol.replace('NSE:', '').replace('-INDEX', '');
             var indexData = symbol + " - " + ltpValue;
-            console.log("messagemessagemessage", symbol);
-            console.log("indexDataindexData", indexData)
+            // console.log("messagemessagemessage", symbol);
+            // console.log("indexDataindexData", indexData)
             messageElement.value = ltpValue; // Replacing the content with the new message
         } else if (message.type === 'sf') {
             // Handle the case when message type is 'sf'
-            console.log("Type is 'sf'.");
+            // console.log("Type is 'sf'.");
             var symbol = message['symbol'];
             // Retrieve the hidden input value if it exists
             var hiddenSymbolInput = document.querySelector('input[name="der-symbol-' + symbol + '"]');
             var hiddenSymbol = hiddenSymbolInput ? hiddenSymbolInput.value : null;
             var escapedSymbol = message['symbol'].replace(/(:|\.|\[|\]|,|=|@)/g, "\\$1");
 
-            console.log("hiddenSymbolhiddenSymbol", hiddenSymbol);
-            console.log("***************************", escapedSymbol);
+
+            // Fetch openPlData value
+            var open_qty = document.querySelector('input[name="open-qty"]').value;
+            var open_symbol = document.querySelector('input[name="open-symbol"]').value;
+            var open_traded_price = document.querySelector('input[name="open-traded-price"]').value;
+            if (symbol === open_symbol) {
+                
+                document.getElementById('openPlData').innerText = '';
+                // Update the corresponding LTP value
+                // Update the corresponding LTP value
+                var ltpValue = message['ltp'];
+                var currentValue = open_qty * ltpValue;
+                var expenseValue = open_traded_price * open_qty;
+                var plData = (currentValue - expenseValue).toFixed(2);
+                // Convert plData to a number and round it to two decimal places
+                var plDataNumber = parseFloat(plData);
+                var plDataFormatted = plDataNumber.toFixed(2);
+
+                // Determine if plData is negative or positive
+                var plDataIsNegative = plDataNumber < 0;
+
+                // Get a reference to the parent <div> element
+                var parentDivElement = document.getElementById('openPlData').parentElement;
+
+                // Update the class based on plData value
+                if (plDataIsNegative) {
+                    parentDivElement.classList.remove('alert-primary');
+                    parentDivElement.classList.add('alert-danger');
+                } else {
+                    parentDivElement.classList.remove('alert-danger');
+                    parentDivElement.classList.add('alert-success');
+                }
+
+                // Update the innerHTML of openPlData element
+                document.getElementById('openPlData').innerHTML = 'P/L : ' + plDataFormatted + '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;LTP :' + ltpValue;
+                // Check if plData is negative or positive
+                if (parseFloat(plData) < 0) {
+                    plDataElement.classList.add('danger'); // Add the 'danger' class
+                } else {
+                    plDataElement.classList.add('success'); // Add the 'success' class
+                }
+
+                // console.log("ltpValueltpValue", ltpValue);
+                var ltpElement = document.querySelector('#der-ltp-' + escapedSymbol);
+                ltpElement.textContent = "LTP: " + ltpValue;
+                // console.log("ltpElementltpElement", ltpElement);
+
+            }
+
+            // console.log("hiddenSymbolhiddenSymbol", hiddenSymbol);
+            // console.log("***************************", escapedSymbol);
             // Compare the symbols
             if (symbol === hiddenSymbol) {
                 // Update the corresponding LTP value
                 var ltpValue = message['ltp'];
-                console.log("ltpValueltpValue", ltpValue);
+                // console.log("ltpValueltpValue", ltpValue);
                 var ltpElement = document.querySelector('#der-ltp-' + escapedSymbol);
                 ltpElement.textContent = "LTP: " + ltpValue;
-                console.log("ltpElementltpElement", ltpElement);
+                // console.log("ltpElementltpElement", ltpElement);
 
             }
         } else {
             // Do something else if the type is neither 'if' nor 'sf'
-            console.log("Type is not 'if' or 'sf'.");
+            // console.log("Type is not 'if' or 'sf'.");
         }
     }
 
     var urlParts = window.location.pathname.split('/');
 
     var domain = '//' + window.location.hostname;
-    console.log(domain);
+    // console.log(domain);
 
     var lastKeyword = window.location.pathname.split('/').filter(Boolean).pop();
 
@@ -296,7 +445,7 @@
 
     // Event handler for receiving messages from the WebSocket server
     socket.onmessage = function(event) {
-        console.log("Received message:", event.data);
+        // console.log("Received message:", event.data);
         var message = event.data;
         updateData(message);
     };
@@ -311,5 +460,71 @@
 
 </script>
 
+<script>
+    // Function to refresh the page
+    function refreshPage() {
+        location.reload();
+    }
+
+    // Function to check if the current time is between 9:30 AM and 3:30 PM
+    function isBetweenWorkingHours() {
+        var now = new Date();
+        var hours = now.getHours();
+        var minutes = now.getMinutes();
+        
+        // Check if current time is between 9:30 AM and 3:30 PM
+        if ((hours > 9 || (hours === 9 && minutes >= 30)) && (hours < 15 || (hours === 15 && minutes <= 30))) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    // Set interval to refresh the page every 3 minutes (180,000 milliseconds) only if it's between working hours
+    setInterval(function() {
+        if (isBetweenWorkingHours()) {
+            refreshPage();
+        }
+    }, 180000);
+</script>
+
+<script>
+    //========================================================================================================================================
+    function fetchSessionDataAndUpdateUI() {
+        // Make AJAX request to fetch session data
+        $.ajax({
+            type: 'GET',
+            url: '{% url "get_session_data" %}',  // URL to fetch session data
+            success: function(response) {
+                // Check if session data exists
+                if (response.hasOwnProperty('open_symbol') && response.hasOwnProperty('open_qty') && response.hasOwnProperty('open_traded_price')) {
+                    // Show the container
+                    document.getElementById('plContainer').style.display = 'block';
+    
+                    // Get the data from the response
+                    var open_symbol = response.open_symbol;
+                    var open_qty = response.open_qty;
+                    var open_traded_price = response.open_traded_price;
+                    console.log("open_qtyopen_qty", open_qty,"open_traded_price", open_traded_price , "open_symbol", open_symbol)
+                    // Update the HTML elements with the retrieved data
+                    // Assign values to the hidden input fields
+                    document.querySelector('input[name="open-symbol"]').value = open_symbol;
+                    document.querySelector('input[name="open-qty"]').value = open_qty;
+                    document.querySelector('input[name="open-traded-price"]').value = open_traded_price;
+                }
+            },
+            error: function(xhr, status, error) {
+                console.error('Error fetching session data:', error);
+            }
+        });
+    }
+
+    // Call fetchSessionDataAndUpdateUI initially
+    fetchSessionDataAndUpdateUI();
+
+    // Call fetchSessionDataAndUpdateUI every 1 second
+    //setInterval(fetchSessionDataAndUpdateUI, 1000);
+    // ========================================================================================================================================
+</script>
 
 {% endblock %}

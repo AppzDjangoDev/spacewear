@@ -1,0 +1,112 @@
+{% extends 'trading_tool/html/index.html' %}
+{% load static %}
+{% block content %}
+<!-- Header End -->
+
+<div class="container-fluid" style="max-width: initial;">
+    <button class="btn btn-primary" onclick="loadPreviousMonth()">Previous Month</button>
+
+    <div class="row">
+        <div class="col-12">
+            <div class="card mt-5">
+                <div class="card-header bg-primary text-white">
+                    <h2 class="card-title">Calendar View - {{ month }} -- {{ month_name }} - {{year}}</h2>
+                    <input type="hidden" id="dynMonth" value="{{ month }}" />
+                    <input type="hidden" id="dynYear" value="{{ year }}" />
+
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-bordered" id="calendar-table">
+                            <thead>
+                                <tr class="bg-light">
+                                    <th class="text-center">Monday</th>
+                                    <th class="text-center">Tuesday</th>
+                                    <th class="text-center">Wednesday</th>
+                                    <th class="text-center">Thursday</th>
+                                    <th class="text-center">Friday</th>
+                                    <th class="text-center">Saturday</th>
+                                    <th class="text-center">Sunday</th>
+                                    <th class="text-center">WEEKLY P/L</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for week in calendar %}
+                                    <tr>
+                                        {% for day in week %}
+                                            <td class="text-center">{{ day }}</td>
+                                        {% endfor %}
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script>
+    var currentMonth = ''
+    var currentYear = ''
+    
+    function loadPreviousMonth() {
+        var currentMonth = $('#dynMonth').val();
+        var currentYear = $('#dynYear').val();
+
+
+        if (currentMonth === 1) {
+            currentMonth = 12;
+            currentYear--;
+        } else {
+            //currentMonth--;
+            console.log('currentMonthcurrentMonth', currentMonth)
+        }
+
+        $.ajax({
+            type: 'GET',
+            url: '{% url "trading_calender_view" %}',
+            data: {'prev_month': true, 'month': currentMonth, 'year': currentYear},
+            success: function(response) {
+                // Update the calendar with the data of the previous month
+                updateCalendar(response);
+                console.log("responseresponse", response)
+            },
+            error: function(xhr, status, error) {
+                console.error(xhr.responseText);
+            }
+        });
+    }
+
+    function updateCalendar(response) {
+        var calendarData = response.calendar;
+        var monthName = response.month_name;
+        var month = response.month;
+        var year = response.year;
+        console.log("responseresponse", year, response.month_name)
+        // Clear the existing table
+        $('#calendar-table tbody').empty();
+        // Update the month name
+        $('.card-title').text('Calendar View - ' + monthName + '-' + year);
+        $('#dynMonth').val(month);
+        $('#dynYear').val(year);
+
+        // Iterate over the calendar data and update the table cells
+        for (var i = 0; i < calendarData.length; i++) {
+            var week = calendarData[i];
+            var row = $('<tr></tr>');
+
+            for (var j = 0; j < week.length; j++) {
+                var cell = $('<td class="text-center"></td>').text(week[j]);
+                row.append(cell);
+            }
+
+            $('#calendar-table tbody').append(row);
+        }
+    }
+</script>
+
+
+
+{% endblock %}

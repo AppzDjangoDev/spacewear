@@ -112,11 +112,11 @@
                 </a>
               </li>
               <li class="sidebar-item">
-                <a class="sidebar-link" href="./authentication-register.html" aria-expanded="false">
+                <a class="sidebar-link" href="{% url 'trading_calender_view' %}" aria-expanded="false">
                   <span>
                     <i class="ti ti-user-plus"></i>
                   </span>
-                  <span class="hide-menu">Register</span>
+                  <span class="hide-menu">Trading Calender</span>
                 </a>
               </li>
               <li class="nav-small-cap">
@@ -151,7 +151,7 @@
     <!--  Main wrapper -->
     <div class="body-wrapper">
       <!--  Header Start -->
-      <header class="app-header">
+      <header class="app-header pt-4">
         <nav class="navbar navbar-expand-lg navbar-light">
           <ul class="navbar-nav">
             <li class="nav-item d-block d-xl-none">
@@ -166,7 +166,7 @@
               </a>
             </li> {% endcomment %}
           </ul>
-          <div class="navbar-collapse justify-content-end px-0" id="navbarNav">
+          <div class="navbar-collapse justify-content-end px-0 " id="navbarNav">
             <ul class="navbar-nav flex-row ms-auto align-items-center justify-content-end">
             
   
@@ -174,25 +174,28 @@
               {% comment %} ======================================================================================================= {% endcomment %}
             {% if options_data.data.optionsChain %}
             <div class="container-fluid p-0 ">
-                <div class="row">
-                  {% comment %} <div class="col-sm-3 my-1 "  style="display: block;">
-                    <div class="alert alert-success d-flex flex-column justify-content-center align-items-center p-0 m-0" style="height:55px;" role="alert">
-                      <p id="position" class="mb-0 fs-3 fw-bolder">P/L: </p>
+                <div class="row  justify-content-center align-items-center">
+                   <div class="col-sm-3 my-1 " id="plContainer">
+                    <div class="alert alert-primary d-flex flex-column justify-content-center align-items-center p-0 m-0" style="height:55px;" role="alert">
+                      <p id="openPlData" class="mb-0 fs-3 fw-bolder">No Positions</p>
+                      <input type="hidden" name="open-symbol" value="">
+                      <input type="hidden" name="open-qty" value="">
+                      <input type="hidden" name="open-traded-price" value="">
                       <!-- <button id="Portfolio" class="btn btn-success btn-lg btn-block w-100 h-100 fw-bold" style="border-radius: 6px;">P/L:</button> -->
                   </div>
                   
-                  </div>  {% endcomment %}
-                  <div class="col-sm-4 my-2"  style="display: block;">
+                  </div>  
+                  <div class="col-sm-3 my-2"  style="display: block;">
                     <div class="alert alert-primary p-0 m-0" style="height:65px;" role="alert">
                       <button id="trailingtotop" class="btn btn-primary btn-lg btn-block w-100 h-100 fw-bold" style="border-radius: 6px;">TRAIL TP</button>
                     </div>
                   </div> 
-                <div class="col-sm-4 my-2">
+                <div class="col-sm-3 my-2">
                   <div class="alert alert-primary p-0 m-0" style="height:65px;" role="alert">
                     <button  id="trailingwithlimit" class="btn btn-primary btn-lg btn-block w-100 h-100 m-0 fw-bold" style="border-radius: 6px;">TRAIL <i class="ti ti-arrow-up text-success"></i>{{forward_trailing_points}}</button>
                   </div>
                 </div> 
-                <div class="col-sm-4 my-2 mb-2"  style="display: block;">
+                <div class="col-sm-3 my-2"  style="display: block;">
                   <div class="alert alert-primary p-0 m-0" style="height:65px;" role="alert">
                     <button id="trailingtodown" class="btn btn-primary btn-lg btn-block w-100 h-100 m-0 fw-bold" style="border-radius: 6px;">TRAIL <i class="ti ti-arrow-down text-warning"></i>{{reverse_trailing_points}}</button>
                   </div>
@@ -294,8 +297,8 @@
 
 
       <!--  Header End -->
-      <div class="container-fluid">
-        <div class="row">
+      <div class="container-fluid ">
+        <div class="row pt-5">
           <div class="col-sm-6 col-xl-6">
             <div class="card">
               <div class="card-body">

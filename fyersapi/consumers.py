@@ -58,7 +58,7 @@ class FyersPositionDataConsumer(WebsocketConsumer):
             )
             self.fyers.connect()
         else:
-            print("Error:", response.text)
+            #print("Error:", response.text)
             self.send(text_data=f"Error: {response.text}")
 
     def disconnect(self, close_code):
@@ -70,15 +70,15 @@ class FyersPositionDataConsumer(WebsocketConsumer):
         self.fyers.keep_running()
 
     def onPosition(self, message):
-        print("Position Response:", message)
+        #print("Position Response:", message)
         self.send(text_data=f"Position Response: {message}")
 
     def onerror(self, message):
-        print("Error:", message)
+        #print("Error:", message)
         self.send(text_data=f"Error: {message}")
 
     def onclose(self, message):
-        print("Connection closed:", message)
+        #print("Connection closed:", message)
         self.send(text_data=f"Connection closed: {message}")
 
     @staticmethod
@@ -97,7 +97,7 @@ class FyersIndexDataConsumer(WebsocketConsumer):
         self.accept()
 
         self.last_keyword = self.scope['url_route']['kwargs']['last_keyword']  # Extract the last keyword from URL
-        print("last_keywordlast_keyword", self.last_keyword)
+        #print("last_keywordlast_keyword", self.last_keyword)
         self.symbols = ["NSE:" + self.last_keyword + "-INDEX"]
         # Generate app_id_hash
         self.app_id = settings.FYERS_APP_ID
@@ -125,13 +125,13 @@ class FyersIndexDataConsumer(WebsocketConsumer):
             json_response = response.json()
             self.access_token = json_response.get("access_token")
             self.getoptionsymbols = self.getOptionStrikes()
-            # print("=================================================", self.getoptionsymbols)
+            # #print("=================================================", self.getoptionsymbols)
             # Connect to FyersOrderSocket with the new access token
             self.fyers = data_ws.FyersDataSocket(
                 access_token=self.access_token,       # Access token in the format "appid:accesstoken"
                 log_path="",                     # Path to save logs. Leave empty to auto-create logs in the current directory.
                 litemode=True,                  # Lite mode disabled. Set to True if you want a lite response.
-                write_to_file=False,              # Save response in a log file instead of printing it.
+                write_to_file=False,              # Save response in a log file instead of #printing it.
                 reconnect=True,                  # Enable auto-reconnection to WebSocket on disconnection.
                 on_connect=self.on_open,               # Callback function to subscribe to data upon connection.
                 on_close=self.on_close,                # Callback function to handle WebSocket connection close events.
@@ -141,13 +141,13 @@ class FyersIndexDataConsumer(WebsocketConsumer):
 
             self.fyers.connect()
         else:
-            print("Error:", response.text)
+            #print("Error:", response.text)
             self.send(text_data=f"Error: {response.text}")
 
     def disconnect(self, close_code):
         # Unsubscribe from symbols when disconnecting WebSocket
-        print("Disconnecting WebSocket")
-        print("***********************", self.allsymbols)
+        #print("Disconnecting WebSocket")
+        #print("***********************", self.allsymbols)
         data_type = "SymbolUpdate"
         self.fyers.unsubscribe(symbols=self.allsymbols, data_type=data_type)
         # Close the WebSocket connection
@@ -162,7 +162,7 @@ class FyersIndexDataConsumer(WebsocketConsumer):
         data_type = "SymbolUpdate"
         self.allsymbols = self.symbols+self.getoptionsymbols
 
-        print("self.allsymbolsself.allsymbols", self.allsymbols)
+        #print("self.allsymbolsself.allsymbols", self.allsymbols)
 
         # Subscribe to the specified symbols and data type
         self.fyers.subscribe(symbols=self.allsymbols, data_type=data_type)
@@ -170,15 +170,15 @@ class FyersIndexDataConsumer(WebsocketConsumer):
         self.fyers.keep_running()
 
     def on_message(self, message):
-        print("Message:", message)
+        #print("Message:", message)
         self.send(text_data=f"{message}")
 
     def on_error(self, message):
-        print("Error:", message)
+        #print("Error:", message)
         self.send(text_data=f"Error: {message}")
 
     def on_close(self, message):
-        print("Connection closed:", message)
+        #print("Connection closed:", message)
         data_type = "SymbolUpdate"
         self.fyers.unsubscribe(symbols=self.allsymbols, data_type=data_type)
         self.send(text_data=f"Connection closed: {message}")
@@ -193,7 +193,7 @@ class FyersIndexDataConsumer(WebsocketConsumer):
         response=None
         # Initialize the FyersModel instance with your client_id, access_token, and enable async mode
         self.fyers = fyersModel.FyersModel(client_id=self.app_id, is_async=False, token=self.access_token, log_path="")
-        print("self.symbolsself.symbols", type(self.symbols))
+        #print("self.symbolsself.symbols", type(self.symbols))
         self.ce_symbols=[]
         self.pe_symbols=[]
       
@@ -214,15 +214,15 @@ class FyersIndexDataConsumer(WebsocketConsumer):
                 }
 
                 response = self.fyers.optionchain(data=options_data)
-                # print("77777777777777777777777777777777777777777777777777777777777777777777", response)
+                # #print("77777777777777777777777777777777777777777777777777777777777777777777", response)
                 # Filter optionsChain data for option type 'PE'
                 pe_options = [option for option in response['data']['optionsChain'] if option['option_type'] == 'PE']
                 # Sort the filtered data by strike_price in ascending order
                 pe_options_sorted = sorted(pe_options, key=lambda x: x['strike_price'], reverse=True)
-                print("**************************************")
-                # print(pe_options_sorted)
+                #print("**************************************")
+                # #print(pe_options_sorted)
                 self.pe_symbols = [option['symbol'] for option in pe_options_sorted]
-                print("**************************************")
+                #print("**************************************")
 
 
 
@@ -230,18 +230,18 @@ class FyersIndexDataConsumer(WebsocketConsumer):
                 ce_options = [option for option in response['data']['optionsChain'] if option['option_type'] == 'CE']
                 # Sort the filtered data by strike_price in ascending order
                 ce_options_sorted = sorted(ce_options, key=lambda x: x['strike_price'])
-                print("**************************************")
-                # print(ce_options_sorted)
+                #print("**************************************")
+                # #print(ce_options_sorted)
                 self.ce_symbols = [option['symbol'] for option in ce_options_sorted]
                 symbol_list =  self.ce_symbols + self.pe_symbols
-                print("**************************************")
+                #print("**************************************")
                 return symbol_list
             
 
         except (KeyError, AttributeError, IndexError) as e:
             # Handle the error gracefully
             error_message = f'Error occurred: {str(e)}'
-            print("Error occurred while fetching expiry data:", error_message)
+            #print("Error occurred while fetching expiry data:", error_message)
           
         return response
 
