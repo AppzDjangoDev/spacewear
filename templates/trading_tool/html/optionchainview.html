@@ -59,12 +59,15 @@
                 {% endfor %}
             </div>
         </div>
+
+
+
         <div class="container-fluid mb-2 ">
             <div class="row">   
             <div class="col-sm-6">
             {% for option in ce_options_with_serial %}
                 {% if option.option_type == "CE"%}
-                <div class="alert alert-success" role="alert">
+                <div class="alert alert-success" role="alert" style="--bs-alert-padding-x: 10px;--bs-alert-padding-y: 10px;">
                     <div class="row">
                         <div class="col-4 d-flex justify-content-center align-items-center">
                             <button class="btn btn-success btn-lg btn-block w-100 h-100 fw-bolder buy-button" style="border-radius: 6px">Buy</button>
@@ -75,11 +78,15 @@
                             <input type="hidden" name="opt-symbol" value="{{ option.symbol }}">
                             <h5 class="card-title text-muted fw-bolder mb-0">
                                 {% if option.serial_number == 1 %}
+                                    <span style="color: #6a7dfb; font-size: 70%;">ITM&nbsp;2</span>
+                                {% elif option.serial_number == 2 %}
                                     <span style="color: #6a7dfb; font-size: 70%;">ITM&nbsp;1</span>
                                 {% elif option.serial_number == 3 %}
-                                    <span style="color: #6a7dfb; font-size: 70%;">OTM&nbsp;1</span>
-                                {% elif option.serial_number == 2  %}
                                     <span style="color: #6a7dfb; font-size: 70%;">ATM</span>
+                                {% elif option.serial_number == 4 %}
+                                    <span style="color: #6a7dfb; font-size: 70%;">OTM&nbsp;1</span>
+                                {% elif option.serial_number == 5  %}
+                                    <span style="color: #6a7dfb; font-size: 70%;">OTM&nbsp;2</span>
                                 {% endif %}
                                 <br>
                                 CE&nbsp;{{ option.strike_price }}
@@ -99,7 +106,7 @@
             <div class="col-sm-6">
                 {% for option in pe_options_with_serial %}
                 {% if option.option_type == "PE"%}
-                    <div class="alert alert-danger" role="alert">
+                    <div class="alert alert-danger" role="alert"  style="--bs-alert-padding-x: 10px;--bs-alert-padding-y: 10px;">
                         <div class="row">
                             <div class="col-4 d-flex justify-content-center align-items-center">
                                 <button class="btn btn-success btn-lg btn-block w-100 h-100 fw-bolder buy-button" style="border-radius: 6px">Buy</button>
@@ -109,11 +116,15 @@
                                 <input type="hidden" name="opt-symbol" value="{{ option.symbol }}">
                                 <h5 class="card-title text-muted fw-bolder mb-0">
                                     {% if option.serial_number == 1 %}
+                                        <span style="color: #6a7dfb; font-size: 70%;">ITM&nbsp;2</span>
+                                    {% elif option.serial_number == 2 %}
                                         <span style="color: #6a7dfb; font-size: 70%;">ITM&nbsp;1</span>
                                     {% elif option.serial_number == 3 %}
-                                        <span style="color: #6a7dfb; font-size: 70%;">OTM&nbsp;1</span>
-                                    {% elif option.serial_number == 2  %}
                                         <span style="color: #6a7dfb; font-size: 70%;">ATM</span>
+                                    {% elif option.serial_number == 4 %}
+                                        <span style="color: #6a7dfb; font-size: 70%;">OTM&nbsp;1</span>
+                                    {% elif option.serial_number == 5  %}
+                                        <span style="color: #6a7dfb; font-size: 70%;">OTM&nbsp;2</span>
                                     {% endif %}
                                     <br>
                                     PE&nbsp;{{ option.strike_price }}
@@ -134,6 +145,9 @@
             </div>
         </div>
         </div>
+
+
+
     </div>
 </div>
 
@@ -375,7 +389,6 @@
                 
                 document.getElementById('openPlData').innerText = '';
                 // Update the corresponding LTP value
-                // Update the corresponding LTP value
                 var ltpValue = message['ltp'];
                 var currentValue = open_qty * ltpValue;
                 var expenseValue = open_traded_price * open_qty;
@@ -400,7 +413,7 @@
                 }
 
                 // Update the innerHTML of openPlData element
-                document.getElementById('openPlData').innerHTML = 'P/L : ' + plDataFormatted + '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;LTP :' + ltpValue;
+                document.getElementById('openPlData').innerHTML = 'P/L: ' + plDataFormatted + '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;LTP:' + ltpValue;
                 // Check if plData is negative or positive
                 if (parseFloat(plData) < 0) {
                     plDataElement.classList.add('danger'); // Add the 'danger' class

@@ -209,12 +209,12 @@ class FyersIndexDataConsumer(WebsocketConsumer):
             if first_expiry_ts:
                 options_data = {
                     "symbol":self.symbols[0],
-                    "strikecount": 1,
+                    "strikecount": 2,
                     "timestamp": first_expiry_ts
                 }
 
                 response = self.fyers.optionchain(data=options_data)
-                # #print("77777777777777777777777777777777777777777777777777777777777777777777", response)
+                print("77777777777777777777777777777777777777777777777777777777777777777777", response)
                 # Filter optionsChain data for option type 'PE'
                 pe_options = [option for option in response['data']['optionsChain'] if option['option_type'] == 'PE']
                 # Sort the filtered data by strike_price in ascending order

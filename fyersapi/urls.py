@@ -12,10 +12,13 @@ urlpatterns = [
     path('get_accese_token_store_session', views.get_accese_token_store_session, name='get_accese_token_store_session'),
     path('get_user_profile', views.ProfileView.as_view(), name='get_user_profile'),
 
-    path('trading-calender-view', views.CalenderView.as_view(), name='trading_calender_view'),
 
 
-    
+
+
+    path('trading-calender-view', views.TradingCalenderView.as_view(), name='trading_calender_view'),
+    path('sod-reporting-view', views.SOD_ReportingView.as_view(), name='sod_reporting_view'),
+    path('eod-reporting-view', views.EOD_ReportingView.as_view(), name='eod_reporting_view'),
 
     path('close_all_positions', views.close_all_positions, name='close_all_positions'),
     path('update-data-instance/', views.update_data_instance, name='update_data_instance'),

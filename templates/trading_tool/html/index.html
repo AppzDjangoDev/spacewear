@@ -52,15 +52,6 @@
                 <i class="ti ti-dots nav-small-cap-icon fs-4"></i>
                 <span class="hide-menu">OPTION CHAIN</span>
               </li>
-              {% comment %} <li class="sidebar-item">
-                <a class="sidebar-link" href="{% url 'options_chain_view' %}" aria-expanded="false">
-                  <span>
-                    <i class="ti ti-article"></i>
-                  </span>
-                  <span class="hide-menu">MIDCAP NIFTY</span>
-                </a>
-              </li> {% endcomment %}
-
               <li class="sidebar-item">
                 <a class="sidebar-link" href="{% url 'options_chain_view' slug='MIDCPNIFTY' %}" aria-expanded="false">
                     <span><i class="ti ti-article"></i></span>
@@ -91,14 +82,6 @@
                   <span class="hide-menu">NIFTY</span>
                 </a>
               </li>
-              {% comment %} <li class="sidebar-item">
-                <a class="sidebar-link" href="./ui-typography.html" aria-expanded="false">
-                  <span>
-                    <i class="ti ti-typography"></i>
-                  </span>
-                  <span class="hide-menu">Typography</span>
-                </a>
-              </li> {% endcomment %}
               <li class="nav-small-cap">
                 <i class="ti ti-dots nav-small-cap-icon fs-4"></i>
                 <span class="hide-menu">REPORT</span>
@@ -116,27 +99,27 @@
                   <span>
                     <i class="ti ti-user-plus"></i>
                   </span>
-                  <span class="hide-menu">Trading Calender</span>
+                  <span class="hide-menu">Trading Journel</span>
                 </a>
               </li>
               <li class="nav-small-cap">
                 <i class="ti ti-dots nav-small-cap-icon fs-4"></i>
-                <span class="hide-menu">EXTRA</span>
+                <span class="hide-menu">REPORTING</span>
               </li>
               <li class="sidebar-item">
-                <a class="sidebar-link" href="./icon-tabler.html" aria-expanded="false">
+                <a class="sidebar-link" href="{% url 'sod_reporting_view' %}" aria-expanded="false">
                   <span>
                     <i class="ti ti-mood-happy"></i>
                   </span>
-                  <span class="hide-menu">Icons</span>
+                  <span class="hide-menu">SOD - REPORTING</span>
                 </a>
               </li>
               <li class="sidebar-item">
-                <a class="sidebar-link" href="./sample-page.html" aria-expanded="false">
+                <a class="sidebar-link"href="{% url 'eod_reporting_view' %}" aria-expanded="false">
                   <span>
                     <i class="ti ti-aperture"></i>
                   </span>
-                  <span class="hide-menu">Sample Page</span>
+                  <span class="hide-menu">EOD - REPORTING</span>
                 </a>
               </li>
             </ul>
@@ -154,26 +137,17 @@
       <header class="app-header pt-4">
         <nav class="navbar navbar-expand-lg navbar-light">
           <ul class="navbar-nav">
-            <li class="nav-item d-block d-xl-none">
+            <li class="nav-item d-block d-xl-none" >
               <a class="nav-link sidebartoggler nav-icon-hover" id="headerCollapse" href="javascript:void(0)">
                 <i class="ti ti-menu-2"></i>
               </a>
             </li>
-            {% comment %} <li class="nav-item">
-              <a class="nav-link nav-icon-hover" href="javascript:void(0)">
-                <i class="ti ti-bell-ringing"></i>
-                <div class="notification bg-primary rounded-circle"></div>
-              </a>
-            </li> {% endcomment %}
           </ul>
           <div class="navbar-collapse justify-content-end px-0 " id="navbarNav">
-            <ul class="navbar-nav flex-row ms-auto align-items-center justify-content-end">
-            
-  
-
-              {% comment %} ======================================================================================================= {% endcomment %}
+            <ul class="navbar-nav flex-row ms-auto align-items-center justify-content-end" style="width: -webkit-fill-available;">
+            {% comment %} ======================================================================================================= {% endcomment %}
             {% if options_data.data.optionsChain %}
-            <div class="container-fluid p-0 ">
+            <div class="container-fluid p-0 mt-1 ">
                 <div class="row  justify-content-center align-items-center">
                    <div class="col-sm-3 my-1 " id="plContainer">
                     <div class="alert alert-primary d-flex flex-column justify-content-center align-items-center p-0 m-0" style="height:55px;" role="alert">
@@ -203,66 +177,13 @@
 
               </div>
             </div> 
-            {% comment %} <button  style="height: 60px; color=blue;" id="index" disabled class="btn btn-Primary btn-block w-100 h-10 fw-bolder fs-4"> {{text}}</button> {% endcomment %}
-
             {% endif%}
-              {% comment %} ======================================================================================================= {% endcomment %}
-               {% comment %} <script>
-                // Function to update the data container with the received message
-                function updatePosData(message) {
-                    var dataContainer = document.getElementById("data-position");
-                    var messageElement = document.querySelector('#position'); // Selecting the existing h1 element
-                    console.log("ppppppppppppppppppppppppp", message);
-                    if (message.includes("Error:")) {
-                        console.log("Error exists in the string.");
-                        // Remove the 'display: none;' style
-                    } else {
-                        message = message.replace(/'/g, '"');
-                        var messageObject = JSON.parse(message);
-                        if (messageObject.hasOwnProperty('code') && messageObject.code === 1605) {
-                            // Remove the 'display: none;' style
-                            index_container.style.display = 'block';
-                            messageElement.textContent = "No open positions";
-                        } else if (messageObject.hasOwnProperty('positions') && Object.keys(messageObject.positions).length !== 0) {
-                            console.log("The JSON data contains positions.", messageObject);
-                            var pl_unrealized = messageObject['pl_unrealized'];
-                            var positionData = "P/L: " + pl_unrealized;
-                            messageElement.textContent = positionData;
-                        } else {
-                            console.log("Some error occurred.");
-                        }
-                    }
-                }
-                var domain = '//' + window.location.hostname ;
-                // WebSocket connection using secure WebSocket (wss://) protocol
-                var socket = new WebSocket("wss://"+domain+"/ws/fyerspositionsdata/");
-            
-                // Event handler for receiving messages from the WebSocket server
-                socket.onmessage = function(event) {
-                    console.log("Received message:", event);
-                    var message = event.data;
-                    updatePosData(message);
-                };
-            
-                // Explicitly close the connection when navigating away
-                window.addEventListener('beforeunload', function() {
-                    socket.close();
-                });
-            </script>  {% endcomment %}
-            {% comment %} ======================================================================================================= {% endcomment %}
-
             {% for item in fund_data.fund_limit %}
             {% if item.id == 10 %}
                 <a href="#" class="btn btn-success fw-semibold lh-sm my-4 mx-2">Available Balance:{{ item.equityAmount|floatformat:2 }}</a>
                 <button id="updatelatestdata" target="_blank" class="btn btn-primary fw-semibold lh-sm my-4 mx-2">Update Now</button>
             {% endif %}
             {% endfor %}
-              
-              {% comment %} <a href="{% url 'explore_more' %}" class="btn btn-succes">Test</a> {% endcomment %}
-             
-
-              {% comment %} <a href="{% url "get_accese_token_store_session" %}" class="btn btn-success mx-2">Get Access</a> {% endcomment %}
-              {% comment %} <a href="{% url "get_user_profile" %}" class="btn btn-success mx-2">Get Profile</a> {% endcomment %}
               <li class="nav-item dropdown">
                 <a class="nav-link nav-icon-hover" href="javascript:void(0)" id="drop2" data-bs-toggle="dropdown"
                   aria-expanded="false">
@@ -282,7 +203,6 @@
                       <i class="ti ti-list-check fs-6"></i>
                       <p class="mb-0 fs-3">Trade Configurations</p>
                     </a>
-                    <button class="btn btn-outline-primary mx-3 mt-2 d-block" id="disconnect-reconnect-btn">Reconnect</button>
                     <a href="{% url 'logout' %}" class="btn btn-outline-primary mx-3 mt-2 d-block">Logout</a>
                   </div>
                 </div>
@@ -304,7 +224,7 @@
               <div class="card-body">
                 <div class="row alig n-items-start">
                   <div class="col-8">
-                    <h5 class="card-title mb-9 fw-semibold">Today Earnings </h5>
+                    <h5 class="card-title mb-9 fw-semibold">Today Earnings</h5>
                     <h4 class="fw-semibold mb-3" style="color: {% if positions_data.overall.pl_realized >= 0 %}#03C03C{% else %}red{% endif %}">
                       <p class="fs-2 mb-0" id="pl-realized" >INR</p> {{ positions_data.overall.pl_realized|floatformat:2 }}</p>
                     </h4>
@@ -313,7 +233,7 @@
                         class="me-2 rounded-circle bg-light-danger round-20 d-flex align-items-center justify-content-center">
                         <i class="ti ti-arrow-up-right text-success"></i>
                       </span>
-                      <a href="{% url "brokerconnect" %}" class="btn btn-success mx-2">Refresh</a>
+                      <a href="{% url "sod_reporting_view" %}" class="btn btn-success mx-2">SOD</a>
                     </div>
                   </div>
                   <div class="col-4">

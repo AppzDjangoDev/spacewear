@@ -20,7 +20,7 @@ from django.utils import timezone
 from django.db.models import Q
 from django.views.generic.edit import FormView
 from django.urls import reverse_lazy
-from .forms import TradingConfigurationsForm
+from .forms import EOD_DataForm, SOD_DataForm, TradingConfigurationsForm
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import render
 
@@ -241,16 +241,149 @@ class ProfileView(LoginRequiredMixin, View):
       return render(request, 'trading_tool/html/profile_view.html')
 
 
-from datetime import datetime, timedelta
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.urls import reverse_lazy
+from django.views.generic import FormView
+from .forms import SOD_DataForm
+from .models import SOD_EOD_Data  # Import your model
+
+class SOD_ReportingView(LoginRequiredMixin, FormView):
+    login_url = '/login'
+    template_name = 'trading_tool/html/sod_form.html'
+    form_class = SOD_DataForm
+    success_url = reverse_lazy('dashboard')
+
+    def get_initial_data(self):
+        initial = super().get_initial()
+        # Retrieve slug data from URL parameters
+        # Load initial value for week_no
+        data_instance = get_data_instance(self.request)
+        fund_data = data_instance.funds()
+        print("fund_datafund_data", fund_data)
+        current_date = datetime.date.today()
+        initial_week_no = current_date.isocalendar()[1]
+        initial['week_no'] = initial_week_no
+        total_balance = 0
+
+        for item in fund_data.get('fund_limit', []):
+            if item.get('title') == 'Total Balance':
+                total_balance = item.get('equityAmount')
+                break
+
+        print("Total Balance:", total_balance)
+        initial['trading_date'] = current_date
+        initial['opening_balance'] = total_balance
+
+        return initial
+
+    def get_initial(self):
+        return self.get_initial_data()
+
+    def form_valid(self, form):
+        # Check if a record with the same trading_date already exists
+        trading_date = form.cleaned_data.get('trading_date')
+        if SOD_EOD_Data.objects.filter(trading_date=trading_date).exists():
+            return JsonResponse({'error': 'A record for this trading date already exists.'}, status=400)
+        
+        form.save()
+        return JsonResponse({'success': 'Form submitted successfully.'})
+
+    def form_invalid(self, form):
+        errors = form.errors.as_json()
+        return JsonResponse({'errors': errors}, status=400)
+
+
+
+class EOD_ReportingView(LoginRequiredMixin, FormView):
+    login_url = '/login'
+    template_name = 'trading_tool/html/eod_form.html'
+    form_class = EOD_DataForm
+    success_url = reverse_lazy('dashboard')
+
+    def get_initial_data(self):
+        initial = super().get_initial()
+        # Retrieve slug data from URL parameters
+        # Load initial value for week_no
+        data_instance = get_data_instance(self.request)
+        fund_data = data_instance.funds()
+        order_data = data_instance.orderbook()
+        total_order_status = sum(1 for order in order_data["orderBook"] if order["status"] == 2)
+        total_balance = 0
+        realised_profit = 0
+        total_order_status = 0 
+        default_brokerage = settings.DEFAULT_BROKERAGE
+        exp_brokerage = default_brokerage * total_order_status
+
+        for item in fund_data.get('fund_limit', []):
+            if item.get('title') == 'Total Balance':
+                total_balance = item.get('equityAmount')
+            if item.get('title') == 'Realized Profit and Loss':
+                realised_profit = item.get('equityAmount')
+                break
+
+        initial['day_exp_brokerage'] = exp_brokerage
+        initial['day_order_count'] = total_order_status
+        initial['day_p_and_l'] = realised_profit
+        initial['closing_balance'] = total_balance
+        return initial
+
+    def get_initial(self):
+        return self.get_initial_data()
+
+    def form_valid(self, form):
+        # Check if a record with the same trading_date already exists
+        trading_date = datetime.date.today()
+        existing_instance = SOD_EOD_Data.objects.filter(trading_date=trading_date).first()
+        print("existing_instance", existing_instance)
+        
+        if existing_instance:
+            # If a record exists, update the existing instance with the form data
+            for field in form.Meta.fields:
+                setattr(existing_instance, field, form.cleaned_data[field])
+            existing_instance.save()
+            return JsonResponse({'success': 'Form data updated successfully.'})
+        else:
+            # If no record exists, save the form data as a new instance
+            form.save()
+            return JsonResponse({'success': 'Form submitted successfully.'})
+
+    def form_invalid(self, form):
+        errors = form.errors.as_json()
+        return JsonResponse({'errors': errors}, status=400)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 import calendar
 from django.shortcuts import render
 from django.views import View
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import JsonResponse
-from django.conf import settings   
+from django.conf import settings  
 
-class CalenderView(LoginRequiredMixin, View):
+
+class TradingCalenderView(LoginRequiredMixin, View):
     login_url = '/login'
+
+    def get_first_last_dates(self, year, month):
+        first_date = datetime.datetime(year, month, 1).strftime('%Y-%m-%d')
+        last_date = (datetime.datetime(year, month, calendar.monthrange(year, month)[1])
+                     .strftime('%Y-%m-%d'))
+        return first_date, last_date
 
     def get(self, request):
         client_id = settings.FYERS_APP_ID
@@ -266,36 +399,87 @@ class CalenderView(LoginRequiredMixin, View):
             response = fyers.get_profile()
 
             # Get current month calendar
-            now = datetime.now()
+            now = datetime.datetime.now()
             year = now.year
             month = now.month
             cal = calendar.monthcalendar(year, month)
             month_name = calendar.month_name[month]
+            first_date, last_date = self.get_first_last_dates(year, month)
 
-            if request.is_ajax() and 'prev_month' in request.GET:
+
+            if request.is_ajax():
                 # If the request is AJAX and it's for the previous month data
                 year = request.GET.get('year')
                 month = request.GET.get('month')
+                if  'prev_month' in request.GET:
+                    year, month = self.calculate_previous_month(int(year), int(month))  # Function to calculate the previous month
+                elif 'next_month' in request.GET:
+                    year, month = self.calculate_next_month(int(year), int(month))  # Function to calculate the previous month
 
-                print("#########################################", month, year)
-
-                year, month = self.calculate_previous_month(int(year), int(month))  # Function to calculate the previous month
                 cal = calendar.monthcalendar(year, month)
-                print("calendarcalendar", cal)
                 month_name = calendar.month_name[month]
-                return JsonResponse({'calendar': cal, 'month_name': month_name, 'month': month, 'year': year})
+                first_date, last_date = self.get_first_last_dates(year, month)
+                # Iterate over each week in the calendar data
+                for week in cal:
+                    # Check if the first day of the week is valid
+                    if week[6]  != 0:
+                        # If the first day is None, indicating days outside the month, find the first valid day
+                        for day in week:
+                            if day  != 0:
+                                week_number = self.get_week_of_year(year, month, day)
+                                week.append(week_number)
+                                break
+                    else:
+                        # Calculate week number for the first day of the week
+                        week_number = self.get_week_of_year(year, month, week[0])
+                        # Append week number to the week list
+                        week.append(week_number)
+
+                return JsonResponse({'calendar': cal, 'month_name': month_name, 'month': month, 'year': year, 'first_date': first_date, 'last_date': last_date})
+        
+
+    
+
+            # Iterate over each week in the calendar data
+            for week in cal:
+                # Check if the first day of the week is valid
+                if week[6]  != 0:
+                    # If the first day is None, indicating days outside the month, find the first valid day
+                    for day in week:
+                        if day  != 0:
+                            week_number = self.get_week_of_year(year, month, day)
+                            week.append(week_number)
+                            break
+                else:
+                    # Calculate week number for the first day of the week
+                    week_number = self.get_week_of_year(year, month, week[0])
+                    # Append week number to the week list
+                    week.append(week_number)
 
             context = {
                 'calendar': cal, 
                 'month_name': month_name,
                 'month': month,
-                'year': year
+                'year': year,
+                'first_date': first_date,
+                'last_date': last_date
             }
             return render(request, 'trading_tool/html/calender_view.html', context)
         
         else:
             print("no access token")
             return render(request, 'trading_tool/html/calender_view.html')
+
+    def calculate_next_month(self, year, month):
+        # Calculate the next month
+        month += 1
+        if month > 12:
+            # If the current month is December, go to the next year and set the month to January
+            year += 1
+            month = 1
+
+        return year, month
+
 
     def calculate_previous_month(self, year, month):
         # Calculate the previous month
@@ -307,12 +491,16 @@ class CalenderView(LoginRequiredMixin, View):
 
         return year, month
 
-
-   
+    def get_week_of_year(self, year, month, day):
+        # Calculate the nth week of the year if the day is valid for the month
+        if 1 <= day <= calendar.monthrange(year, month)[1]:
+            week_number = datetime.datetime(year, month, day).isocalendar()[1]
+            return week_number
+        else:
+            return None  # Return None if the day is outside the valid range for the month
 
 
 from django.http import JsonResponse
-
 class OrderHistory(LoginRequiredMixin, View):
     login_url = '/login'
 
@@ -371,22 +559,6 @@ class OrderHistory(LoginRequiredMixin, View):
         return render(request, 'trading_tool/html/order_history.html', context)
 
 
-    
-# class OrderHistory(LoginRequiredMixin, View):
-#     login_url = '/login'  # Replace '/login/' with your actual login URL
-
-#     def get(self, request):
-#         context = {}
-#         data_instance = get_data_instance(request)
-#         order_data = data_instance.orderbook()
-#         print("order_dataorder_dataorder_dataorder_data", order_data)
-#         # order_data = TradingData.objects.filter(category='ORDERS')
-#         paginator = Paginator(order_data, 20)  # Show 20 items per page
-#         page_number = request.GET.get('page')
-#         page_obj = paginator.get_page(page_number)
-#         context['order_history_data'] = page_obj
-#         return render(request, 'trading_tool/html/order_history.html', context)
-
 class OptionChainView(LoginRequiredMixin, View):
     login_url = '/login'
 
@@ -399,7 +571,7 @@ class OptionChainView(LoginRequiredMixin, View):
         reverse_trailing_points = confData.reverse_trailing_points
         data = {
             "symbol": "NSE:" + slug + "-INDEX",
-            "strikecount": 1,
+            "strikecount": 2,
         }
         try:
             expiry_response = data_instance.optionchain(data=data)
@@ -415,7 +587,7 @@ class OptionChainView(LoginRequiredMixin, View):
 
         options_data = {
             "symbol": "NSE:" + slug + "-INDEX",
-            "strikecount": 1,
+            "strikecount": 2,
             "timestamp": first_expiry_ts
         }
         try:
@@ -476,44 +648,6 @@ class OptionChainView(LoginRequiredMixin, View):
         return render(request, template, context)
 
 
-# class OptionChainView(LoginRequiredMixin,View):
-#     login_url = '/login'
-#     def get(self, request, slug):  # Modify to accept 'slug' parameter
-#         context = {}
-#         template = 'trading_tool/html/optionchainview.html'
-#         data_instance = get_data_instance(request)
-#         confData = TradingConfigurations.objects.first()
-#         forward_trailing_points = confData.forward_trailing_points
-#         reverse_trailing_points = confData.reverse_trailing_points
-#         data = {
-#             "symbol":"NSE:"+slug+"-INDEX" ,  # Update 'symbol' to use 'slug' parameter
-#             "strikecount": 1,
-#             # "timestamp": next_thursday_timestamp
-#         }
-#         try:
-#             expiry_response = data_instance.optionchain(data=data)
-#         except AttributeError as e:
-#             expiry_response = {'code': -1, 'message': f'Error occurred: {str(e)}', 's': 'error'}
-#             print("Error occurred while fetching fund data:", e)
-#             return render(request, template, context)
-
-
-            
-#         first_expiry_ts = expiry_response['data']['expiryData'][0]['expiry']
-#         first_expiry_date = expiry_response['data']['expiryData'][0]['date']
-#         options_data = {
-#             "symbol":"NSE:"+slug+"-INDEX" ,  # Update 'symbol' to use 'slug' parameter
-#             "strikecount": 1,
-#             "timestamp": first_expiry_ts
-#         }
-#         print("options_dataoptions_dataoptions_dataoptions_dataoptions_data", options_data)
-#         print("data_instance", )
-#         response = data_instance.optionchain(data=options_data)
-#         context['forward_trailing_points'] = forward_trailing_points
-#         context['reverse_trailing_points'] = reverse_trailing_points
-#         context['expiry_response'] = first_expiry_date
-#         context['options_data'] = response
-#         return render(request, template, context)
 
 def update_latest_data(request):
     # Call API to get data
@@ -676,202 +810,6 @@ def instantBuyOrderWithSL(request):
     else:
         message = "Some Error Occurred Before Execution"
         return JsonResponse({'response': message})
-
-# def instantBuyOrderWithSL(request):
-#     if request.method == 'POST':
-#         # Retrieve values from POST data
-#         data_instance = get_data_instance(request)
-#         der_symbol = request.POST.get('der_symbol')
-#         ex_symbol = request.POST.get('ex_symbol')
-#         get_lot_count = get_deafult_lotsize(ex_symbol)
-#         # get config data from table 
-#         trade_config_data = TradingConfigurations.objects.first()
-#         order_qty = trade_config_data.default_order_qty*get_lot_count
-#         # Preparing Order Data 
-#         data = {
-#             "symbol":der_symbol,
-#             "qty": order_qty ,
-#             "type":2, # Market Order
-#             "side":1, # Buy
-#             "productType":"INTRADAY",
-#             "validity":"DAY",
-#             "offlineOrder":False
-#         }
-#         # order Placement
-#         response = data_instance.place_order(data=data)
-#         print("BUY ORDER RESPONSE :", response["code"])
-#         # check response status success
-#         if response["code"] == 1101:
-#             allOrderData = data_instance.orderbook()
-#             # Find the order with status 6, if any which is PENDING
-#             order_with_status_6 = next((order for order in allOrderData["orderBook"] if order['status'] == 6 and order["symbol"] == der_symbol), None)
-#             print("CHECK PENDING ORDERS:", order_with_status_6)
-#             if order_with_status_6:
-#                 print("orders_with_status_6orders_with_status_6", order_with_status_6["id"])
-#                 exst_qty = order_with_status_6['qty']
-#                 orderId = order_with_status_6['id']
-#                 new_qty = order_qty + exst_qty
-#                 # modify existing sl order 
-#                 modify_data = {
-#                     "id":orderId, 
-#                     "type":4, 
-#                     "qty": new_qty
-#                 }
-#                 print("*******************************************")
-#                 print("OrderID :", orderId)
-#                 print("Symbol :", der_symbol)
-#                 print("Existing Qty:", exst_qty)
-#                 print("New Qty :", new_qty)
-#                 print("*******************************************")
-#                 modify_response = data_instance.modify_order(data=modify_data)
-#                 return JsonResponse({'response': modify_response["message"]})
-#             else:
-#                 # Here We need to Place Stoploss Order with default Stoploss price 
-#                 buy_order_id = response["id"]
-#                 print("BUY ORDER ID:", buy_order_id)
-#                 buy_order_data = {"id":buy_order_id}
-#                 get_buy_orderdata = data_instance.orderbook(data=buy_order_data)
-#                 # get_buy_orderdata = {
-#                 #     "code": 200,
-#                 #     "message": "",
-#                 #     "s": "ok",
-#                 #     "orderBook": [{
-#                 #         "clientId": "XXXXX86",
-#                 #         "exchange": 10,
-#                 #         "fyToken": "101000000014366",
-#                 #         "id": "23080444447604",
-#                 #         "offlineOrder": False,
-#                 #         "source": "W",
-#                 #         "status": 2,
-#                 #         "type": 2,
-#                 #         "pan": "",
-#                 #         "limitPrice": 8.1,
-#                 #         "productType": "INTRADAY",
-#                 #         "qty": 1,
-#                 #         "disclosedQty": 0,
-#                 #         "remainingQuantity": 0,
-#                 #         "segment": 10,
-#                 #         "symbol": "NSE:IDEA-EQ",
-#                 #         "description": "VODAFONE IDEA LIMITED",
-#                 #         "ex_sym": "IDEA",
-#                 #         "orderDateTime": "02-Aug-2023 13:01:42",
-#                 #         "side": 1,
-#                 #         "orderValidity": "DAY",
-#                 #         "stopPrice": 0,
-#                 #         "tradedPrice": 117.0,
-#                 #         "filledQty": 1,
-#                 #         "exchOrdId": "1100000024706527",
-#                 #         "message": "",
-#                 #         "ch": -0.35,
-#                 #         "chp": -4.24,
-#                 #         "lp": 7.9,
-#                 #         "orderNumStatus": "23080444447604:2",
-#                 #         "slNo": 1,
-#                 #         "orderTag": "1:Ordertag"
-#                 #     }]
-#                 # }
-#                 order_details = get_buy_orderdata["orderBook"][0]
-#                 traded_price = order_details["tradedPrice"]
-#                 traded_price=10
-#                 #************CALCULATING SL AND SL_TRIGGER****************
-#                 default_stoploss = trade_config_data.default_stoploss
-#                 stoploss_limit_slippage = trade_config_data.stoploss_limit_slippage
-#                 stoploss_price = traded_price-(traded_price*default_stoploss/100)
-#                 stoploss_price = round(stoploss_price / 0.05) * 0.05
-#                 stoploss_price = round(stoploss_price, 2)
-#                 stoploss_limit = stoploss_price-float(stoploss_limit_slippage)
-#                 stoploss_limit = round(stoploss_limit / 0.05) * 0.05
-#                 stoploss_limit = round(stoploss_limit, 2)
-#                 print("*******************************************")
-#                 print("BUY_SYMBOL:", der_symbol)
-#                 print("TRADED_PRICE_BUY", traded_price)
-#                 print("DEFAULT SL:", default_stoploss)
-#                 print("STOPLOSS:",stoploss_price)
-#                 print("STOPLOSS-LIMIT:",stoploss_limit)
-#                 print("ORDER-QUANTITY:",order_qty)
-#                 print("*******************************************")
-#                 sl_data = {
-#                     "symbol":der_symbol,
-#                     "qty":order_qty,
-#                     "type":4, # SL-L Order
-#                     "side":-1, # SELL
-#                     "productType":"INTRADAY",
-#                     "limitPrice":stoploss_limit,
-#                     "stopPrice":stoploss_price,
-#                     "validity":"DAY",
-#                     "offlineOrder":False,
-#                 }
-#                 stoploss_order_response = data_instance.place_order(data=sl_data)
-#                 print("SL ORDER RESPONSE :", stoploss_order_response)
-#                 if stoploss_order_response["code"] == 1101:
-#                     message="BUY/SL-L Placed Successfully"
-#                     return JsonResponse({'response': message})
-#                 elif response["code"] == -99:
-#                     print("The code is -99", response)
-#                     message="SL-L not Placed, Insufficient Fund"
-#                     return JsonResponse({'response': message})
-#                 else:
-#                     print("The code is not 1101", response)
-#                     return JsonResponse({'response': response["message"]})
-                
-#         elif response["code"] == -99:
-#             print("The code is -99", response)
-#             message="Insufficient Fund"
-#             return JsonResponse({'response': message})
-        
-#         else:
-#             # need ato add alert for buy order not worked 
-#             print("The code is not 1101", response)
-#             return JsonResponse({'response': response["message"]})
-
-#     else:
-#         # Handle GET request
-#         message="Some Error Occured Before Execute"
-#         return JsonResponse({'response': message})
-        
-# def trailingwithlimit(request):
-#     client_id = settings.FYERS_APP_ID
-#     access_token = request.session.get('access_token')
-#     trade_config_data = TradingConfigurations.objects.first()
-#     forwrd_trail_limit = trade_config_data.forward_trailing_points
-#     if access_token:
-#         # Initialize the FyersModel instance with your client_id, access_token, and enable async mode
-#         fyers = fyersModel.FyersModel(client_id=client_id, token=access_token, log_path="")
-#         order_data = fyers.orderbook()
-#         # Initialize an empty list to store order IDs with status 6
-#         orders_with_status_6 = []
-#         # Iterate through the orderBook
-#         for order in order_data["orderBook"]:
-#             # Check if the status is 6
-#             if order["status"] == 5:
-#                 # Append the ID to the list
-#                 orders_with_status_6.append(order["id"])
-#                 existing_stop_price = order["stopPrice"]
-#                 existing_limit_price = order["limitPrice"]
-#         new_stop_price = existing_stop_price + forwrd_trail_limit
-#         new_limit_price = existing_limit_price + forwrd_trail_limit
-#         # Check if there are orders to cancel
-#         if orders_with_status_6:
-#             # Cancel the orders
-#             orderId =orders_with_status_6[0]
-#             data = {
-#                 "id":orderId, 
-#                 "limitPrice": new_limit_price, 
-#                 "stopPrice": new_stop_price,
-#             }
-#             trailing_order_update = fyers.modify_order(data=data)
-#             # trailing_order_update = fyers.cancel_basket_orders(data=orders_with_status_6)
-#         # Code indicates successful cancellation or order not found
-#         if 'message' in trailing_order_update:
-#             message = trailing_order_update['message']
-#             messages.success(request, message)
-#             return JsonResponse({'message': message})
-#         else:
-#             # Handle the case where 'data' key is missing
-#             message = "Error: Response format is unexpected"
-#             messages.error(request, "Error: Response format is unexpected")
-#             return JsonResponse({'message': message})
-#     return redirect('dashboard')  
 
 def trailingwithlimit(request):
     client_id = settings.FYERS_APP_ID
