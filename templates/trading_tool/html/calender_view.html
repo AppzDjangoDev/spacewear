@@ -49,13 +49,13 @@
                                                 <td class="text-center {% if key == now_date and month == now_month and year == now_year %}current-date{% endif %}">
                                                     {% if key and key <= 5 %}
                                                         {% if value|first  != 0 %}
-                                                        <button id="date-button-{{ value|first }}-{{ month|stringformat:"02d" }}-{{ year }}" class="btn btn-light btn-sm btn-block fs-4 mt-1 calbtn" onclick="sendDate('{{  value|first }}-{{ month|stringformat:"02d" }}-{{ year }}', this)">{{value|first }}</button><br>
+                                                        <button id="date-button-{{ value|first }}-{{ month|stringformat:"02d" }}-{{ year }}" class="btn btn-light btn-sm btn-block fs-4 mt-1 ml-1 calbtn" onclick="sendDate('{{  value|first }}-{{ month|stringformat:"02d" }}-{{ year }}', this)">{{value|first }}</button><br>
                                                         {% if value|last > 0 %}
-                                                            <button class="btn btn-success btn-sm btn-block fs-4 mt-1 calbtn" disabled>{{ value|last }}</button>
+                                                            <button class="btn btn-success btn-sm btn-block fs-4 mt-1 ml-1 calbtn" disabled>{{ value|last }}</button>
                                                         {% elif value|last < 0 %}
-                                                            <button class="btn btn-danger btn-sm btn-block fs-4 mt-1 calbtn" disabled>{{ value|last }}</button>
+                                                            <button class="btn btn-danger btn-sm btn-block fs-4 mt-1 ml-1 calbtn" disabled>{{ value|last }}</button>
                                                         {% else %}
-                                                            <button class="btn btn-light btn-sm btn-block fs-4 mt-1 calbtn" disabled>-</button>
+                                                            <button class="btn btn-light btn-sm btn-block fs-4 mt-1 ml-1 calbtn" disabled>-</button>
                                                         {% endif %}
                                                         {% endif %}
                                                        
@@ -63,22 +63,22 @@
                                                             <input type="hidden" id="{{ value|first }}-{{ month|stringformat:"02d" }}-{{ year }}" value="{{ value|first }}-{{ month|stringformat:"02d" }}-{{ year }}" />
                                                         {% endwith %}
                                                     {% elif key and key >= 5 and key <= 7 %}
-                                                        <button class="btn btn-warning btn-sm btn-block fs-4 mt-1 calbtn" disabled>{{ value| first  }}</button>
-                                                        <button class="btn btn-light btn-sm btn-block fs-4 mt-1 calbtn" disabled>-</button>
+                                                        <button class="btn btn-warning btn-sm btn-block fs-4 mt-1 ml-1 calbtn" disabled>{{ value| first  }}</button>
+                                                        <button class="btn btn-light btn-sm btn-block fs-4 mt-1 ml-1 calbtn" disabled>-</button>
 
 
                                                     {% elif key and key >= 7 %}
                                                         
 
-                                                        <button id="week-{{ key }}" class="btn btn-primary btn-sm  fs-4 mt-1 calbtn btn-block" disabled>{{ value|first }}</button></br>
+                                                        <button id="week-{{ key }}" class="btn btn-primary btn-sm  fs-4 mt-1 ml-1 calbtn btn-block" disabled>{{ value|first }}</button></br>
 
                                                         {% if value|last > 0 %}
-                                                        <button class="btn btn-success btn-sm btn-block fs-4 mt-1 calbtn" disabled>{{ value|last }}</button>
+                                                        <button class="btn btn-success btn-sm btn-block fs-4 mt-1 ml-1 calbtn" disabled>{{ value|last }}</button>
                                                         {% elif value|last < 0 %}
-                                                            <button class="btn btn-danger btn-sm btn-block fs-4 mt-1 calbtn" disabled>{{ value|last }}</button>
+                                                            <button class="btn btn-danger btn-sm btn-block fs-4 mt-1 ml-1 calbtn" disabled>{{ value|last }}</button>
                                                        
                                                         {% else %}
-                                                            <button class="btn btn-light btn-sm btn-block fs-4 mt-1 calbtn" disabled>-</button>
+                                                            <button class="btn btn-light btn-sm btn-block fs-4 mt-1 ml-1 calbtn" disabled>-</button>
                                                         {% endif %}
 
                                                         {% endif %}
@@ -113,7 +113,7 @@
                                 <div id="order-history-table" class="table-responsive">
                                     <table class="table text-nowrap mb-0 align-middle">
                                         {% if date_wise_data %}
-                                            <thead class="text-dark fs-4 mt-1">
+                                            <thead class="text-dark fs-4 mt-1 ml-1">
                                                 <tr>
                                                     <th class="border-bottom-0">
                                                         <h6 class="fw-semibold mb-0">Opening Balance</h6>
@@ -269,12 +269,12 @@
                     var buttonClass = '';
                     var disabled = false;
                     if (j <= 4) {
-                        buttonClass = 'btn btn-light btn-lg btn-block calbtn';
+                        buttonClass = 'btn btn-light btn-lg btn-block calbtn m-1';
                     } else if (j >= 5 && j <= 6) {
-                        buttonClass = 'btn btn-warning btn-lg btn-block calbtn';
+                        buttonClass = 'btn btn-warning btn-lg btn-block calbtn m-1';
                         disabled = true;
                     } else {
-                        buttonClass = 'btn btn-primary btn-lg btn-block calbtn';
+                        buttonClass = 'btn btn-primary btn-lg btn-block calbtn m-1';
                         disabled = true;
                     }
                     var button = $('<button class="' + buttonClass + '"></button>')
@@ -289,16 +289,16 @@
                     // Display profit near the button
                     var profitButton;
                     if (profit > 0) {
-                        profitButton = $('<button class="btn btn-success btn-lg btn-block calbtn my-1 " disabled></button>').text(profit);
+                        profitButton = $('<button class="btn btn-success btn-lg btn-block calbtn mt-1 ml-1 " disabled></button>').text(profit);
                     } else if (profit < 0) {
-                        profitButton = $('<button class="btn btn-danger btn-lg btn-block calbtn my-1 " disabled></button>').text(profit);
+                        profitButton = $('<button class="btn btn-danger btn-lg btn-block calbtn mt-1 ml-1 " disabled></button>').text(profit);
                     } else if (j >= 6 && j <= 7) {
-                        profitButton = $('<button class="btn btn-light btn-lg btn-block calbtn my-1 " disabled></button>').text('-');
+                        profitButton = $('<button class="btn btn-light btn-lg btn-block calbtn mt-1 ml-1 " disabled></button>').text('-');
                         console.log('holyday', j)
                     } else if (profit == 0 ){
-                        profitButton = $('<button class="btn btn-light btn-lg btn-block calbtn my-1 " disabled></button>').text('-');
+                        profitButton = $('<button class="btn btn-light btn-lg btn-block calbtn mt-1 ml-1 " disabled></button>').text('-');
                     }else {
-                        profitButton = $('<button class="btn btn-light btn-lg btn-block calbtn my-1 " disabled></button>').text(profit);
+                        profitButton = $('<button class="btn btn-light btn-lg btn-block calbtn mt-1 ml-1 " disabled></button>').text(profit);
                     }
                     // Append the profit button and line break
                     cell.append(button);

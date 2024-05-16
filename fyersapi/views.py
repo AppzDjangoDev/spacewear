@@ -263,6 +263,11 @@ class SOD_ReportingView(LoginRequiredMixin, FormView):
         fund_data = data_instance.funds()
         print("fund_datafund_data", fund_data)
         current_date = datetime.date.today()
+
+
+        # calculate the slippage 
+        
+
         initial_week_no = current_date.isocalendar()[1]
         initial['week_no'] = initial_week_no
         total_balance = 0
@@ -275,6 +280,31 @@ class SOD_ReportingView(LoginRequiredMixin, FormView):
         print("Total Balance:", total_balance)
         initial['trading_date'] = current_date
         initial['opening_balance'] = total_balance
+
+        previous_date = current_date - datetime.timedelta(days=1)
+        previous_date_data =SOD_EOD_Data.objects.filter(trading_date=previous_date).exists()
+        if previous_date_data:
+            previous_date_data = SOD_EOD_Data.objects.filter(trading_date=previous_date).first()
+            prev_day_slippage = total_balance -   previous_date_data.closing_balance
+
+            # calculate overall expense 
+            turnover = previous_date_data.opening_balance + previous_date_data.day_p_and_l + previous_date_data.withdrwal_amount
+            turnover = turnover-previous_date_data.withdrwal_amount
+            print("turnoverturnoverturnover", turnover)
+            actual_expense = turnover - total_balance
+            actual_benefit = previous_date_data.day_p_and_l - actual_expense
+            previous_date_data.actual_expense = actual_expense
+            previous_date_data.actual_benefit = actual_benefit
+            previous_date_data.save()
+            initial['prev_day_slippage'] = prev_day_slippage
+   
+          
+
+
+
+
+
+
 
         return initial
 
