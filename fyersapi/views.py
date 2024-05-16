@@ -1,3 +1,5 @@
+from decimal import Decimal
+import json
 from django.shortcuts import render
 from django.views import View
 from django.conf import settings
@@ -292,6 +294,43 @@ class SOD_ReportingView(LoginRequiredMixin, FormView):
         errors = form.errors.as_json()
         return JsonResponse({'errors': errors}, status=400)
 
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from .models import SOD_EOD_Data
+import datetime
+
+@csrf_exempt
+def fetch_date_data(request):
+    if request.method == 'POST':
+        date_str = request.POST.get('date')
+        
+        date_obj = datetime.datetime.strptime(date_str, '%d-%m-%Y')
+        print("date_strdate_strdate_str", date_obj)
+        
+        data_instance = SOD_EOD_Data.objects.filter(trading_date=date_obj).first()
+        data_instance = SOD_EOD_Data.objects.filter(trading_date=date_obj).first()
+        print("data_instancedata_instance", data_instance)
+        
+        if data_instance:
+            data = {
+                'trading_date': data_instance.trading_date,
+                'opening_balance': data_instance.opening_balance,
+                'closing_balance': data_instance.closing_balance,
+                'day_exp_brokerage': data_instance.day_exp_brokerage,
+                'day_order_count': data_instance.day_order_count,
+                'day_p_and_l': data_instance.day_p_and_l,
+                'actual_expense': data_instance.actual_expense,
+                'actual_benefit': data_instance.actual_benefit,
+       
+                # 'some_other_field': data_instance.some_other_field,
+                # # Add other fields as necessary
+            }
+            print("datadatadata", data)
+            return JsonResponse({'data': data}, status=200)
+        else:
+            return JsonResponse({'error': 'No data found for the given date'}, status=404)
+
+    return JsonResponse({'error': 'Invalid request method'}, status=400)
 
 
 class EOD_ReportingView(LoginRequiredMixin, FormView):
@@ -352,22 +391,6 @@ class EOD_ReportingView(LoginRequiredMixin, FormView):
         return JsonResponse({'errors': errors}, status=400)
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 import calendar
 from django.shortcuts import render
 from django.views import View
@@ -406,6 +429,9 @@ class TradingCalenderView(LoginRequiredMixin, View):
             month_name = calendar.month_name[month]
             first_date, last_date = self.get_first_last_dates(year, month)
 
+            date_wise_data = SOD_EOD_Data.objects.filter(trading_date=now).first()
+
+
 
             if request.is_ajax():
                 # If the request is AJAX and it's for the previous month data
@@ -435,17 +461,57 @@ class TradingCalenderView(LoginRequiredMixin, View):
                         # Append week number to the week list
                         week.append(week_number)
 
-                return JsonResponse({'calendar': cal, 'month_name': month_name, 'month': month, 'year': year, 'first_date': first_date, 'last_date': last_date})
-        
+                profit_data = SOD_EOD_Data.objects.filter(trading_date__range=[first_date, last_date])
+                profit_data_dict = {entry['trading_date'].strftime('%d-%m-%Y'): entry['day_p_and_l'] for entry in profit_data.values('trading_date', 'day_p_and_l')}            
+                print("profit_data_dict", profit_data_dict)
 
-    
+                combined_list = []
+                for row in cal:
+                    combined_row = []
+                    counter=1
+                    for i, item in enumerate(row):
+                        limit = len(row)
+                        if i == limit:
+                            combined_row.append(item)  
+                            print("combined_row", combined_row)
+                            # Append the last item as is
+                        elif isinstance(item, int):
+                                date_key = f"{item:02d}-{month:02d}-{year}"  # Construct the date dynamically
+                                if date_key in profit_data_dict:
+                                    print('date_key', date_key, item)
+                                    combined_row.append({counter:[item ,float(profit_data_dict[date_key])]})  # Change Decimal to float
+                                else:
+                                    print('date_key11', date_key, item)
+                                    combined_row.append({counter:[item , 0.00]})  # Change Decimal to float
+                        else:
+                            print('date_key12', date_key, item)
+                            print("ppppppppp", i, item)
+                            combined_row.append(item)
+                        counter +=1
+                    combined_list.append(combined_row)
+                    for sublist in combined_list:
+                        sublist_sum = 0
+                        for d in sublist:
+                            for key, value in d.items():
+                                if key in range(1, 6):  # Check if the key is between 1 and 5
+                                    sublist_sum += value[1]  # Add the second element of the value
+                                if key == 8:
+                                    value[1] = sublist_sum
 
+                    print("combined_listcombined_list", combined_list)
+
+                return JsonResponse({'calendar': combined_list, 'month_name': month_name, 'month': month, 'year': year, 'first_date': first_date, 'last_date': last_date, 'now' : now})
+            
+
+
+            
             # Iterate over each week in the calendar data
             for week in cal:
                 # Check if the first day of the week is valid
                 if week[6]  != 0:
                     # If the first day is None, indicating days outside the month, find the first valid day
                     for day in week:
+                        # sod_eod_data = SOD_EOD_Data.object.filter()
                         if day  != 0:
                             week_number = self.get_week_of_year(year, month, day)
                             week.append(week_number)
@@ -456,13 +522,74 @@ class TradingCalenderView(LoginRequiredMixin, View):
                     # Append week number to the week list
                     week.append(week_number)
 
+            profit_data = SOD_EOD_Data.objects.filter(trading_date__range=[first_date, last_date])
+            profit_data_dict = {entry['trading_date'].strftime('%d-%m-%Y'): entry['day_p_and_l'] for entry in profit_data.values('trading_date', 'day_p_and_l')}            
+            print("profit_data_dict", profit_data_dict)
+
+            combined_list = []
+            for row in cal:
+                combined_row = []
+                counter=1
+                for i, item in enumerate(row):
+                    limit = len(row)
+                    if i == limit:
+                        combined_row.append(item)  
+                        print("combined_row", combined_row)
+                        # Append the last item as is
+                    elif isinstance(item, int):
+                            date_key = f"{item:02d}-{month:02d}-{year}"  # Construct the date dynamically
+                            if date_key in profit_data_dict:
+                                print('date_key', date_key, item)
+                                combined_row.append({counter:[item ,float(profit_data_dict[date_key])]})  # Change Decimal to float
+                            else:
+                                print('date_key11', date_key, item)
+                                combined_row.append({counter:[item , 0.00]})  # Change Decimal to float
+                    else:
+                        print('date_key12', date_key, item)
+                        print("ppppppppp", i, item)
+                        combined_row.append(item)
+                    counter +=1
+                combined_list.append(combined_row)
+                for sublist in combined_list:
+                    sublist_sum = 0
+                    for d in sublist:
+                        for key, value in d.items():
+                            if key in range(1, 6):  # Check if the key is between 1 and 5
+                                sublist_sum += value[1]  # Add the second element of the value
+                            if key == 8:
+                                value[1] = sublist_sum
+
+
+                
+
+
+
+
+
+
+            # for date, profit in profit_data_dict.items():
+            #     day = int(date.split('-')[0])
+            #     for row in cal:
+            #         if day in row[:-1]:  # Exclude the last element of the sublist
+            #             index = row.index(day)
+            #             row[index] = f"{day}:{profit}"
+
+
+
+
             context = {
-                'calendar': cal, 
+                'calendar': combined_list, 
                 'month_name': month_name,
                 'month': month,
                 'year': year,
                 'first_date': first_date,
-                'last_date': last_date
+                'last_date': last_date,
+                'now' : now,
+                'now_date': now.day,
+                'now_month': now.month,
+                'now_year': now.year,
+                'date_wise_data' : date_wise_data,
+                'profit_data_dict': profit_data_dict
             }
             return render(request, 'trading_tool/html/calender_view.html', context)
         
@@ -477,10 +604,8 @@ class TradingCalenderView(LoginRequiredMixin, View):
             # If the current month is December, go to the next year and set the month to January
             year += 1
             month = 1
-
         return year, month
-
-
+    
     def calculate_previous_month(self, year, month):
         # Calculate the previous month
         month -= 1

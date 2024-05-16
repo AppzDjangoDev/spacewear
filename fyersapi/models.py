@@ -25,6 +25,7 @@ class SOD_EOD_Data(models.Model):
     day_order_count = models.IntegerField(null=True)
     day_exp_brokerage = models.DecimalField(max_digits=7, decimal_places=2, default=0)
     actual_expense = models.DecimalField(max_digits=7, decimal_places=2, default=0)
+    actual_benefit = models.DecimalField(max_digits=7, decimal_places=2, default=0)
     last_updated = models.DateTimeField(auto_now=True)
     trading_date = models.DateField(null=True, unique=True)
     week_no = models.IntegerField(null=True)
