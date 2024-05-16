@@ -49,7 +49,7 @@
                                                 <td class="text-center {% if key == now_date and month == now_month and year == now_year %}current-date{% endif %}">
                                                     {% if key and key <= 5 %}
                                                         {% if value|first  != 0 %}
-                                                        <button class="btn btn-light btn-sm btn-block fs-4 mt-1 calbtn" onclick="sendDate('{{  value|first }}-{{ month|stringformat:"02d" }}-{{ year }}')">{{value|first }}</button></br>
+                                                        <button id="date-button-{{ value|first }}-{{ month|stringformat:"02d" }}-{{ year }}" class="btn btn-light btn-sm btn-block fs-4 mt-1 calbtn" onclick="sendDate('{{  value|first }}-{{ month|stringformat:"02d" }}-{{ year }}', this)">{{value|first }}</button><br>
                                                         {% if value|last > 0 %}
                                                             <button class="btn btn-success btn-sm btn-block fs-4 mt-1 calbtn" disabled>{{ value|last }}</button>
                                                         {% elif value|last < 0 %}
@@ -106,7 +106,7 @@
                                             <h5 class="card-title fw-semibold">Daily Log </h5>
                                         </div>
                                         <div class="col-6 text-right">
-                                            <button id="date-button"  class="btn btn-primary">{{ date_wise_data.trading_date|date:"d-m-Y" }}</button>
+                                            <button id="date-button"  class="btn btn-primary">{{ date_wise_data.trading_date|date:"Y-m-d" }}</button>
                                         </div>
                                     </div>
                                 </div>
@@ -128,10 +128,10 @@
                                                         <h6 class="fw-semibold mb-0">Days P/L</h6>
                                                     </th>
                                                     <th class="border-bottom-0">
-                                                        <h6 class="fw-semibold mb-0">Exp Brokerage</h6>
+                                                        <h6 class="fw-semibold mb-0">Actual Benifit</h6>
                                                     </th>
                                                     <th class="border-bottom-0">
-                                                        <h6 class="fw-semibold mb-0">Price</h6>
+                                                        <h6 class="fw-semibold mb-0">Actual Expense</h6>
                                                     </th>
                                                     <th class="border-bottom-0">
                                                         <h6 class="fw-semibold mb-0">Notes</h6>
@@ -144,6 +144,7 @@
                                                     <td class="border-bottom-0"><h6 class="fw-semibold mb-0">{{ date_wise_data.closing_balance }}</h6></td>
                                                     <td class="border-bottom-0"><h6 class="fw-semibold mb-0">{{ date_wise_data.day_order_count }}</h6></td>
                                                     <td class="border-bottom-0"><h6 class="fw-semibold mb-0">{{ date_wise_data.day_p_and_l }}</h6></td>
+                                                    <td class="border-bottom-0"><h6 class="fw-semibold mb-0">{{ date_wise_data.actual_benefit }}</h6></td>
                                                     <td class="border-bottom-0"><h6 class="fw-semibold mb-0">{{ date_wise_data.actual_expense }}</h6></td>
                                                     <td class="border-bottom-0"><h6 class="fw-semibold mb-0">{{ date_wise_data.notes }}</h6></td>
                                                 </tr>
@@ -329,8 +330,14 @@
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
-    function sendDate(date) {
-        console.log('datedate', date);
+    function sendDate(date, button) {
+        
+        const date_str = parseDate(date); // Parse the input date string
+        console.log('datedate', formatDate(date_str));
+        // Change the button color to a dark shade
+        formattedDate = formatDate(date_str)
+
+        
         $.ajax({
             url: '{% url "fetch_date_data" %}',
             type: 'POST',
@@ -356,7 +363,7 @@
                             <td class="border-bottom-0"><h6 class="fw-semibold mb-0">${data.closing_balance}</h6></td>
                             <td class="border-bottom-0"><h6 class="fw-semibold mb-0">${data.day_order_count}</h6></td>
                             <td class="border-bottom-0"><h6 class="fw-semibold mb-0">${data.day_p_and_l}</h6></td>
-                            <td class="border-bottom-0"><h6 class="fw-semibold mb-0">${data.day_exp_brokerage}</h6></td>
+                            <td class="border-bottom-0"><h6 class="fw-semibold mb-0">${data.actual_benefit}</h6></td>
                             <td class="border-bottom-0"><h6 class="fw-semibold mb-0">${data.actual_expense}</h6></td>
                             <td class="border-bottom-0"><h6 class="fw-semibold mb-0">${data.notes || 'N/A'}</h6></td>
                         </tr>`;
@@ -372,9 +379,25 @@
                 var dateButton = $('#date-button');
                 tableBody.empty(); // Clear existing data
                 tableBody.append('<tr><td colspan="7" class="text-center">Currently No data Found</td></tr>');
-                dateButton.text(date); // Reset the button text
+                dateButton.text(formattedDate); // Reset the button text
             }
         });
+    }
+
+    function parseDate(dateString) {
+        // Assuming the date string is in the format "dd-mm-yyyy"
+        const parts = dateString.split('-');
+        const day = parseInt(parts[0], 10);
+        const month = parseInt(parts[1], 10) - 1; // Months are zero-based
+        const year = parseInt(parts[2], 10);
+        return new Date(year, month, day);
+    }
+
+    function formatDate(date) {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
     }
 </script>
 

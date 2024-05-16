@@ -321,6 +321,7 @@ def fetch_date_data(request):
                 'day_p_and_l': data_instance.day_p_and_l,
                 'actual_expense': data_instance.actual_expense,
                 'actual_benefit': data_instance.actual_benefit,
+                'notes': data_instance.notes,
        
                 # 'some_other_field': data_instance.some_other_field,
                 # # Add other fields as necessary
