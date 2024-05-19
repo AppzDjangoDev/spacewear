@@ -14,7 +14,7 @@ class DataLabels {
     this.w = ctx.w
   }
 
-  // When there are many datalabels to be printed, and some of them overlaps each other in the same series, this method will take care of that
+  // When there are many datalabels to be #printed, and some of them overlaps each other in the same series, this method will take care of that
   // Also, when datalabels exceeds the drawable area and get clipped off, we need to adjust and move some pixels to make them visible again
   dataLabelsCorrection(
     x,

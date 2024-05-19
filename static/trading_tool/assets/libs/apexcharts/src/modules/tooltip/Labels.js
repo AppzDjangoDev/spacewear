@@ -4,7 +4,7 @@ import Utils from './Utils'
 
 /**
  * ApexCharts Tooltip.Labels Class to draw texts on the tooltip.
- * This file deals with printing actual text on the tooltip.
+ * This file deals with #printing actual text on the tooltip.
  *
  * @module Tooltip.Labels
  **/
@@ -26,12 +26,12 @@ export default class Labels {
       this.toggleActiveInactiveSeries(shared)
     }
 
-    let values = this.getValuesToPrint({
+    let values = this.getValuesTo#print({
       i,
       j
     })
 
-    this.printLabels({
+    this.#printLabels({
       i,
       j,
       values,
@@ -47,7 +47,7 @@ export default class Labels {
     this.ttCtx.tooltipRect.ttHeight = tooltipEl.getBoundingClientRect().height
   }
 
-  printLabels({ i, j, values, ttItems, shared, e }) {
+  #printLabels({ i, j, values, ttItems, shared, e }) {
     const w = this.w
     let val
     let goalVals = []
@@ -400,7 +400,7 @@ export default class Labels {
     }
   }
 
-  getValuesToPrint({ i, j }) {
+  getValuesTo#print({ i, j }) {
     const w = this.w
     const filteredSeriesX = this.ctx.series.filteredSeriesX()
 

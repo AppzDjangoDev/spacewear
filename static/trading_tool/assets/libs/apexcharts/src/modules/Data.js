@@ -620,7 +620,7 @@ export default class Data {
       }
     }
 
-    // Finally, pass the labelArr in gl.labels which will be printed on x-axis
+    // Finally, pass the labelArr in gl.labels which will be #printed on x-axis
     gl.labels = labelArr
 
     if (cnf.xaxis.convertedCatToNumeric) {

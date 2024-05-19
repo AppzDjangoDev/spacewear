@@ -34,7 +34,6 @@
                                     
                                     <input class="form-control my-3" disabled name="ltp" value="{{ option.ltp }}">
                                 </div>
-
                             </div>
                         </div>
                         <!-- Mobile View -->
@@ -49,9 +48,18 @@
                                 <div class="col-6" id="index-cont" >
                                     <input class="form-control my-2" id="index" disabled name="ltp" value="0">
                                 </div>
-                                <button  id="refresh_page" class="btn btn-primary btn-md m-3 w-50 h-150 " style="border-radius: 6px;">Refresh</button>
-
                             </div>
+                            <div class="row" style="margin: 0px;">
+                                <div class="alert alert-primary d-flex flex-row justify-content-between align-items-center p-0 m-0" style="height:55px;" role="alert">
+                                    <div class="col-8">
+                                        <p id="exp_stoploss_amount" style="margin-left: 10px;" class="mb-0 fs-3 fw-bolder">Exp Loss:</p>
+                                    </div>
+                                    <div class="col-4">
+                                        <button id="refresh_page" class="btn btn-primary btn-md my-1 h-150" style="border-radius: 6px;">Refresh</button>
+                                    </div>
+                                </div>
+                            </div>
+                            
                         </div>
                     </div>
                 </div>
@@ -62,7 +70,7 @@
 
 
 
-        <div class="container-fluid mb-2 ">
+        <div class="container-fluid mt-2 ">
             <div class="row">   
             <div class="col-sm-6">
             {% for option in ce_options_with_serial %}
@@ -194,31 +202,9 @@
                         timer: 500,
                         
                     });  
-                    // ====================================================================================================================
-                    if (response.code === -99 ){
-                        // Store the current value in the session using Django
-                        $.ajax({
-                            type: 'POST',
-                            url: '{% url "store_current_value_in_session" %}', // Replace with your Django view URL
-                            data: {
-                                'open_symbol': response.symbol,
-                                'open_qty': response.qty,
-                                'open_traded_price': response.traded_price,
-                                'csrfmiddlewaretoken': csrfToken
-                            },
-                            success: function(response) {
-                                console.log("====================================================================================================================")
-                                console.log('Current value stored in session successfully.', response);
-                                fetchSessionDataAndUpdateUI();
-                                reconnectWebSocket();
-                            },
-                            error: function(xhr, status, error) {
-                                console.error('Failed to store current value in session.', error);
-                            }
-                        });
-                    }
-                    // ====================================================================================================================
-                        
+                    fetchSessionDataAndUpdateUI();
+                    reconnectWebSocket();
+        // ====================================================================================================================
                    
                 },
                 error: function(xhr, status, error) {
@@ -260,42 +246,19 @@
                         timer: 500,
                         
                     });
-                    // Check if the response code is 200
-                    if (response.code === -352) {
-                        // Call the removeSessionData function
-                        $.ajax({
-                            type: 'POST',
-                            url: '{% url "remove_session_data" %}',  // Adjust the URL to match your Django view URL
-                            data: {
-                                // Add any data you need to send to the server for removing session values
-                                'csrfmiddlewaretoken': csrfToken
-                            },
-                            success: function(response) {
-                                // Handle success response if needed
-                                console.log('Session data removed successfully.', response);
-                                var parentDivElement = document.getElementById('openPlData').parentElement;
-                                parentDivElement.classList.remove('alert-danger');
-                                parentDivElement.classList.remove('alert-success');
-                                parentDivElement.classList.add('alert-primary');
-                                document.querySelector('input[name="open-qty"]').value = '';
-                                document.querySelector('input[name="open-symbol"]').value = '';
-                                document.querySelector('input[name="open-traded-price"]').value = '';
-                                document.getElementById('openPlData').innerHTML = 'No positions';
-                                //document.getElementById('plContainer').style.display = 'none';
-                                fetchSessionDataAndUpdateUI();
-                                reconnectWebSocket()
-                                
-                                
-
-                                // Optionally, update the UI or perform any other action
-                            },
-                            error: function(xhr, status, error) {
-                                // Handle error response if needed
-                                console.error('Failed to remove session data.', error);
-                                // Optionally, display an error message or perform any other action
-                            }
-                        });
-                    }
+                    console.log('Session data removed successfully.', response);
+                    var parentDivElement = document.getElementById('openPlData').parentElement;
+                    parentDivElement.classList.remove('alert-danger');
+                    parentDivElement.classList.remove('alert-success');
+                    parentDivElement.classList.add('alert-primary');
+                    document.querySelector('input[name="open-qty"]').value = '';
+                    document.querySelector('input[name="open-symbol"]').value = '';
+                    document.querySelector('input[name="open-traded-price"]').value = '';
+                    document.getElementById('openPlData').innerHTML = 'No positions';
+                    document.getElementById('exp_stoploss_amount').textContent = `Exp Loss: ${'0'}`;
+                    //document.getElementById('plContainer').style.display = 'none';
+                    fetchSessionDataAndUpdateUI();
+                    reconnectWebSocket()
                     
                 },
                 error: function(xhr, status, error) {
@@ -415,11 +378,7 @@
                 // Update the innerHTML of openPlData element
                 document.getElementById('openPlData').innerHTML = 'P/L: ' + plDataFormatted + '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;LTP:' + ltpValue;
                 // Check if plData is negative or positive
-                if (parseFloat(plData) < 0) {
-                    plDataElement.classList.add('danger'); // Add the 'danger' class
-                } else {
-                    plDataElement.classList.add('success'); // Add the 'success' class
-                }
+              
 
                 // console.log("ltpValueltpValue", ltpValue);
                 var ltpElement = document.querySelector('#der-ltp-' + escapedSymbol);
@@ -518,12 +477,16 @@
                     var open_symbol = response.open_symbol;
                     var open_qty = response.open_qty;
                     var open_traded_price = response.open_traded_price;
-                    console.log("open_qtyopen_qty", open_qty,"open_traded_price", open_traded_price , "open_symbol", open_symbol)
+                    var exp_stoploss_amount = response.exp_stoploss_amount
+                    console.log("open_qtyopen_qty", open_qty,"open_traded_price", open_traded_price , "open_symbol", open_symbol,'exp_stoploss_amount', exp_stoploss_amount)
                     // Update the HTML elements with the retrieved data
                     // Assign values to the hidden input fields
                     document.querySelector('input[name="open-symbol"]').value = open_symbol;
                     document.querySelector('input[name="open-qty"]').value = open_qty;
                     document.querySelector('input[name="open-traded-price"]').value = open_traded_price;
+                    document.getElementById('exp_stoploss_amount').textContent = `Exp Loss: ${exp_stoploss_amount}/${open_qty}`;
+                    
+
                 }
             },
             error: function(xhr, status, error) {

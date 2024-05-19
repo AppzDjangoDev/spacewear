@@ -5702,11 +5702,11 @@
   content: "\ed2c";
 }
 
-.ti-fingerprint:before {
+.ti-finger#print:before {
   content: "\ebd1";
 }
 
-.ti-fingerprint-off:before {
+.ti-finger#print-off:before {
   content: "\f12a";
 }
 
@@ -9010,11 +9010,11 @@
   content: "\f183";
 }
 
-.ti-printer:before {
+.ti-#printer:before {
   content: "\eb0e";
 }
 
-.ti-printer-off:before {
+.ti-#printer-off:before {
   content: "\f184";
 }
 

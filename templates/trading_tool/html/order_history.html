@@ -8,22 +8,23 @@
         <div class="card w-100">
           <div class="card-body p-4 mb-4">
             <div class="mb-4">
-              <h5 class="card-title fw-semibold">Orders History</h5>
+              <h5 class="card-title fw-semibold">Orders History : Executed</h5>
             </div>
             <!-- Filter by Status dropdown -->
             <div class="mb-3">
                 <label for="status-filter" class="form-label">Filter by Status:</label>
                 <select class="form-select" id="status-filter">
-                  <option value="">All</option>
-                  <option value="1">Cancelled</option>
                   <option value="2">Traded / Filled</option>
+                  <option value="6">Pending</option>
+                  <option value="5">Rejected</option>
                   <option value="3">For future use</option>
                   <option value="4">Transit</option>
-                  <option value="5">Rejected</option>
-                  <option value="6">Pending</option>
+                  <option value="1">Cancelled</option>
+                  
                 </select>
             </div>
-            <button id="load-more-btn" class="btn btn-primary mt-3">Load All</button>
+            <button id="load-more-btn" class="btn btn-primary mt-3">All Orders</button>
+            <input type="hidden" id="executed" value='6' />
             <div id="order-history-table" class="table-responsive">
               <table class="table text-nowrap mb-0 align-middle">
                 {% if order_history_data %}
@@ -130,6 +131,30 @@
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 <script>
   $(document).ready(function() {
+
+
+    var selectedStatus = $('#executed').val();
+    $.ajax({
+      type: 'GET',
+      url: '{% url "order_history" %}',
+      data: {
+        status: selectedStatus
+      },
+      success: function(data) {
+        $('#order-history-table').html(data);
+      }
+    });
+
+
+
+
+
+
+
+
+
+
+
     $('#status-filter').change(function() {
       var selectedStatus = $(this).val();
       $.ajax({
@@ -143,6 +168,8 @@
         }
       });
     });
+
+
 
     function loadMoreData() {
         var selectedStatus = $('#status-filter').val();

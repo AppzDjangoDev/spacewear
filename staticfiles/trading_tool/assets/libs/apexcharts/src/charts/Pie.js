@@ -434,12 +434,12 @@ class Pie {
     if (!this.donutDataLabels.total.showAlways) {
       elPath.node.addEventListener(
         'mouseenter',
-        this.printDataLabelsInner.bind(this, elPath.node, dataLabels)
+        this.#printDataLabelsInner.bind(this, elPath.node, dataLabels)
       )
 
       elPath.node.addEventListener(
         'mousedown',
-        this.printDataLabelsInner.bind(this, elPath.node, dataLabels)
+        this.#printDataLabelsInner.bind(this, elPath.node, dataLabels)
       )
     }
   }
@@ -883,7 +883,7 @@ class Pie {
    * @param {string} val - The value of that series
    * @param {object} el - Optional el (indicates which series was hovered/clicked). If this param is not present, means we need to show total
    */
-  printInnerLabels(labelsConfig, name, val, el) {
+  #printInnerLabels(labelsConfig, name, val, el) {
     const w = this.w
 
     let labelColor
@@ -931,7 +931,7 @@ class Pie {
     }
   }
 
-  printDataLabelsInner(el, dataLabelsConfig) {
+  #printDataLabelsInner(el, dataLabelsConfig) {
     let w = this.w
 
     let val = el.getAttribute('data:value')
@@ -939,7 +939,7 @@ class Pie {
       w.globals.seriesNames[parseInt(el.parentNode.getAttribute('rel'), 10) - 1]
 
     if (w.globals.series.length > 1) {
-      this.printInnerLabels(dataLabelsConfig, name, val, el)
+      this.#printInnerLabels(dataLabelsConfig, name, val, el)
     }
 
     let dataLabelsGroup = w.globals.dom.baseEl.querySelector(
@@ -997,33 +997,33 @@ class Pie {
       `apexcharts-pie-area`
     )
 
-    const selectSlice = ({ makeSliceOut, printLabel }) => {
+    const selectSlice = ({ makeSliceOut, #printLabel }) => {
       Array.prototype.forEach.call(slices, (s) => {
         if (s.getAttribute('data:pieClicked') === 'true') {
           if (makeSliceOut) {
             sliceOut = true
           }
-          if (printLabel) {
-            this.printDataLabelsInner(s, dataLabelsConfig)
+          if (#printLabel) {
+            this.#printDataLabelsInner(s, dataLabelsConfig)
           }
         }
       })
     }
 
-    selectSlice({ makeSliceOut: true, printLabel: false })
+    selectSlice({ makeSliceOut: true, #printLabel: false })
 
     if (dataLabelsConfig.total.show && w.globals.series.length > 1) {
       if (sliceOut && !dataLabelsConfig.total.showAlways) {
-        selectSlice({ makeSliceOut: false, printLabel: true })
+        selectSlice({ makeSliceOut: false, #printLabel: true })
       } else {
-        this.printInnerLabels(
+        this.#printInnerLabels(
           dataLabelsConfig,
           dataLabelsConfig.total.label,
           dataLabelsConfig.total.formatter(w)
         )
       }
     } else {
-      selectSlice({ makeSliceOut: false, printLabel: true })
+      selectSlice({ makeSliceOut: false, #printLabel: true })
 
       if (!sliceOut) {
         if (
@@ -1036,7 +1036,7 @@ class Pie {
               `.apexcharts-${this.chartType.toLowerCase()}-slice-${index}`
             )
 
-            this.printDataLabelsInner(el, dataLabelsConfig)
+            this.#printDataLabelsInner(el, dataLabelsConfig)
           } else if (
             dataLabelsGroup &&
             w.globals.selectedDataPoints.length &&

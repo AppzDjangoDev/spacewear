@@ -185,7 +185,7 @@ class TimeScale {
       }
 
       let shouldNotSkipUnit = false // there is a big change in unit i.e days to months
-      let shouldNotPrint = false // should skip these values
+      let shouldNot#print = false // should skip these values
 
       switch (this.tickInterval) {
         case 'years':
@@ -212,7 +212,7 @@ class TimeScale {
             shouldNotSkipUnit = true
           }
           if (value === 30) {
-            shouldNotPrint = true
+            shouldNot#print = true
           }
           break
         case 'months_days':
@@ -221,7 +221,7 @@ class TimeScale {
             shouldNotSkipUnit = true
           }
           if (value === 30) {
-            shouldNotPrint = true
+            shouldNot#print = true
           }
           break
         case 'week_days':
@@ -243,17 +243,17 @@ class TimeScale {
           break
         case 'minutes_fives':
           if (value % 5 !== 0) {
-            shouldNotPrint = true
+            shouldNot#print = true
           }
           break
         case 'seconds_tens':
           if (value % 10 !== 0) {
-            shouldNotPrint = true
+            shouldNot#print = true
           }
           break
         case 'seconds_fives':
           if (value % 5 !== 0) {
-            shouldNotPrint = true
+            shouldNot#print = true
           }
           break
       }
@@ -264,11 +264,11 @@ class TimeScale {
         this.tickInterval === 'seconds_tens' ||
         this.tickInterval === 'seconds_fives'
       ) {
-        if (!shouldNotPrint) {
+        if (!shouldNot#print) {
           return true
         }
       } else {
-        if ((value % modulo === 0 || shouldNotSkipUnit) && !shouldNotPrint) {
+        if ((value % modulo === 0 || shouldNotSkipUnit) && !shouldNot#print) {
           return true
         }
       }

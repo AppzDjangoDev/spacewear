@@ -108,7 +108,7 @@
 .lnr-eye:before {
 	content: "\e81b";
 }
-.lnr-printer:before {
+.lnr-#printer:before {
 	content: "\e81c";
 }
 .lnr-file-empty:before {

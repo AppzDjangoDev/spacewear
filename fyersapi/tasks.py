@@ -18,7 +18,7 @@
 #   )
 
 #   # Task logic here
-#   print(f"Running daily task at {datetime.datetime.now()}")
+#   #print(f"Running daily task at {datetime.datetime.now()}")
 
 # # celerybeat_schedule in settings.py
 

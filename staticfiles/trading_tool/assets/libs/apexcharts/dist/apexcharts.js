@@ -7172,7 +7172,7 @@
 
       this.ctx = ctx;
       this.w = ctx.w;
-    } // When there are many datalabels to be printed, and some of them overlaps each other in the same series, this method will take care of that
+    } // When there are many datalabels to be #printed, and some of them overlaps each other in the same series, this method will take care of that
     // Also, when datalabels exceeds the drawable area and get clipped off, we need to adjust and move some pixels to make them visible again
 
 
@@ -8536,7 +8536,7 @@
           for (var _i3 = 0; _i3 < ser.length; _i3++) {
             gl.seriesX.push(labelArr);
           }
-        } // Finally, pass the labelArr in gl.labels which will be printed on x-axis
+        } // Finally, pass the labelArr in gl.labels which will be #printed on x-axis
 
 
         gl.labels = labelArr;
@@ -9068,7 +9068,7 @@
     }, {
       key: "cleanup",
       value: function cleanup() {
-        var w = this.w; // hide some elements to avoid printing them on exported svg
+        var w = this.w; // hide some elements to avoid #printing them on exported svg
 
         var xcrosshairs = w.globals.dom.baseEl.getElementsByClassName('apexcharts-xcrosshairs');
         var ycrosshairs = w.globals.dom.baseEl.getElementsByClassName('apexcharts-ycrosshairs');
@@ -13716,7 +13716,7 @@
             var dataLabels = w.config.plotOptions.pie.donut.labels;
             var graphics = new Graphics(this.lgCtx.ctx);
             graphics.pathMouseDown(_seriesEl.members[0], null);
-            this.lgCtx.ctx.pie.printDataLabelsInner(_seriesEl.members[0].node, dataLabels);
+            this.lgCtx.ctx.pie.#printDataLabelsInner(_seriesEl.members[0].node, dataLabels);
           }
 
           _seriesEl.fire('click');
@@ -14522,7 +14522,7 @@
         if (w.globals.isRangeBar) {
           this.minX = w.globals.minY;
           this.maxX = w.globals.maxY;
-        } // avoid zooming out beyond 1000 which may result in NaN values being printed on x-axis
+        } // avoid zooming out beyond 1000 which may result in NaN values being #printed on x-axis
 
 
         if (w.config.xaxis.type === 'datetime' && new Date(this.minX).getUTCFullYear() < 1000) {
@@ -15776,7 +15776,7 @@
 
   /**
    * ApexCharts Tooltip.Labels Class to draw texts on the tooltip.
-   * This file deals with printing actual text on the tooltip.
+   * This file deals with #printing actual text on the tooltip.
    *
    * @module Tooltip.Labels
    **/
@@ -15818,11 +15818,11 @@
           this.toggleActiveInactiveSeries(shared);
         }
 
-        var values = this.getValuesToPrint({
+        var values = this.getValuesTo#print({
           i: i,
           j: j
         });
-        this.printLabels({
+        this.#printLabels({
           i: i,
           j: j,
           values: values,
@@ -15836,8 +15836,8 @@
         this.ttCtx.tooltipRect.ttHeight = tooltipEl.getBoundingClientRect().height;
       }
     }, {
-      key: "printLabels",
-      value: function printLabels(_ref2) {
+      key: "#printLabels",
+      value: function #printLabels(_ref2) {
         var _this = this;
 
         var i = _ref2.i,
@@ -16184,8 +16184,8 @@
         }
       }
     }, {
-      key: "getValuesToPrint",
-      value: function getValuesToPrint(_ref5) {
+      key: "getValuesTo#print",
+      value: function getValuesTo#print(_ref5) {
         var i = _ref5.i,
             j = _ref5.j;
         var w = this.w;
@@ -21177,8 +21177,8 @@
         elPath.node.addEventListener('mousedown', graphics.pathMouseDown.bind(this, elPath));
 
         if (!this.donutDataLabels.total.showAlways) {
-          elPath.node.addEventListener('mouseenter', this.printDataLabelsInner.bind(this, elPath.node, dataLabels));
-          elPath.node.addEventListener('mousedown', this.printDataLabelsInner.bind(this, elPath.node, dataLabels));
+          elPath.node.addEventListener('mouseenter', this.#printDataLabelsInner.bind(this, elPath.node, dataLabels));
+          elPath.node.addEventListener('mousedown', this.#printDataLabelsInner.bind(this, elPath.node, dataLabels));
         }
       } // This function can be used for other circle charts too
 
@@ -21520,8 +21520,8 @@
        */
 
     }, {
-      key: "printInnerLabels",
-      value: function printInnerLabels(labelsConfig, name, val, el) {
+      key: "#printInnerLabels",
+      value: function #printInnerLabels(labelsConfig, name, val, el) {
         var w = this.w;
         var labelColor;
 
@@ -21562,14 +21562,14 @@
         }
       }
     }, {
-      key: "printDataLabelsInner",
-      value: function printDataLabelsInner(el, dataLabelsConfig) {
+      key: "#printDataLabelsInner",
+      value: function #printDataLabelsInner(el, dataLabelsConfig) {
         var w = this.w;
         var val = el.getAttribute('data:value');
         var name = w.globals.seriesNames[parseInt(el.parentNode.getAttribute('rel'), 10) - 1];
 
         if (w.globals.series.length > 1) {
-          this.printInnerLabels(dataLabelsConfig, name, val, el);
+          this.#printInnerLabels(dataLabelsConfig, name, val, el);
         }
 
         var dataLabelsGroup = w.globals.dom.baseEl.querySelector('.apexcharts-datalabels-group');
@@ -21611,15 +21611,15 @@
 
         var selectSlice = function selectSlice(_ref2) {
           var makeSliceOut = _ref2.makeSliceOut,
-              printLabel = _ref2.printLabel;
+              #printLabel = _ref2.#printLabel;
           Array.prototype.forEach.call(slices, function (s) {
             if (s.getAttribute('data:pieClicked') === 'true') {
               if (makeSliceOut) {
                 sliceOut = true;
               }
 
-              if (printLabel) {
-                _this3.printDataLabelsInner(s, dataLabelsConfig);
+              if (#printLabel) {
+                _this3.#printDataLabelsInner(s, dataLabelsConfig);
               }
             }
           });
@@ -21627,22 +21627,22 @@
 
         selectSlice({
           makeSliceOut: true,
-          printLabel: false
+          #printLabel: false
         });
 
         if (dataLabelsConfig.total.show && w.globals.series.length > 1) {
           if (sliceOut && !dataLabelsConfig.total.showAlways) {
             selectSlice({
               makeSliceOut: false,
-              printLabel: true
+              #printLabel: true
             });
           } else {
-            this.printInnerLabels(dataLabelsConfig, dataLabelsConfig.total.label, dataLabelsConfig.total.formatter(w));
+            this.#printInnerLabels(dataLabelsConfig, dataLabelsConfig.total.label, dataLabelsConfig.total.formatter(w));
           }
         } else {
           selectSlice({
             makeSliceOut: false,
-            printLabel: true
+            #printLabel: true
           });
 
           if (!sliceOut) {
@@ -21650,7 +21650,7 @@
               if (w.globals.selectedDataPoints[0].length > 0) {
                 var index = w.globals.selectedDataPoints[0];
                 var el = w.globals.dom.baseEl.querySelector(".apexcharts-".concat(this.chartType.toLowerCase(), "-slice-").concat(index));
-                this.printDataLabelsInner(el, dataLabelsConfig);
+                this.#printDataLabelsInner(el, dataLabelsConfig);
               } else if (dataLabelsGroup && w.globals.selectedDataPoints.length && w.globals.selectedDataPoints[0].length === 0) {
                 dataLabelsGroup.style.opacity = 0;
               }
@@ -24438,7 +24438,7 @@
 
           var shouldNotSkipUnit = false; // there is a big change in unit i.e days to months
 
-          var shouldNotPrint = false; // should skip these values
+          var shouldNot#print = false; // should skip these values
 
           switch (_this.tickInterval) {
             case 'years':
@@ -24475,7 +24475,7 @@
               }
 
               if (value === 30) {
-                shouldNotPrint = true;
+                shouldNot#print = true;
               }
 
               break;
@@ -24488,7 +24488,7 @@
               }
 
               if (value === 30) {
-                shouldNotPrint = true;
+                shouldNot#print = true;
               }
 
               break;
@@ -24520,32 +24520,32 @@
 
             case 'minutes_fives':
               if (value % 5 !== 0) {
-                shouldNotPrint = true;
+                shouldNot#print = true;
               }
 
               break;
 
             case 'seconds_tens':
               if (value % 10 !== 0) {
-                shouldNotPrint = true;
+                shouldNot#print = true;
               }
 
               break;
 
             case 'seconds_fives':
               if (value % 5 !== 0) {
-                shouldNotPrint = true;
+                shouldNot#print = true;
               }
 
               break;
           }
 
           if (_this.tickInterval === 'hours' || _this.tickInterval === 'minutes_fives' || _this.tickInterval === 'seconds_tens' || _this.tickInterval === 'seconds_fives') {
-            if (!shouldNotPrint) {
+            if (!shouldNot#print) {
               return true;
             }
           } else {
-            if ((value % modulo === 0 || shouldNotSkipUnit) && !shouldNotPrint) {
+            if ((value % modulo === 0 || shouldNotSkipUnit) && !shouldNot#print) {
               return true;
             }
           }

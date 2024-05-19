@@ -18,7 +18,6 @@
   </ul>
   {% endif %} {% endcomment %}
   <!--  Body Wrapper -->
-
   <div class="page-wrapper" id="main-wrapper" data-layout="vertical" data-navbarbg="skin6" data-sidebartype="full"
     data-sidebar-position="fixed" data-header-position="fixed">
     <!-- Sidebar Start -->
@@ -95,6 +94,19 @@
                 </a>
               </li>
               <li class="sidebar-item">
+                <a class="sidebar-link" href="{% url 'transaction_history' %}" aria-expanded="false">
+                  <span>
+                    <i class="ti ti-login"></i>
+                  </span>
+                  <span class="hide-menu">Transaction History</span>
+                </a>
+              </li>
+
+              <li class="nav-small-cap">
+                <i class="ti ti-dots nav-small-cap-icon fs-4"></i>
+                <span class="hide-menu">ANALYSE</span>
+              </li>
+              <li class="sidebar-item">
                 <a class="sidebar-link" href="{% url 'trading_calender_view' %}" aria-expanded="false">
                   <span>
                     <i class="ti ti-user-plus"></i>
@@ -102,6 +114,15 @@
                   <span class="hide-menu">Trading Journel</span>
                 </a>
               </li>
+              <li class="sidebar-item">
+                <a class="sidebar-link"href="{% url 'candle_overview' %}" aria-expanded="false">
+                  <span>
+                    <i class="ti ti-aperture"></i>
+                  </span>
+                  <span class="hide-menu">Candle Overview</span>
+                </a>
+              </li>
+
               <li class="nav-small-cap">
                 <i class="ti ti-dots nav-small-cap-icon fs-4"></i>
                 <span class="hide-menu">REPORTING</span>
@@ -155,9 +176,7 @@
                       <input type="hidden" name="open-symbol" value="">
                       <input type="hidden" name="open-qty" value="">
                       <input type="hidden" name="open-traded-price" value="">
-                      <!-- <button id="Portfolio" class="btn btn-success btn-lg btn-block w-100 h-100 fw-bold" style="border-radius: 6px;">P/L:</button> -->
                   </div>
-                  
                   </div>  
                   <div class="col-sm-3 my-2"  style="display: block;">
                     <div class="alert alert-primary p-0 m-0" style="height:65px;" role="alert">
@@ -211,11 +230,7 @@
           </div>
         </nav>
       </header>
-
-
       {% block content %}
-
-
       <!--  Header End -->
       <div class="container-fluid ">
         <div class="row pt-5">
@@ -254,7 +269,7 @@
                 <div class="row alig n-items-start">
                   <div class="col-8">
                    
-                    <h5 class="card-title mb-9 fw-semibold">SMART EXIT</h5>
+                    <h5 class="card-title mb-9 fw-semibold">Smart Exit</h5>
                     <h4 class="fw-semibold mb-3" style="color: {% if positions_data.overall.pl_unrealized >= 0 %}#03C03C{% else %}red{% endif %}">
                       <p class="fs-2 mb-0" id="pl-unrealized" >INR</p> {{ positions_data.overall.pl_unrealized|floatformat:2 }}
                     </h4>
@@ -454,11 +469,9 @@
                     </tr> 
                   </li>
                   {% endfor %}
-
                   {% else  %}
                   <div class="timeline-desc fs-3 text-dark mt-n1">Currently No data Found</div>
                   {% endif %} 
-
                     </tbody>
                   </table>
                 </div>
@@ -466,8 +479,6 @@
               </div>
             </div>
           </div>
-
-
         </div>
         </div>
         <div class="py-6 px-6 text-center">
@@ -480,6 +491,15 @@
     .container-fluid {
         max-width: none !important;
     }
+    body.dark-mode {
+      background-color: #000000;
+      color: #ffffff;
+    }
+    body {
+      background-color: #ffffff;
+      color: #000000;
+    }
+    
   </style>
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
   <script>
@@ -535,7 +555,6 @@
         // Set an interval to call the fetchData function every 5 minutes
         setInterval(fetchData, 300*1000);
     });
-    
   </script>
   <script>
     $(document).ready(function() {
@@ -573,13 +592,6 @@
           });
       });
     });
-
-
-    
-
-
-
-
 
     $(document).ready(function() {
       $('#updatelatestdata').click(function(e) {
@@ -736,9 +748,6 @@
       });
     });
   </script>
-
-
-  
   <script src="{% static 'trading_tool/assets/libs/jquery/dist/jquery.min.js' %}"></script>
   <script src="{% static 'trading_tool/assets/libs/bootstrap/dist/js/bootstrap.bundle.min.js' %}"></script>
   <script src="{% static 'trading_tool/assets/js/sidebarmenu.js' %}"></script>
@@ -749,7 +758,38 @@
     var positions_data = {{ positions_data|default:"{}" | safe }};
 </script>
 
-</body>
 
+
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const toggleSwitch = document.querySelector('.theme-switch input[type="checkbox"]');
+    const currentTheme = localStorage.getItem('theme');
+
+    if (currentTheme) {
+      document.documentElement.setAttribute('data-theme', currentTheme);
+
+      if (currentTheme === 'dark') {
+        toggleSwitch.checked = true;
+      }
+    }
+
+    function switchTheme(e) {
+      if (e.target.checked) {
+        document.documentElement.setAttribute('data-theme', 'dark');
+        localStorage.setItem('theme', 'dark');
+      } else {
+        document.documentElement.setAttribute('data-theme', 'light');
+        localStorage.setItem('theme', 'light');
+      }
+    }
+
+    toggleSwitch.addEventListener('change', switchTheme, false);
+  });     
+</script>
+
+
+
+</body>
 </html>
 

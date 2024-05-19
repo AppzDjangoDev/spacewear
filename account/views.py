@@ -63,19 +63,19 @@ class DashboardView(LoginRequiredMixin, TemplateView):
             self.positions_data = data_instance.positions()
         except AttributeError as e:
             self.positions_data = {'code': -1, 'message': f'Error occurred: {str(e)}', 's': 'error'}
-            print("Error occurred while fetching positions data:", e)
+            #print("Error occurred while fetching positions data:", e)
 
         try:
             self.order_data = data_instance.orderbook()
         except AttributeError as e:
             self.order_data = {'code': -1, 'message': f'Error occurred: {str(e)}', 's': 'error'}
-            print("Error occurred while fetching order data:", e)
+            #print("Error occurred while fetching order data:", e)
 
         try:
             self.fund_data = data_instance.funds()
         except AttributeError as e:
             self.fund_data = {'code': -1, 'message': f'Error occurred: {str(e)}', 's': 'error'}
-            print("Error occurred while fetching fund data:", e)
+            #print("Error occurred while fetching fund data:", e)
 
         self.total_order_status = 0
         self.pending_orders_status_6 = 0
@@ -83,7 +83,7 @@ class DashboardView(LoginRequiredMixin, TemplateView):
         average_brokerage = 30
         self.recent_order_data = []
         trading_config = TradingConfigurations.objects.first()
-        # print("self.order_limitself.order_limit", self.order_limit) 
+        # #print("self.order_limitself.order_limit", self.order_limit) 
         #  trading_config.max_trade_count
         self.order_limit =  trading_config.max_trade_count
         self.progress_percentage= 0
@@ -124,20 +124,20 @@ class UserloginView(View):
         template = "trading_tool/html/authentication-login.html"
         context = {}
         context['form'] = UserLoginForm()
-        print("context", context)
+        #print("context", context)
         logged_user = request.user
 
         if logged_user.is_authenticated:
-            print(logged_user)
-            print("dashboard__form")
+            #print(logged_user)
+            #print("dashboard__form")
             return redirect('brokerconnect')  
         else:
-            print(logged_user)
-            print("login__form")
+            #print(logged_user)
+            #print("login__form")
             return render(request, template, context)
         
     def logoutUser(self, request):  # Make sure to include `self` as the first parameter for methods in a class
-        print("logout_processing")
+        #print("logout_processing")
         logout(request)
         messages.success(request, "Logout Successful !")
         return redirect('login')
@@ -151,23 +151,23 @@ class UserloginView(View):
             if form.is_valid():
                 login_username = request.POST["username"]
                 login_password = request.POST["password"]
-                print(login_username)
-                print(login_password)
+                #print(login_username)
+                #print(login_password)
                 user = auth.authenticate(username=login_username, password=login_password)
                 if user :
                 # if user is not None and  user.is_superuser==False and user.is_active==True:
                     auth.login(request, user)
-                    print("login success")
+                    #print("login success")
                     messages.success(request, "Login Successful !")
                     # return render(request, "user/dashboard.html")
                     return redirect('brokerconnect')  
                 else:
-                    print("user not Exists")
+                    #print("user not Exists")
                     # messages.info(request, "user not Exists")
                     messages.error(request, 'Username or Password incorrect !')
                     return render(request, template, context)
             else:
-                print("user not created")
+                #print("user not created")
                 return render(request, template, context)
 
 
@@ -202,6 +202,6 @@ class SuccessView(View):
     def get(self, request):
         template = "success_page.html"
         context={}
-        print("context", context)
+        #print("context", context)
         return render(request, template, context)
         

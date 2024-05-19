@@ -345,7 +345,7 @@ export default class Toolbar {
       this.maxX = w.globals.maxY
     }
 
-    // avoid zooming out beyond 1000 which may result in NaN values being printed on x-axis
+    // avoid zooming out beyond 1000 which may result in NaN values being #printed on x-axis
     if (
       w.config.xaxis.type === 'datetime' &&
       new Date(this.minX).getUTCFullYear() < 1000

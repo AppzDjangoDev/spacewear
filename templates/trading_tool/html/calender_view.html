@@ -3,7 +3,7 @@
 {% block content %}
 <style>
     .calbtn{
-        height: 50px;
+        height: 35px;
         width: 120px;
     }
 
@@ -26,7 +26,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="card-body">
+                    <div class="card-body" style="padding: 10px;">
                         <div class="table-responsive">
                             <table class="table table-bordered" id="calendar-table">
                                 <thead>
@@ -46,47 +46,44 @@
                                     <tr>
                                         {% for day_dict in week %}
                                             {% for key, value in day_dict.items %}
-                                                <td class="text-center {% if key == now_date and month == now_month and year == now_year %}current-date{% endif %}">
+                                                <td class="text-center day_box {% if key == now_date and month == now_month and year == now_year %}current-date{% endif %}">
                                                     {% if key and key <= 5 %}
-                                                        {% if value|first  != 0 %}
-                                                        <button id="date-button-{{ value|first }}-{{ month|stringformat:"02d" }}-{{ year }}" class="btn btn-light btn-sm btn-block fs-4 mt-1 ml-1 calbtn" onclick="sendDate('{{  value|first }}-{{ month|stringformat:"02d" }}-{{ year }}', this)">{{value|first }}</button><br>
-                                                        {% if value|last > 0 %}
-                                                            <button class="btn btn-success btn-sm btn-block fs-4 mt-1 ml-1 calbtn" disabled>{{ value|last }}</button>
-                                                        {% elif value|last < 0 %}
-                                                            <button class="btn btn-danger btn-sm btn-block fs-4 mt-1 ml-1 calbtn" disabled>{{ value|last }}</button>
-                                                        {% else %}
-                                                            <button class="btn btn-light btn-sm btn-block fs-4 mt-1 ml-1 calbtn" disabled>-</button>
+                                                        {% if value|first != 0 %}
+                                                            <div class="button-container">
+                                                                <button id="date-button-{{ value|first }}-{{ month|stringformat:"02d" }}-{{ year }}" class="btn btn-light btn-sm btn-block fs-4 mt-1 ml-1 calbtn" onclick="sendDate('{{  value|first }}-{{ month|stringformat:"02d" }}-{{ year }}')">{{value|first }}</button>
+                                                                {% if value|last > 0 %}
+                                                                    <button class="btn btn-success btn-sm btn-block fs-4 mt-1 ml-1 calbtn" disabled>{{ value|last }}</button>
+                                                                {% elif value|last < 0 %}
+                                                                    <button class="btn btn-danger btn-sm btn-block fs-4 mt-1 ml-1 calbtn" disabled>{{ value|last }}</button>
+                                                                {% else %}
+                                                                    <button class="btn btn-light btn-sm btn-block fs-4 mt-1 ml-1 calbtn" disabled>-</button>
+                                                                {% endif %}
+                                                            </div>
                                                         {% endif %}
-                                                        {% endif %}
-                                                       
+                                                        
                                                         {% with date=key|stringformat:"02d" %}
                                                             <input type="hidden" id="{{ value|first }}-{{ month|stringformat:"02d" }}-{{ year }}" value="{{ value|first }}-{{ month|stringformat:"02d" }}-{{ year }}" />
                                                         {% endwith %}
                                                     {% elif key and key >= 5 and key <= 7 %}
-                                                        <button class="btn btn-warning btn-sm btn-block fs-4 mt-1 ml-1 calbtn" disabled>{{ value| first  }}</button>
-                                                        <button class="btn btn-light btn-sm btn-block fs-4 mt-1 ml-1 calbtn" disabled>-</button>
-
-
+                                                        <button class="btn btn-warning btn-sm btn-block fs-4 mt-1 ml-1 " disabled>{{ value|first }}</button>
                                                     {% elif key and key >= 7 %}
-                                                        
-
-                                                        <button id="week-{{ key }}" class="btn btn-primary btn-sm  fs-4 mt-1 ml-1 calbtn btn-block" disabled>{{ value|first }}</button></br>
-
-                                                        {% if value|last > 0 %}
-                                                        <button class="btn btn-success btn-sm btn-block fs-4 mt-1 ml-1 calbtn" disabled>{{ value|last }}</button>
-                                                        {% elif value|last < 0 %}
-                                                            <button class="btn btn-danger btn-sm btn-block fs-4 mt-1 ml-1 calbtn" disabled>{{ value|last }}</button>
-                                                       
-                                                        {% else %}
-                                                            <button class="btn btn-light btn-sm btn-block fs-4 mt-1 ml-1 calbtn" disabled>-</button>
-                                                        {% endif %}
-
-                                                        {% endif %}
+                                                        <div class="button-container">
+                                                            <button id="week-{{ key }}" class="btn btn-primary btn-sm fs-4 mt-1 ml-1 calbtn btn-block" disabled>{{ value|first }}</button>
+                                                            {% if value|last > 0 %}
+                                                                <button class="btn btn-success btn-sm btn-block fs-4 mt-1 ml-1 calbtn" disabled>{{ value|last }}</button>
+                                                            {% elif value|last < 0 %}
+                                                                <button class="btn btn-danger btn-sm btn-block fs-4 mt-1 ml-1 calbtn" disabled>{{ value|last }}</button>
+                                                            {% else %}
+                                                                <button class="btn btn-light btn-sm btn-block fs-4 mt-1 ml-1 calbtn" disabled>-</button>
+                                                            {% endif %}
+                                                        </div>
+                                                    {% endif %}
                                                 </td>
-                                            {% endfor %} 
+                                            {% endfor %}
                                         {% endfor %}
                                     </tr>
                                     {% endfor %}
+                                    
                                 </tbody>
                             </table>
                         </div>
@@ -171,9 +168,17 @@
 
 
 <style>
+    .button-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
     .current-date {
         background-color: #b6b4c442 !important;/* Change this to your desired highlight color */
         font-weight: bold;
+    }
+    .day_box {
+        padding: 10px 1px !important;
     }
 </style>
 
@@ -257,10 +262,10 @@
         for (var i = 0; i < response.calendar.length; i++) {
             var week = response.calendar[i];
             var row = $('<tr></tr>');
-
+    
             for (var j = 0; j < week.length; j++) {
                 var dayData = week[j];
-                var cell = $('<td class="text-center"></td>');
+                var cell = $('<td class="text-center day_box"></td>');
                 // Check if the dayData is not empty
                 if (Object.keys(dayData).length !== 0) {
                     var day = Object.values(dayData)[0][0]; // Extract day from the dayData
@@ -269,12 +274,12 @@
                     var buttonClass = '';
                     var disabled = false;
                     if (j <= 4) {
-                        buttonClass = 'btn btn-light btn-lg btn-block calbtn m-1';
+                        buttonClass = 'btn btn-light btn-sm btn-block calbtn mt-1 ml-1';
                     } else if (j >= 5 && j <= 6) {
-                        buttonClass = 'btn btn-warning btn-lg btn-block calbtn m-1';
+                        buttonClass = 'btn btn-warning btn-sm btn-block';
                         disabled = true;
                     } else {
-                        buttonClass = 'btn btn-primary btn-lg btn-block calbtn m-1';
+                        buttonClass = 'btn btn-primary btn-sm btn-block calbtn mt-1 ml-1';
                         disabled = true;
                     }
                     var button = $('<button class="' + buttonClass + '"></button>')
@@ -285,46 +290,46 @@
                         .click(function() {
                             sendDate($(this).attr('data-date'));
                         });
-
-                    // Display profit near the button
+    
+                    // Create profit button
                     var profitButton;
                     if (profit > 0) {
-                        profitButton = $('<button class="btn btn-success btn-lg btn-block calbtn mt-1 ml-1 " disabled></button>').text(profit);
+                        profitButton = $('<button class="btn btn-success btn-sm btn-block calbtn mt-1 ml-1" disabled></button>').text(profit);
                     } else if (profit < 0) {
-                        profitButton = $('<button class="btn btn-danger btn-lg btn-block calbtn mt-1 ml-1 " disabled></button>').text(profit);
-                    } else if (j >= 6 && j <= 7) {
-                        profitButton = $('<button class="btn btn-light btn-lg btn-block calbtn mt-1 ml-1 " disabled></button>').text('-');
-                        console.log('holyday', j)
-                    } else if (profit == 0 ){
-                        profitButton = $('<button class="btn btn-light btn-lg btn-block calbtn mt-1 ml-1 " disabled></button>').text('-');
-                    }else {
-                        profitButton = $('<button class="btn btn-light btn-lg btn-block calbtn mt-1 ml-1 " disabled></button>').text(profit);
+                        profitButton = $('<button class="btn btn-danger btn-sm btn-block calbtn mt-1 ml-1" disabled></button>').text(profit);
+                    } else {
+                        profitButton = $('<button class="btn btn-light btn-sm btn-block mt-1 ml-1" disabled></button>').text('-');
                     }
-                    // Append the profit button and line break
-                    cell.append(button);
-                    cell.append(profitButton);
-                    cell.append('</br>');
+    
+                    // Wrap buttons in a container for vertical alignment
+                    var buttonContainer = $('<div class="button-container"></div>');
+                    buttonContainer.append(button);
+                    buttonContainer.append(profitButton);
+    
+                    // Append the container to the cell
+                    cell.append(buttonContainer);
+    
                     // Highlight the current date
                     if (day == currentDate && month == currentMonth && year == currentYear) {
                         cell.addClass('current-date');
                     }
-                    
                 }
-
+    
                 // Add input field for date
                 var inputFieldDate = $('<input type="hidden">').attr('id', dateValue).attr('value', dateValue);
                 cell.append(inputFieldDate);
-
+    
                 // Add input field for profit
                 var inputFieldProfit = $('<input type="hidden">').attr('id', 'profit_' + dateValue).attr('value', profit);
                 cell.append(inputFieldProfit);
-
+    
                 row.append(cell);
             }
-
+    
             $('#calendar-table tbody').append(row);
         }
     }
+    
 </script>
 
 
@@ -369,7 +374,7 @@
                         </tr>`;
                     tableBody.append(row);
                 } else {
-                    tableBody.append('<tr><td colspan="7" class="text-center">Currently No data Found</td></tr>');
+                    tableBody.append('<tr><td colspan="7" class="text-center day_box">Currently No data Found</td></tr>');
                     dateButton.text(date); // Reset the button text
                 }
             },
@@ -378,7 +383,7 @@
                 var tableBody = $('#data-table-body');
                 var dateButton = $('#date-button');
                 tableBody.empty(); // Clear existing data
-                tableBody.append('<tr><td colspan="7" class="text-center">Currently No data Found</td></tr>');
+                tableBody.append('<tr><td colspan="7" class="text-center day_box">Currently No data Found</td></tr>');
                 dateButton.text(formattedDate); // Reset the button text
             }
         });

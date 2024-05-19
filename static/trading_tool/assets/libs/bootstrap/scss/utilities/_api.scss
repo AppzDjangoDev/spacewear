@@ -35,13 +35,13 @@
 }
 
 
-// Print utilities
-@media print {
+// #print utilities
+@media #print {
   @each $key, $utility in $utilities {
     // The utility can be disabled with `false`, thus check if the utility is a map first
-    // Then check if the utility needs print styles
-    @if type-of($utility) == "map" and map-get($utility, print) == true {
-      @include generate-utility($utility, "-print");
+    // Then check if the utility needs #print styles
+    @if type-of($utility) == "map" and map-get($utility, #print) == true {
+      @include generate-utility($utility, "-#print");
     }
   }
 }

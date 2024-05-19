@@ -4,7 +4,7 @@ from django.views import View
 
 class DashboardView(View):
     def get(self, request , **kwargs):
-        print("pppppppppppppppppppppp")
+        #print("pppppppppppppppppppppp")
         template = "trading_tool/html/index.html"
         context={}
 

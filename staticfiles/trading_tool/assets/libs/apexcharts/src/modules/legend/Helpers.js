@@ -167,7 +167,7 @@ export default class Helpers {
 
         const graphics = new Graphics(this.lgCtx.ctx)
         graphics.pathMouseDown(seriesEl.members[0], null)
-        this.lgCtx.ctx.pie.printDataLabelsInner(
+        this.lgCtx.ctx.pie.#printDataLabelsInner(
           seriesEl.members[0].node,
           dataLabels
         )

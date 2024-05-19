@@ -34,6 +34,8 @@ class SOD_EOD_Data(models.Model):
     position_data = models.JSONField(null=True)
     order_data = models.JSONField(null=True)
     fund_data = models.JSONField(null=True)
+    sod_status = models.BooleanField(default=False)
+    eod_status = models.BooleanField(default=False)
 
 
 class TradingConfigurations(models.Model):

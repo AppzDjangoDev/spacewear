@@ -52,8 +52,8 @@ def brokerconnect(request):
     )
     # Generate the auth code using the session model
     response = session.generate_authcode()
-    # Print the auth code received in the response
-    # You can redirect to another page or render a template after printing
+    # #print the auth code received in the response
+    # You can redirect to another page or render a template after #printing
     return redirect(response)  # Assuming 'home' is the name of a URL pattern you want to redirect to
 
 
@@ -79,13 +79,13 @@ def get_accese_token(request):
         response_type=response_type, 
         grant_type=grant_type
     )
-    print("sessionsession", session)
+    #print("sessionsession", session)
     # Set the authorization code in the session object
     session.set_token(auth_code)
     # Generate the access token using the authorization code
     response = session.generate_token()
-    print("responseresponse", response)
-    # Print the response, which should contain the access token and other details
+    #print("responseresponse", response)
+    # #print the response, which should contain the access token and other details
     access_token = response.get('access_token')
     refresh_token = response.get('refresh_token')
     if access_token:
@@ -120,16 +120,16 @@ def get_accese_token_store_session(request):
     session.set_token(auth_code)
     # Generate the access token using the authorization code
     response = session.generate_token()
-    # Print the response, which should contain the access token and other details
+    # #print the response, which should contain the access token and other details
     access_token = response.get('access_token')
     refresh_token = response.get('refresh_token')
     if access_token and refresh_token:
         request.session['access_token'] = access_token
         request.session['refresh_token'] = refresh_token
     else:
-        print("access_token or refresh_token missing")
+        #print("access_token or refresh_token missing")
         pass
-    # You can redirect to another page or render a template after printing
+    # You can redirect to another page or render a template after #printing
     return redirect('dashboard')  # Assuming 'home' is the name of a URL pattern you want to redirect to
 
 
@@ -154,10 +154,10 @@ def close_all_positions(request):
         if orders_with_status_6:
             # Cancel the orders
             order_cancel_response = fyers.cancel_basket_orders(data=orders_with_status_6)
-            print("Order cancel response:", order_cancel_response)
+            #print("Order cancel response:", order_cancel_response)
             messages.success(request,order_cancel_response)
         else:
-            print("No pending orders to cancel.")
+            #print("No pending orders to cancel.")
             messages.success(request,"No pending orders to cancel.")
         # Code indicates successful cancellation or order not found
         data = {
@@ -167,12 +167,18 @@ def close_all_positions(request):
         }
         response = fyers.exit_positions(data=data)
         # Check if 'data' key exists in the response
-        print("responseresponse", response)
+        #print("responseresponse", response)
         if 'message' in response:
+            
             message = response['message']
             messages.success(request, message)
+            request.session.pop('open_symbol', None)
+            request.session.pop('open_qty', None)
+            request.session.pop('open_traded_price', None)
+            request.session.pop('exp_stoploss_amount', None)
             return JsonResponse({'message': message, 'code': response['code'] })
         else:
+            
             # Handle the case where 'data' key is missing
             message = "Error: Response format is unexpected"
             messages.error(request, "Error: Response format is unexpected")
@@ -190,36 +196,12 @@ def get_data_instance(request):
         # Return the response received from the Fyers API
         return fyers
     else:
-        print("noithing here")
+        #print("noithing here")
         # return redirect('dashboard')  
         # Handle the case where access_token is not found in the session
+        pass
     return None
 
-
-from django.http import JsonResponse
-def update_data_instance(request):
-    context = {}
-    client_id = settings.FYERS_APP_ID
-    access_token = request.session.get('access_token')
-    total_order_status=0
-
-    if access_token:
-        data_instance = get_data_instance(request)
-        # fyers = fyersModel.FyersModel(client_id=client_id, is_async=False, token=access_token, log_path="")
-        positions_data = data_instance.positions()
-        order_data = data_instance.orderbook()
-        fund_data = data_instance.funds()
-        if "orderBook" in order_data:
-            total_order_status = sum(1 for order in order_data["orderBook"] if order["status"] == 2)
-        # Process the response and prepare the data
-        data = { 'positions': positions_data,
-                'total_order_status': total_order_status ,
-                'fund_data': fund_data,
-                'order_data': order_data
-                }  # Modify this according to your response structure
-        return JsonResponse(data)
-    else:
-        return JsonResponse({'error': 'Access token not found'}, status=400)
 
 class ProfileView(LoginRequiredMixin, View):
   login_url = '/login'
@@ -239,7 +221,7 @@ class ProfileView(LoginRequiredMixin, View):
       return render(request, 'trading_tool/html/profile_view.html', context)
     
     else:
-      print("no access token")
+      #print("no access token")
       return render(request, 'trading_tool/html/profile_view.html')
 
 
@@ -261,13 +243,10 @@ class SOD_ReportingView(LoginRequiredMixin, FormView):
         # Load initial value for week_no
         data_instance = get_data_instance(self.request)
         fund_data = data_instance.funds()
-        print("fund_datafund_data", fund_data)
+        #print("fund_datafund_data", fund_data)
         current_date = datetime.date.today()
 
-
         # calculate the slippage 
-        
-
         initial_week_no = current_date.isocalendar()[1]
         initial['week_no'] = initial_week_no
         total_balance = 0
@@ -276,36 +255,27 @@ class SOD_ReportingView(LoginRequiredMixin, FormView):
             if item.get('title') == 'Total Balance':
                 total_balance = item.get('equityAmount')
                 break
-
-        print("Total Balance:", total_balance)
+        #print("Total Balance:", total_balance)
         initial['trading_date'] = current_date
         initial['opening_balance'] = total_balance
 
         previous_date = current_date - datetime.timedelta(days=1)
+        #print("previous_date", previous_date)
         previous_date_data =SOD_EOD_Data.objects.filter(trading_date=previous_date).exists()
         if previous_date_data:
             previous_date_data = SOD_EOD_Data.objects.filter(trading_date=previous_date).first()
-            prev_day_slippage = total_balance -   previous_date_data.closing_balance
-
+            prev_day_slippage = float(total_balance) -   float(previous_date_data.closing_balance)
             # calculate overall expense 
             turnover = previous_date_data.opening_balance + previous_date_data.day_p_and_l + previous_date_data.withdrwal_amount
             turnover = turnover-previous_date_data.withdrwal_amount
-            print("turnoverturnoverturnover", turnover)
-            actual_expense = turnover - total_balance
-            actual_benefit = previous_date_data.day_p_and_l - actual_expense
+            #print("turnoverturnoverturnover", turnover)
+            actual_expense = float(turnover) - total_balance
+            actual_benefit = float(previous_date_data.day_p_and_l) - float(actual_expense)
             previous_date_data.actual_expense = actual_expense
             previous_date_data.actual_benefit = actual_benefit
             previous_date_data.save()
             initial['prev_day_slippage'] = prev_day_slippage
    
-          
-
-
-
-
-
-
-
         return initial
 
     def get_initial(self):
@@ -316,7 +286,6 @@ class SOD_ReportingView(LoginRequiredMixin, FormView):
         trading_date = form.cleaned_data.get('trading_date')
         if SOD_EOD_Data.objects.filter(trading_date=trading_date).exists():
             return JsonResponse({'error': 'A record for this trading date already exists.'}, status=400)
-        
         form.save()
         return JsonResponse({'success': 'Form submitted successfully.'})
 
@@ -324,22 +293,22 @@ class SOD_ReportingView(LoginRequiredMixin, FormView):
         errors = form.errors.as_json()
         return JsonResponse({'errors': errors}, status=400)
 
+
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from .models import SOD_EOD_Data
 import datetime
-
 @csrf_exempt
 def fetch_date_data(request):
     if request.method == 'POST':
         date_str = request.POST.get('date')
         
         date_obj = datetime.datetime.strptime(date_str, '%d-%m-%Y')
-        print("date_strdate_strdate_str", date_obj)
+        #print("date_strdate_strdate_str", date_obj)
         
         data_instance = SOD_EOD_Data.objects.filter(trading_date=date_obj).first()
         data_instance = SOD_EOD_Data.objects.filter(trading_date=date_obj).first()
-        print("data_instancedata_instance", data_instance)
+        #print("data_instancedata_instance", data_instance)
         
         if data_instance:
             data = {
@@ -356,12 +325,54 @@ def fetch_date_data(request):
                 # 'some_other_field': data_instance.some_other_field,
                 # # Add other fields as necessary
             }
-            print("datadatadata", data)
+            #print("datadatadata", data)
             return JsonResponse({'data': data}, status=200)
         else:
             return JsonResponse({'error': 'No data found for the given date'}, status=404)
 
     return JsonResponse({'error': 'Invalid request method'}, status=400)
+
+
+from django.http import JsonResponse
+from django.utils import timezone
+from collections import defaultdict
+from datetime import timedelta
+from .models import SOD_EOD_Data
+
+def update_data_instance(request):
+    fifteen_days_ago = timezone.now() - timedelta(days=15)
+    # Query the database for SOD_EOD_Data objects within the past 15 days
+    data_objects = SOD_EOD_Data.objects.filter(trading_date__gte=fifteen_days_ago)
+    
+    if data_objects.exists():
+        # Create a defaultdict to store balance data for each date
+        balance_data = defaultdict(list)
+        
+        # Iterate through the data_objects and collect opening and closing balance data
+        for obj in data_objects:
+            trading_date = obj.trading_date.strftime('%Y-%m-%d')
+            # Append opening balance twice and closing balance twice
+            balance_data[trading_date].extend([float(obj.opening_balance), float(obj.opening_balance), float(obj.closing_balance), float(obj.closing_balance)])
+        
+        # Format the data into the desired format
+        formatted_data = []
+        for date, balances in balance_data.items():
+            print("balancesbalances", balances)
+            formatted_data.append({'x': date, 'y': balances})
+
+        print("formatted_dataformatted_data", formatted_data)
+        
+        return JsonResponse(formatted_data, safe=False)
+
+    else:
+        return JsonResponse({'error': 'No data found within the past 15 days'}, status=404)
+
+
+
+from django.views.generic import TemplateView
+
+class CandleOverviewView(TemplateView):
+    template_name = 'trading_tool/html/candle_overview.html'
 
 
 class EOD_ReportingView(LoginRequiredMixin, FormView):
@@ -404,7 +415,7 @@ class EOD_ReportingView(LoginRequiredMixin, FormView):
         # Check if a record with the same trading_date already exists
         trading_date = datetime.date.today()
         existing_instance = SOD_EOD_Data.objects.filter(trading_date=trading_date).first()
-        print("existing_instance", existing_instance)
+        #print("existing_instance", existing_instance)
         
         if existing_instance:
             # If a record exists, update the existing instance with the form data
@@ -494,7 +505,7 @@ class TradingCalenderView(LoginRequiredMixin, View):
 
                 profit_data = SOD_EOD_Data.objects.filter(trading_date__range=[first_date, last_date])
                 profit_data_dict = {entry['trading_date'].strftime('%d-%m-%Y'): entry['day_p_and_l'] for entry in profit_data.values('trading_date', 'day_p_and_l')}            
-                print("profit_data_dict", profit_data_dict)
+                #print("profit_data_dict", profit_data_dict)
 
                 combined_list = []
                 for row in cal:
@@ -504,19 +515,19 @@ class TradingCalenderView(LoginRequiredMixin, View):
                         limit = len(row)
                         if i == limit:
                             combined_row.append(item)  
-                            print("combined_row", combined_row)
+                            #print("combined_row", combined_row)
                             # Append the last item as is
                         elif isinstance(item, int):
                                 date_key = f"{item:02d}-{month:02d}-{year}"  # Construct the date dynamically
                                 if date_key in profit_data_dict:
-                                    print('date_key', date_key, item)
+                                    #print('date_key', date_key, item)
                                     combined_row.append({counter:[item ,float(profit_data_dict[date_key])]})  # Change Decimal to float
                                 else:
-                                    print('date_key11', date_key, item)
+                                    #print('date_key11', date_key, item)
                                     combined_row.append({counter:[item , 0.00]})  # Change Decimal to float
                         else:
-                            print('date_key12', date_key, item)
-                            print("ppppppppp", i, item)
+                            #print('date_key12', date_key, item)
+                            #print("ppppppppp", i, item)
                             combined_row.append(item)
                         counter +=1
                     combined_list.append(combined_row)
@@ -529,7 +540,7 @@ class TradingCalenderView(LoginRequiredMixin, View):
                                 if key == 8:
                                     value[1] = sublist_sum
 
-                    print("combined_listcombined_list", combined_list)
+                    #print("combined_listcombined_list", combined_list)
 
                 return JsonResponse({'calendar': combined_list, 'month_name': month_name, 'month': month, 'year': year, 'first_date': first_date, 'last_date': last_date, 'now' : now})
             
@@ -555,7 +566,7 @@ class TradingCalenderView(LoginRequiredMixin, View):
 
             profit_data = SOD_EOD_Data.objects.filter(trading_date__range=[first_date, last_date])
             profit_data_dict = {entry['trading_date'].strftime('%d-%m-%Y'): entry['day_p_and_l'] for entry in profit_data.values('trading_date', 'day_p_and_l')}            
-            print("profit_data_dict", profit_data_dict)
+            #print("profit_data_dict", profit_data_dict)
 
             combined_list = []
             for row in cal:
@@ -565,19 +576,19 @@ class TradingCalenderView(LoginRequiredMixin, View):
                     limit = len(row)
                     if i == limit:
                         combined_row.append(item)  
-                        print("combined_row", combined_row)
+                        #print("combined_row", combined_row)
                         # Append the last item as is
                     elif isinstance(item, int):
                             date_key = f"{item:02d}-{month:02d}-{year}"  # Construct the date dynamically
                             if date_key in profit_data_dict:
-                                print('date_key', date_key, item)
+                                #print('date_key', date_key, item)
                                 combined_row.append({counter:[item ,float(profit_data_dict[date_key])]})  # Change Decimal to float
                             else:
-                                print('date_key11', date_key, item)
+                                #print('date_key11', date_key, item)
                                 combined_row.append({counter:[item , 0.00]})  # Change Decimal to float
                     else:
-                        print('date_key12', date_key, item)
-                        print("ppppppppp", i, item)
+                        #print('date_key12', date_key, item)
+                        #print("ppppppppp", i, item)
                         combined_row.append(item)
                     counter +=1
                 combined_list.append(combined_row)
@@ -625,7 +636,7 @@ class TradingCalenderView(LoginRequiredMixin, View):
             return render(request, 'trading_tool/html/calender_view.html', context)
         
         else:
-            print("no access token")
+            #print("no access token")
             return render(request, 'trading_tool/html/calender_view.html')
 
     def calculate_next_month(self, year, month):
@@ -670,10 +681,11 @@ class OrderHistory(LoginRequiredMixin, View):
         if not isinstance(order_data, list):
             # If order_data is not a list, assume it's a dictionary and extract the 'orderBook' key
             order_data = order_data.get('orderBook', [])
+            order_data = sorted(order_data, key=lambda x: x['slNo'], reverse=True)
 
-        # Map status values to their descriptions
-        for order in order_data:
-            order['status_description'] = settings.STATUS_DESCRIPTIONS.get(order.get('status', 'Unknown'))
+            # Map status values to their descriptions
+            for order in order_data:
+                order['status_description'] = settings.STATUS_DESCRIPTIONS.get(order.get('status', 'Unknown'))
 
         if request.is_ajax():
             load_more = request.GET.get('load_more', None)
@@ -698,7 +710,7 @@ class OrderHistory(LoginRequiredMixin, View):
             # Filter the current page's data based on the status
             if status_filter:
                 filtered_data = [order for order in current_page_data if order.get('status') == int(status_filter)]
-                print("filtered_datafiltered_datafiltered_data", filtered_data)
+                #print("filtered_datafiltered_datafiltered_data", filtered_data)
             else:
                 filtered_data = current_page_data
 
@@ -713,6 +725,20 @@ class OrderHistory(LoginRequiredMixin, View):
         # Otherwise, return the entire rendered page
         context['order_history_data'] = page_obj
         return render(request, 'trading_tool/html/order_history.html', context)
+    
+
+from django.http import JsonResponse
+class TransactionHistory(LoginRequiredMixin, View):
+    login_url = '/login'
+
+    def get(self, request):
+        context = {}
+        get_transaction_data =SOD_EOD_Data.objects.filter(
+                                    Q(withdrwal_amount__gt=0) | Q(withdrwal_amount__lt=0) |
+                                    Q(deposit_amount__gt=0) | Q(deposit_amount__lt=0)
+                                ).order_by('-trading_date')
+        context['get_transaction_data'] = get_transaction_data
+        return render(request, 'trading_tool/html/transaction_history.html', context)
 
 
 class OptionChainView(LoginRequiredMixin, View):
@@ -736,7 +762,7 @@ class OptionChainView(LoginRequiredMixin, View):
         except (KeyError, AttributeError, IndexError) as e:
             # Handle the error gracefully
             error_message = f'Error occurred: {str(e)}'
-            print("Error occurred while fetching expiry data:", error_message)
+            #print("Error occurred while fetching expiry data:", error_message)
             context['expiry_response'] = error_message
             return redirect('login')  
             # return render(request, template, context)
@@ -750,7 +776,7 @@ class OptionChainView(LoginRequiredMixin, View):
             response = data_instance.optionchain(data=options_data)
         except AttributeError as e:
             error_message = f'Error occurred while fetching options data: {str(e)}'
-            print(error_message)
+            #print(error_message)
             context['options_data'] = error_message
             return render(request, template, context)
         
@@ -766,14 +792,13 @@ class OptionChainView(LoginRequiredMixin, View):
 
         # Add serial numbers to the sorted list
         pe_options_with_serial = []    
-        # Print the modified data
+        # #print the modified data
         for option in pe_options_sorted:
-            print(option)
             pe_options_with_serial.append(option)
 
-        # print("**************************************")
-        # print(pe_options_with_serial)
-        # print("**************************************")
+        # #print("**************************************")
+        # #print(pe_options_with_serial)
+        # #print("**************************************")
         # Filter optionsChain data for option type 'CE'
         ce_options = [option for option in response['data']['optionsChain'] if option['option_type'] == 'CE']
 
@@ -786,14 +811,13 @@ class OptionChainView(LoginRequiredMixin, View):
 
         # Add serial numbers to the sorted list
         ce_options_with_serial = []    
-        # Print the modified data
+        # #print the modified data
         for option in ce_options_sorted:
-            print(option)
             ce_options_with_serial.append(option)
 
-        # print("**************************************")
-        # print(ce_options_with_serial)
-        # print("**************************************")
+        # #print("**************************************")
+        # #print(ce_options_with_serial)
+        # #print("**************************************")
         context['access_token'] = request.session.get('access_token')
         context['forward_trailing_points'] = forward_trailing_points
         context['reverse_trailing_points'] = reverse_trailing_points
@@ -807,7 +831,7 @@ class OptionChainView(LoginRequiredMixin, View):
 
 def update_latest_data(request):
     # Call API to get data
-    print("entry__1")
+    #print("entry__1")
     data_instance = get_data_instance(request)
 
     # Save positions data
@@ -904,9 +928,21 @@ def instantBuyOrderWithSL(request):
 
         # Place market buy order
         response = data_instance.place_order(data=data)
-        print("BUY ORDER RESPONSE :", response["code"])
+        #print("BUY ORDER RESPONSE :", response["code"])
+        response["code"] = 1101
 
         if response["code"] == 1101:
+            # Fetch session variables
+            try:
+                open_qty = int(request.session.get('open_qty', 0))
+                open_traded_price = float(request.session.get('open_traded_price', 0.0))
+            except KeyError:
+                open_qty = None
+                open_traded_price = None
+
+
+
+            
             # Check if there's an existing pending order with status 6 for the same symbol
             allOrderData = data_instance.orderbook()
             order_with_status_6 = next((order for order in allOrderData["orderBook"] if order['status'] == 6 and order["symbol"] == der_symbol), None)
@@ -926,7 +962,7 @@ def instantBuyOrderWithSL(request):
                 get_buy_orderdata = data_instance.orderbook(data=buy_order_data)
                 order_details = get_buy_orderdata["orderBook"][0]
                 traded_price = order_details["tradedPrice"]
-                
+                traded_price=15
                 # Calculate stop-loss and limit price
                 default_stoploss = trade_config_data.default_stoploss
                 stoploss_limit_slippage = trade_config_data.stoploss_limit_slippage
@@ -950,6 +986,44 @@ def instantBuyOrderWithSL(request):
                 }
 
                 stoploss_order_response = data_instance.place_order(data=sl_data)
+                open_traded_price = float(traded_price)
+                total_purchase_value = open_traded_price * order_qty 
+                exp_stoploss_value = StopLossCalculator(total_purchase_value, default_stoploss)
+                exp_stoploss_amount = total_purchase_value - exp_stoploss_value
+                
+
+
+
+                # Update session variables
+                if open_qty is not None and open_traded_price is not None:
+                    open_qty += int(order_qty)
+                    if open_traded_price != 0.0 :
+                        avg_price = (traded_price+open_traded_price)/2
+                        open_traded_price = float(avg_price)
+                        
+                        total_purchase_value = open_traded_price * open_qty
+                        exp_stoploss_value = StopLossCalculator(total_purchase_value, default_stoploss)
+                        exp_stoploss_amount = total_purchase_value - exp_stoploss_value
+
+
+
+                    
+
+
+
+                    # Store updated values back to session
+                    print("exp_stoploss_amount", exp_stoploss_amount)
+                    request.session['open_symbol'] = der_symbol
+                    request.session['exp_stoploss_amount'] = exp_stoploss_amount
+                    request.session['open_qty'] = open_qty
+                    request.session['open_traded_price'] = open_traded_price
+                    #print("request.session['open_qty']request.session['open_qty']", request.session['open_qty'])
+                else:
+                    # Handle case when open_qty or open_traded_price is None
+                    # Maybe log an error or take appropriate action
+                    pass
+
+
                 if stoploss_order_response["code"] == 1101:
                     message = "BUY/SL-L Placed Successfully"
                     return JsonResponse({'response': message , 'symbol': der_symbol, 'qty': order_qty, 'traded_price': traded_price })
@@ -966,6 +1040,18 @@ def instantBuyOrderWithSL(request):
     else:
         message = "Some Error Occurred Before Execution"
         return JsonResponse({'response': message})
+    
+
+def StopLossCalculator(purchase_price: float, loss_percentage: float) -> int:
+    
+    stop_loss_price = purchase_price * (1 - loss_percentage / 100)
+    
+    return int(round(stop_loss_price))
+
+
+
+
+
 
 def trailingwithlimit(request):
     client_id = settings.FYERS_APP_ID
@@ -975,7 +1061,7 @@ def trailingwithlimit(request):
         # Initialize the FyersModel instance with your client_id, access_token, and enable async mode
         fyers = fyersModel.FyersModel(client_id=client_id, token=access_token, log_path="")
         order_data = fyers.orderbook()
-        print("pppppppppppppppp", order_data)
+        #print("pppppppppppppppp", order_data)
         
         # Initialize variables to store stop and limit prices
         existing_stop_price = None
@@ -983,7 +1069,7 @@ def trailingwithlimit(request):
         
         # Iterate through the orderBook
         for order in order_data.get("orderBook", []):
-            print("pppppppppppppppp", order)
+            #print("pppppppppppppppp", order)
             # Check if the status is 6
             if order.get("status") == 6:
                 # Get the stop and limit prices
@@ -1008,6 +1094,9 @@ def trailingwithlimit(request):
                 if 'message' in trailing_order_update:
                     message = trailing_order_update['message']
                     messages.success(request, message)
+
+
+
                     return JsonResponse({'message': message})
         
         # Handle the case where 'data' key is missing
@@ -1172,9 +1261,9 @@ def trailingtotop(request):
                     filtered_positions.append(position)
                     break  # Stop iterating once a matching position is found
 
-            print("00000000000000000000000000",filtered_positions)
+            #print("00000000000000000000000000",filtered_positions)
             ltp = filtered_positions[0]["ltp"]
-            print("Last Traded Price:", ltp)
+            #print("Last Traded Price:", ltp)
             trade_config_data = TradingConfigurations.objects.first()
             trailing_to_top_points = trade_config_data.trailing_to_top_points
             stoploss_limit_slippage = trade_config_data.stoploss_limit_slippage
@@ -1182,16 +1271,16 @@ def trailingtotop(request):
             # Calculate new stop and limit prices
             new_stop_price = ltp - trailing_to_top_points
             new_limit_price = (ltp - trailing_to_top_points) - float(stoploss_limit_slippage)
-            print("new_limit_pricenew_limit_price", new_stop_price, "new_limit_price", new_limit_price)
+            #print("new_limit_pricenew_limit_price", new_stop_price, "new_limit_price", new_limit_price)
 
             # todo 
             # Check if there are orders to cancel
             if symbol is not None:
                 # Modify the order with new stop and limit prices
                 data = {"id": order["id"], "limitPrice": new_limit_price, "stopPrice": new_stop_price}
-                print("******************************************")
-                print("data", data)
-                print("******************************************")
+                #print("******************************************")
+                #print("data", data)
+                #print("******************************************")
                 trailing_order_update = fyers.modify_order(data=data)
                 
                 # Check the response
@@ -1222,6 +1311,7 @@ def fyer_websocket_view(request):
 from django.http import JsonResponse
 def store_current_value_in_session(request):
     if request.method == 'POST':
+        #print("qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq")
         # Retrieve data from POST request
         open_symbol = request.POST.get('open_symbol')
         open_qty = request.POST.get('open_qty')
@@ -1231,8 +1321,6 @@ def store_current_value_in_session(request):
         request.session['open_symbol'] = open_symbol
         request.session['open_qty'] = open_qty
         request.session['open_traded_price'] = open_traded_price
-        
-        print("Values stored in session:", request.session.items())
         
         return JsonResponse({'message': 'Current values stored in session successfully.'})
     else:
@@ -1245,13 +1333,19 @@ def get_session_data(request):
         open_symbol = request.session.get('open_symbol')
         open_qty = request.session.get('open_qty')
         open_traded_price = request.session.get('open_traded_price')
+        exp_stoploss_amount = request.session.get('exp_stoploss_amount')
 
+    
         # Check if session data exists
         if open_symbol is not None and open_qty is not None and open_traded_price is not None:
+            #print("open_symbolopen_symbol", open_symbol, open_qty, open_traded_price, "***********************************")
             return JsonResponse({
                 'open_symbol': open_symbol,
                 'open_qty': open_qty,
-                'open_traded_price': open_traded_price
+                'open_traded_price': open_traded_price,
+                'exp_stoploss_amount': exp_stoploss_amount
+
+                
             })
         else:
             return JsonResponse({'error': 'Session data not found'}, status=404)
@@ -1265,7 +1359,6 @@ def remove_session_data(request):
         request.session.pop('open_symbol', None)
         request.session.pop('open_qty', None)
         request.session.pop('open_traded_price', None)
-        print("Session data removed:", request.session.items())
         return JsonResponse({'message': 'Session data removed successfully.'})
     else:
         return JsonResponse({'error': 'Invalid request method.'}, status=400)

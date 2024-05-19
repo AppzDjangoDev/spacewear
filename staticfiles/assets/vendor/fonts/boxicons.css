@@ -2896,7 +2896,7 @@
   content: "\eb70";
 }
 
-.bxs-printer:before {
+.bxs-#printer:before {
   content: "\eb71";
 }
 
@@ -4740,7 +4740,7 @@
   content: "\ed3d";
 }
 
-.bx-fingerprint:before {
+.bx-finger#print:before {
   content: "\ed3e";
 }
 
@@ -5692,7 +5692,7 @@
   content: "\ee2b";
 }
 
-.bx-printer:before {
+.bx-#printer:before {
   content: "\ee2c";
 }
 

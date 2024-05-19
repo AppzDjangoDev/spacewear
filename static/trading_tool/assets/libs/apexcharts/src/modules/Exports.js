@@ -63,7 +63,7 @@ class Exports {
   cleanup() {
     const w = this.w
 
-    // hide some elements to avoid printing them on exported svg
+    // hide some elements to avoid #printing them on exported svg
     const xcrosshairs = w.globals.dom.baseEl.getElementsByClassName(
       'apexcharts-xcrosshairs'
     )

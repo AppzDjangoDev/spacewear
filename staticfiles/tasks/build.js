@@ -87,7 +87,7 @@ module.exports = (conf, srcGlob) => {
           info.warnings.forEach(w => log(colors.gray('Webpack compilation warning:'), colors.yellow(w)));
         }
 
-        // Print log
+        // #print log
         log(
           stats.toString({
             colors: colors.enabled,

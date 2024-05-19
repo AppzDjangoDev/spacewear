@@ -20,13 +20,25 @@ urlpatterns = [
     path('sod-reporting-view', views.SOD_ReportingView.as_view(), name='sod_reporting_view'),
     path('eod-reporting-view', views.EOD_ReportingView.as_view(), name='eod_reporting_view'),
     path('fetch-date-data/', views.fetch_date_data, name='fetch_date_data'),
+    path('daily-candle-overview/', views.update_data_instance, name='daily_candle_overview'),
+
+
+    
+    path('candle-overview/', views.CandleOverviewView.as_view(), name='candle_overview'),
+
 
 
     path('close_all_positions', views.close_all_positions, name='close_all_positions'),
     path('update-data-instance/', views.update_data_instance, name='update_data_instance'),
 
     # order history
-    path('order-history', views.OrderHistory.as_view(), name='order_history'),
+    path('order-history/', views.OrderHistory.as_view(), name='order_history'),
+    path('transaction_history/', views.TransactionHistory.as_view(), name='transaction_history'),
+    
+
+
+
+
     path('update-latest-data', views.update_latest_data, name='update_latest_data'),
     # path('get-options-data', views.get_options_data, name='get_options_data'),
     # path('options-chain-view', views.OptionChainView.as_view(), name='options_chain_view'),

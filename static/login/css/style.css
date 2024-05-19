@@ -5641,26 +5641,26 @@ button.bg-dark:focus {
     display: -ms-inline-flexbox !important;
     display: inline-flex !important; } }
 
-@media print {
-  .d-print-none {
+@media #print {
+  .d-#print-none {
     display: none !important; }
-  .d-print-inline {
+  .d-#print-inline {
     display: inline !important; }
-  .d-print-inline-block {
+  .d-#print-inline-block {
     display: inline-block !important; }
-  .d-print-block {
+  .d-#print-block {
     display: block !important; }
-  .d-print-table {
+  .d-#print-table {
     display: table !important; }
-  .d-print-table-row {
+  .d-#print-table-row {
     display: table-row !important; }
-  .d-print-table-cell {
+  .d-#print-table-cell {
     display: table-cell !important; }
-  .d-print-flex {
+  .d-#print-flex {
     display: -webkit-box !important;
     display: -ms-flexbox !important;
     display: flex !important; }
-  .d-print-inline-flex {
+  .d-#print-inline-flex {
     display: -webkit-inline-box !important;
     display: -ms-inline-flexbox !important;
     display: inline-flex !important; } }
@@ -8073,7 +8073,7 @@ a.text-dark:hover, a.text-dark:focus {
 .invisible {
   visibility: hidden !important; }
 
-@media print {
+@media #print {
   *,
   *::before,
   *::after {

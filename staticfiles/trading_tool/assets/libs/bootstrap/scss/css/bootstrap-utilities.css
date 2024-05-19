@@ -5050,35 +5050,35 @@
     font-size: 1.5rem !important;
   }
 }
-@media print {
-  .d-print-inline {
+@media #print {
+  .d-#print-inline {
     display: inline !important;
   }
-  .d-print-inline-block {
+  .d-#print-inline-block {
     display: inline-block !important;
   }
-  .d-print-block {
+  .d-#print-block {
     display: block !important;
   }
-  .d-print-grid {
+  .d-#print-grid {
     display: grid !important;
   }
-  .d-print-table {
+  .d-#print-table {
     display: table !important;
   }
-  .d-print-table-row {
+  .d-#print-table-row {
     display: table-row !important;
   }
-  .d-print-table-cell {
+  .d-#print-table-cell {
     display: table-cell !important;
   }
-  .d-print-flex {
+  .d-#print-flex {
     display: flex !important;
   }
-  .d-print-inline-flex {
+  .d-#print-inline-flex {
     display: inline-flex !important;
   }
-  .d-print-none {
+  .d-#print-none {
     display: none !important;
   }
 }

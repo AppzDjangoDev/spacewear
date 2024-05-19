@@ -8809,7 +8809,7 @@ $.extend( Datepicker.prototype, {
 			monthNames, monthNamesShort, beforeShowDay, showOtherMonths,
 			selectOtherMonths, defaultDate, html, dow, row, group, col, selectedDate,
 			cornerClass, calender, thead, day, daysInMonth, leadDays, curRows, numRows,
-			printDate, dRow, tbody, daySettings, otherMonth, unselectable,
+			#printDate, dRow, tbody, daySettings, otherMonth, unselectable,
 			tempDate = new Date(),
 			today = this._daylightSavingAdjust(
 				new Date( tempDate.getFullYear(), tempDate.getMonth(), tempDate.getDate() ) ), // clear time
@@ -8935,39 +8935,39 @@ $.extend( Datepicker.prototype, {
 				curRows = Math.ceil( ( leadDays + daysInMonth ) / 7 ); // calculate the number of rows to generate
 				numRows = ( isMultiMonth ? this.maxRows > curRows ? this.maxRows : curRows : curRows ); //If multiple months, use the higher number of rows (see #7043)
 				this.maxRows = numRows;
-				printDate = this._daylightSavingAdjust( new Date( drawYear, drawMonth, 1 - leadDays ) );
+				#printDate = this._daylightSavingAdjust( new Date( drawYear, drawMonth, 1 - leadDays ) );
 				for ( dRow = 0; dRow < numRows; dRow++ ) { // create date picker rows
 					calender += "<tr>";
 					tbody = ( !showWeek ? "" : "<td class='ui-datepicker-week-col'>" +
-						this._get( inst, "calculateWeek" )( printDate ) + "</td>" );
+						this._get( inst, "calculateWeek" )( #printDate ) + "</td>" );
 					for ( dow = 0; dow < 7; dow++ ) { // create date picker days
 						daySettings = ( beforeShowDay ?
-							beforeShowDay.apply( ( inst.input ? inst.input[ 0 ] : null ), [ printDate ] ) : [ true, "" ] );
-						otherMonth = ( printDate.getMonth() !== drawMonth );
+							beforeShowDay.apply( ( inst.input ? inst.input[ 0 ] : null ), [ #printDate ] ) : [ true, "" ] );
+						otherMonth = ( #printDate.getMonth() !== drawMonth );
 						unselectable = ( otherMonth && !selectOtherMonths ) || !daySettings[ 0 ] ||
-							( minDate && printDate < minDate ) || ( maxDate && printDate > maxDate );
+							( minDate && #printDate < minDate ) || ( maxDate && #printDate > maxDate );
 						tbody += "<td class='" +
 							( ( dow + firstDay + 6 ) % 7 >= 5 ? " ui-datepicker-week-end" : "" ) + // highlight weekends
 							( otherMonth ? " ui-datepicker-other-month" : "" ) + // highlight days from other months
-							( ( printDate.getTime() === selectedDate.getTime() && drawMonth === inst.selectedMonth && inst._keyEvent ) || // user pressed key
-							( defaultDate.getTime() === printDate.getTime() && defaultDate.getTime() === selectedDate.getTime() ) ?
+							( ( #printDate.getTime() === selectedDate.getTime() && drawMonth === inst.selectedMonth && inst._keyEvent ) || // user pressed key
+							( defaultDate.getTime() === #printDate.getTime() && defaultDate.getTime() === selectedDate.getTime() ) ?
 
-							// or defaultDate is current printedDate and defaultDate is selectedDate
+							// or defaultDate is current #printedDate and defaultDate is selectedDate
 							" " + this._dayOverClass : "" ) + // highlight selected day
 							( unselectable ? " " + this._unselectableClass + " ui-state-disabled" : "" ) +  // highlight unselectable days
 							( otherMonth && !showOtherMonths ? "" : " " + daySettings[ 1 ] + // highlight custom dates
-							( printDate.getTime() === currentDate.getTime() ? " " + this._currentClass : "" ) + // highlight selected day
-							( printDate.getTime() === today.getTime() ? " ui-datepicker-today" : "" ) ) + "'" + // highlight today (if different)
+							( #printDate.getTime() === currentDate.getTime() ? " " + this._currentClass : "" ) + // highlight selected day
+							( #printDate.getTime() === today.getTime() ? " ui-datepicker-today" : "" ) ) + "'" + // highlight today (if different)
 							( ( !otherMonth || showOtherMonths ) && daySettings[ 2 ] ? " title='" + daySettings[ 2 ].replace( /'/g, "&#39;" ) + "'" : "" ) + // cell title
-							( unselectable ? "" : " data-handler='selectDay' data-event='click' data-month='" + printDate.getMonth() + "' data-year='" + printDate.getFullYear() + "'" ) + ">" + // actions
+							( unselectable ? "" : " data-handler='selectDay' data-event='click' data-month='" + #printDate.getMonth() + "' data-year='" + #printDate.getFullYear() + "'" ) + ">" + // actions
 							( otherMonth && !showOtherMonths ? "&#xa0;" : // display for other months
-							( unselectable ? "<span class='ui-state-default'>" + printDate.getDate() + "</span>" : "<a class='ui-state-default" +
-							( printDate.getTime() === today.getTime() ? " ui-state-highlight" : "" ) +
-							( printDate.getTime() === currentDate.getTime() ? " ui-state-active" : "" ) + // highlight selected day
+							( unselectable ? "<span class='ui-state-default'>" + #printDate.getDate() + "</span>" : "<a class='ui-state-default" +
+							( #printDate.getTime() === today.getTime() ? " ui-state-highlight" : "" ) +
+							( #printDate.getTime() === currentDate.getTime() ? " ui-state-active" : "" ) + // highlight selected day
 							( otherMonth ? " ui-priority-secondary" : "" ) + // distinguish dates from other months
-							"' href='#'>" + printDate.getDate() + "</a>" ) ) + "</td>"; // display selectable date
-						printDate.setDate( printDate.getDate() + 1 );
-						printDate = this._daylightSavingAdjust( printDate );
+							"' href='#'>" + #printDate.getDate() + "</a>" ) ) + "</td>"; // display selectable date
+						#printDate.setDate( #printDate.getDate() + 1 );
+						#printDate = this._daylightSavingAdjust( #printDate );
 					}
 					calender += tbody + "</tr>";
 				}
