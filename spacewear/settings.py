@@ -53,6 +53,8 @@ INSTALLED_APPS = [
     'trading_tool',
     'fyersapi',
     "channels",
+    'django_cron',
+    'scheduler',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -60,6 +62,10 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django_celery_results',
+]
+
+CRON_CLASSES = [
+    'fyersapi.cron.MyCronJob',
 ]
 
 MIDDLEWARE = [
@@ -203,7 +209,7 @@ STATUS_DESCRIPTIONS = {
 
 FYERS_APP_ID="H9O406XBXW-100"
 FYERS_SECRET_ID="XOVF82L85V"
-FYERS_REDIRECT_URL="https://a57c-2405-201-f007-40e3-43b-4501-c5aa-cc8d.ngrok-free.app"
+FYERS_REDIRECT_URL="https://a3b7-2401-4900-4f82-28e8-552-6147-aa7b-fc18.ngrok-free.app"
 
 
 if not DEVELOPMENT_MODE:
@@ -219,3 +225,25 @@ if not DEVELOPMENT_MODE:
 DEFAULT_BROKERAGE=40
 
 TIME_ZONE = 'Asia/Kolkata'
+
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+        },
+    },
+    'root': {
+        'handlers': ['console'],
+        'level': 'DEBUG',
+    },
+    'loggers': {
+        'scheduler': {
+            'handlers': ['console'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
+    },
+}

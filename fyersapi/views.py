@@ -339,6 +339,38 @@ from collections import defaultdict
 from datetime import timedelta
 from .models import SOD_EOD_Data
 
+def daily_candle_overview(request):
+    fifteen_days_ago = timezone.now() - timedelta(days=15)
+    # Query the database for SOD_EOD_Data objects within the past 15 days
+    data_objects = SOD_EOD_Data.objects.filter(trading_date__gte=fifteen_days_ago)
+    
+    if data_objects.exists():
+        # Create a defaultdict to store balance data for each date
+        balance_data = defaultdict(list)
+        
+        # Iterate through the data_objects and collect opening and closing balance data
+        for obj in data_objects:
+            trading_date = obj.trading_date.strftime('%Y-%m-%d')
+            # Append opening balance twice and closing balance twice
+            balance_data[trading_date].extend([float(obj.opening_balance), float(obj.opening_balance), float(obj.closing_balance), float(obj.closing_balance)])
+        
+        # Format the data into the desired format
+        formatted_data = []
+        for date, balances in balance_data.items():
+            print("balancesbalances", balances)
+            formatted_data.append({'x': date, 'y': balances})
+
+        print("formatted_dataformatted_data", formatted_data)
+        
+        return JsonResponse(formatted_data, safe=False)
+
+    else:
+        return JsonResponse({'error': 'No data found within the past 15 days'}, status=404)
+    
+
+
+# ---------------------------------------------------------------------------------------------------------------------------
+
 def update_data_instance(request):
     fifteen_days_ago = timezone.now() - timedelta(days=15)
     # Query the database for SOD_EOD_Data objects within the past 15 days
@@ -366,8 +398,8 @@ def update_data_instance(request):
 
     else:
         return JsonResponse({'error': 'No data found within the past 15 days'}, status=404)
-
-
+    
+# ---------------------------------------------------------------------------------------------------------------------------
 
 from django.views.generic import TemplateView
 

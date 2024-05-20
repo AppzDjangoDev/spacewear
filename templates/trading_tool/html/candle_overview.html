@@ -1,168 +1,161 @@
 {% extends 'trading_tool/html/index.html' %}
 {% load static %}
 {% block content %}
-<!-- Header End -->
 <div class="container-fluid" style="max-width: initial;">
   <div class="container-fluid">
     <div class="card">
       <div class="card-body">
-        <h5 class="card-title fw-semibold mb-4">Weekly Overview</h5>
-        <div class="card">
-            <!-- Container for ApexCharts -->
-            <div id="chart-container" style="height: 400px; width: 100%;"></div>
+        <div id="chart-container" style="width: 100%; height: 400px;">
+          <div id="chart"></div>
         </div>
       </div>
     </div>
   </div>
 </div>
-<!-- Include ApexCharts library -->
 <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-      // Function to update chart dimensions
-      function updateChartDimensions() {
-        var chartContainer = document.getElementById('chart-container');
-        chartContainer.style.height = '400px'; // Fixed height
-        chartContainer.style.width = '100%'; // Full width
-      }
-  
-  
-      // Function to fetch data via AJAX
-      function fetchData() {
-        $.ajax({
-          url: '{% url "daily_candle_overview" %}',
-          method: 'GET',
-          success: function(response) {
-              
-            // Assuming response is in the same format as your 'data' variable
-            // You may need to format the response based on your requirements
-            
-            var data = [
-            { x: '2024-01-01', y: [100, 110, 95, 105] },
-            { x: '2024-01-02', y: [100, 150, 30, 50] },
-            { x: '2024-01-03', y: [110, 120, 105, 115] },
-            { x: '2024-01-04', y: [115, 125, 110, 120] },
-            { x: '2024-01-05', y: [120, 130, 115, 125] },
-            { x: '2024-01-06', y: [100, 135, 10, 40] },
-            { x: '2024-01-07', y: [40, 140, 10, 20] },
-            { x: '2024-01-08', y: [135, 145, 130, 140] },
-            { x: '2024-01-09', y: [140, 150, 135, 145] },
-            { x: '2024-01-10', y: [145, 155, 140, 150] },
-            { x: '2024-01-11', y: [150, 160, 145, 155] },
-            { x: '2024-01-12', y: [155, 165, 150, 160] },
-            { x: '2024-01-13', y: [160, 170, 155, 165] },
-            { x: '2024-01-14', y: [165, 175, 160, 170] },
-            ];
-            var newData = response;
-            console.log("newDatanewDatanewData", response)
-  
-            // Update series data in ApexCharts
-            chart.updateSeries([{
-              data: newData
-            }]);
-          },
-          error: function(xhr, status, error) {
-            console.error(error); // Log any errors
-          }
-        });
-      }
+  document.addEventListener('DOMContentLoaded', function() {
+    // Function to update chart dimensions
+    function updateChartDimensions() {
+      var chartContainer = document.getElementById('chart-container');
+      chartContainer.style.height = '400px'; // Fixed height
+      chartContainer.style.width = '100%'; // Full width
+    }
 
-      
+    // Function to find min and max values from data
+    function findMinMax(data) {
+      let min = Infinity;
+      let max = -Infinity;
 
-  
-      // ApexCharts configuration
-      var options = {
-        chart: {
-          type: 'candlestick',
-          height: 1000,
-          animations: {
-            enabled: true // Disable animations for better performance
-          },
-         
-        },
-        series: [{
-          data: [] // Initially empty, data will be updated via AJAX
-        }],
-        xaxis: {
-          type: 'datetime',
-          grid: {
-            show: true // Show vertical grid lines
-          }
-        },
-        yaxis: {
-          tooltip: {
-            enabled: true
-          },
-          grid: {
-            show: true // Show horizontal grid lines
-          }
-        },
-        annotations: {
-          points: [{
-            x: new Date().getTime(),
-            y: 100,
-            marker: {
-              size: 8,
-              fillColor: '#fff',
-              strokeColor: 'red',
-              strokeWidth: 2,
-              shape: 'circle',
-              radius: 5
-            },
-            label: {
-              borderColor: '#FF4560',
-              offsetY: 0,
-              style: {
-                color: '#fff',
-                background: '#FF4560'
-              },
-              text: 'Point Annotation'
-            }
-          }],
-          lines: [{
-            x1: new Date().getTime(),
-            x2: new Date().getTime() + 86400000,
-            y1: 100,
-            y2: 150,
-            strokeDashArray: 5,
-            borderColor: '#775DD0',
-            borderWidth: 2,
-            label: {
-              borderColor: '#775DD0',
-              style: {
-                color: '#fff',
-                background: '#775DD0'
-              },
-              text: 'Line Annotation'
-            }
-          }],
-          // Add other types of annotations as needed
-        }
-      };
-  
-      // Initialize ApexCharts
-      var chart = new ApexCharts(document.querySelector("#chart-container"), options);
-      chart.render();
-  
-      // Update chart dimensions on window resize
-      window.addEventListener('resize', function() {
-        updateChartDimensions();
-        chart.updateOptions({
-          chart: {
-            width: document.getElementById('chart-container').style.width,
-            height: document.getElementById('chart-container').style.height
-          }
+      data.forEach(point => {
+        point.y.forEach(value => {
+          if (value < min) min = value;
+          if (value > max) max = value;
         });
       });
-  
-      // Initial call to update chart dimensions
+
+      return { min, max };
+    }
+
+    // Function to fetch data via AJAX
+    function fetchData() {
+      $.ajax({
+        url: '{% url "daily_candle_overview" %}',
+        method: 'GET',
+        success: function(response) {
+          // Assuming response is in the same format as your 'data' variable
+          // You may need to format the response based on your requirements
+          var data = response; // Update this based on your actual response structure
+         
+
+          var minMax = findMinMax(data);
+
+          // Update series data and y-axis in ApexCharts
+          chart.updateOptions({
+            series: [{
+              data: data
+            }],
+            yaxis: {
+              min: minMax.min,
+              max: minMax.max
+            }
+          });
+        },
+        error: function(xhr, status, error) {
+          console.error(error); // Log any errors
+        }
+      });
+    }
+
+    // ApexCharts configuration
+    var options = {
+      chart: {
+        type: 'candlestick',
+        height: 1000,
+        animations: {
+          enabled: true // Enable animations for better performance
+        },
+      },
+      series: [{
+        data: [] // Initially empty, data will be updated via AJAX
+      }],
+      xaxis: {
+        type: 'datetime',
+        grid: {
+          show: true // Show vertical grid lines
+        }
+      },
+      yaxis: {
+        tooltip: {
+          enabled: true
+        },
+        grid: {
+          show: true // Show horizontal grid lines
+        }
+      },
+      annotations: {
+        points: [{
+          x: new Date().getTime(),
+          y: 100,
+          marker: {
+            size: 8,
+            fillColor: '#fff',
+            strokeColor: 'red',
+            strokeWidth: 2,
+            shape: 'circle',
+            radius: 5
+          },
+          label: {
+            borderColor: '#FF4560',
+            offsetY: 0,
+            style: {
+              color: '#fff',
+              background: '#FF4560'
+            },
+            text: 'Point Annotation'
+          }
+        }],
+        lines: [{
+          x1: new Date().getTime(),
+          x2: new Date().getTime() + 86400000,
+          y1: 100,
+          y2: 150,
+          strokeDashArray: 5,
+          borderColor: '#775DD0',
+          borderWidth: 2,
+          label: {
+            borderColor: '#775DD0',
+            style: {
+              color: '#fff',
+              background: '#775DD0'
+            },
+            text: 'Line Annotation'
+          }
+        }]
+      }
+    };
+
+    // Render the chart
+    var chart = new ApexCharts(document.querySelector("#chart"), options);
+    chart.render();
+
+    // Update chart dimensions on window resize
+    window.addEventListener('resize', function() {
       updateChartDimensions();
-  
-      // Fetch data on page load
-      fetchData();
+      chart.updateOptions({
+        chart: {
+          width: document.getElementById('chart-container').style.width,
+          height: document.getElementById('chart-container').style.height
+        }
+      });
     });
-  </script>
-  
-  
+
+    // Initial call to update chart dimensions
+    updateChartDimensions();
+
+    // Fetch data on page load
+    fetchData();
+  });
+</script>
 {% endblock %}
